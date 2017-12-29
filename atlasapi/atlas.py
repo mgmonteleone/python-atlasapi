@@ -15,8 +15,8 @@ limitations under the License.
 """
 
 import requests
-from settings import Settings
-from network import Network
+from .settings import Settings
+from .network import Network
 
 class Atlas:
     def __init__(self, user, password, group):

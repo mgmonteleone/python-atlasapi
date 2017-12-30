@@ -8,6 +8,8 @@ A Python package for MongoDB Atlas Cloud provider.
 
 `Configure Atlas API Access <https://docs.atlas.mongodb.com/configure-api-access/>`__
 
+`Current state of the python-atlasapi support <https://github.com/mickybart/python-atlasapi/blob/master/API.rst>`__
+
 Installation
 ------------
 

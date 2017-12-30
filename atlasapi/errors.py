@@ -16,3 +16,7 @@ limitations under the License.
 
 class ErrRoleException(Exception):
     pass
+
+class ErrPaginationException(Exception):
+    def __init__(self):
+        super().__init__("Issue occurs during the pagination.")

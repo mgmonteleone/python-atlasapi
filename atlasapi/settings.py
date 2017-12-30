@@ -20,6 +20,7 @@ class Settings:
     
     api_resources = {
         "Database Users" : {
+            "Get All Database Users" : "/api/atlas/v1.0/groups/%s/databaseUsers?pageNum=%d&itemsPerPage=%d",
             "Get a Single Database User" : "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s",
             "Create a Database User" : "/api/atlas/v1.0/groups/%s/databaseUsers",
             "Update a Database User" : "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s",
@@ -32,6 +33,11 @@ class Settings:
     
     # Atlas enforced
     databaseName = "admin"
+    
+    # Atlas default pagination
+    pageNum = 1
+    itemsPerPage = 100
+    itemsPerPageMax = 100
     
     # Requests
     requests_timeout = 2

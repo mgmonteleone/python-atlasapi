@@ -17,6 +17,7 @@ limitations under the License.
 import requests
 from .settings import Settings
 from .network import Network
+from .errors import ErrPaginationException
 
 class Atlas:
     def __init__(self, user, password, group):
@@ -93,6 +94,27 @@ class Atlas:
                 atlas (Atlas): Atlas instance
             """
             self.atlas = atlas
+            
+        def get_all_database_users(self, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage, iterable=False):
+            """Get All Database Users
+            
+            url: https://docs.atlas.mongodb.com/reference/api/database-users-get-all-users/
+            
+            Kwargs:
+                pageNum (int): Page number
+                itemsPerPage (int): Number of Users per Page
+            """
+            
+            # Enforce Atlas limitation if needed
+            if itemsPerPage > Settings.itemsPerPageMax:
+                itemsPerPage = Settings.itemsPerPageMax
+            
+            uri = Settings.api_resources["Database Users"]["Get All Database Users"] % (self.atlas.group, pageNum, itemsPerPage)
+            
+            if iterable:
+                return DatabaseUsersGetAll(self.atlas, pageNum, itemsPerPage)
+            else:
+                return self.atlas.network.get(Settings.BASE_URL + uri)
         
         def get_a_single_database_user(self, user):
             """Get a Database User
@@ -138,3 +160,40 @@ class Atlas:
             """
             uri = Settings.api_resources["Database Users"]["Delete a Database User"] % (self.atlas.group, user)
             return self.atlas.network.delete(Settings.BASE_URL + uri)
+
+class AtlasPagination:
+    def __init__(self, atlas, fetch, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage):
+        self.atlas = atlas
+        self.fetch = fetch
+        self.pageNum = pageNum
+        self.itemsPerPage = itemsPerPage
+    
+    def __iter__(self):
+        # pageNum is set with the value requested (so not necessary 1)
+        pageNum = self.pageNum
+        # total: This is a fake value to enter into the while. It will be updated with a real value later
+        total = pageNum * self.itemsPerPage
+        
+        while (pageNum * self.itemsPerPage - total < self.itemsPerPage):
+            c, details = self.fetch(pageNum, self.itemsPerPage)
+            if not self.atlas.isSuccess(c):
+                raise ErrPaginationException()
+            
+            # set the real total
+            total = details["totalCount"]
+            
+            # while into the page results
+            results = details["results"]
+            results_count = len(results)
+            index = 0
+            while (index < results_count):
+                user = results[index]
+                index += 1
+                yield user
+            
+            # next page
+            pageNum += 1
+            
+class DatabaseUsersGetAll(AtlasPagination):
+    def __init__(self, atlas, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage):
+        super().__init__(atlas, atlas.DatabaseUsers.get_all_database_users, pageNum, itemsPerPage)

@@ -26,6 +26,22 @@ Or install the development version from github:
 Usage
 -----
 
+Get All Database Users
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: python
+
+    from atlasapi.atlas import Atlas
+    
+    a = Atlas("<user>","<password>","<groupid>")
+    
+    # Low level Api
+    c, details = a.DatabaseUsers.get_all_database_users(pageNum=1, itemsPerPage=100)
+    
+    # Iterable
+    for user in a.DatabaseUsers.get_all_database_users(iterable=True):
+        print(user["username"])
+
 Create a Database User
 ^^^^^^^^^^^^^^^^^^^^^^
 

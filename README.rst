@@ -40,6 +40,7 @@ Create a Database User
     p.add_roles("test-db",
                 [RoleSpecs.dbAdmin,
                 RoleSpecs.readWrite])
+    p.add_role("other-test-db", RoleSpecs.readWrite, "a_collection")
 
     c, details = a.DatabaseUsers.create_a_database_user(p)
     a.isCreated(c)
@@ -56,7 +57,7 @@ Update a Database User
     
     # Update roles and password
     p = DatabaseUsersUpdatePermissionsSpecs("password for test user")
-    p.add_role("test-db", RoleSpecs.read)
+    p.add_role("test-db", RoleSpecs.read, "a_collection")
     
     c, details = a.DatabaseUsers.update_a_database_user("test", p)
     a.isSuccess(c)

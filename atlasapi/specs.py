@@ -55,48 +55,66 @@ class DatabaseUsersPermissionsSpecs:
         
         return content
     
-    def add_roles(self, databaseName, roleNames):
+    def add_roles(self, databaseName, roleNames, collectionName=None):
         """Add multiple roles
         
         Args:
             databaseName (str): Database Name
             roleNames (list of RoleSpecs): roles
+            
+        Kwargs:
+            collectionName (str): Collection
         """
         for roleName in roleNames:
-            self.add_role(databaseName, roleName)
+            self.add_role(databaseName, roleName, collectionName)
     
-    def add_role(self, databaseName, roleName):
+    def add_role(self, databaseName, roleName, collectionName=None):
         """Add one role
         
         Args:
             databaseName (str): Database Name
             roleName (RoleSpecs): role
+            
+        Kwargs:
+            collectionName (str): Collection
         """
         role = {"databaseName" : databaseName,
                 "roleName" : roleName}
         
+        if collectionName:
+            role["collectionName"] = collectionName
+        
         if role not in self.roles:
             self.roles.append(role)
 
-    def remove_roles(self, databaseName, roleNames):
+    def remove_roles(self, databaseName, roleNames, collectionName=None):
         """Remove multiple roles
         
         Args:
             databaseName (str): Database Name
             roleNames (list of RoleSpecs): roles
+            
+        Kwargs:
+            collectionName (str): Collection
         """
         for roleName in roleNames:
-            self.remove_role(databaseName, roleName)
+            self.remove_role(databaseName, roleName, collectionName)
             
-    def remove_role(self, databaseName, roleName):
+    def remove_role(self, databaseName, roleName, collectionName=None):
         """Remove one role
         
         Args:
             databaseName (str): Database Name
             roleName (RoleSpecs): role
+            
+        Kwargs:
+            collectionName (str): Collection
         """
         role = {"databaseName" : databaseName,
-                  "roleName" : roleName}
+                "roleName" : roleName}
+        
+        if collectionName:
+            role["collectionName"] = collectionName
         
         if role in self.roles:
             self.roles.remove(role)

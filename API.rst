@@ -14,6 +14,15 @@ Status : [100%]
 - Update a Database User
 - Delete a Database User
 
+Projects
+--------
+
+Status : [100%]
+
+- Get All Projects
+- Get One Project
+- Create a Project
+
 Cluster
 -------
 

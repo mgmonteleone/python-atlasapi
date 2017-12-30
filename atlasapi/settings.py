@@ -26,6 +26,11 @@ class Settings:
             "Update a Database User" : "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s",
             "Delete a Database User" : "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s"
         },
+        "Projects" : {
+            "Get All Projects" : "/api/atlas/v1.0/groups",
+            "Get One Project" : "/api/atlas/v1.0/groups/%s",
+            "Create a Project" : "/api/atlas/v1.0/groups"
+        },
         "Clusters" : {
             "Get a Single Cluster" : "/api/atlas/v1.0/groups/%s/clusters/%s"
         }
@@ -40,7 +45,7 @@ class Settings:
     itemsPerPageMax = 100
     
     # Requests
-    requests_timeout = 2
+    requests_timeout = 10
     
     # HTTP Return code
     SUCCESS = 200

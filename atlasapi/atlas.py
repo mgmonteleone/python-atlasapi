@@ -37,6 +37,7 @@ class Atlas:
         # APIs
         self.Clusters = Atlas._Clusters(self)
         self.DatabaseUsers = Atlas._DatabaseUsers(self)
+        self.Projects = Atlas._Projects(self)
     
     def isSuccess(self, code):
         return (code == Settings.SUCCESS)
@@ -160,6 +161,71 @@ class Atlas:
             """
             uri = Settings.api_resources["Database Users"]["Delete a Database User"] % (self.atlas.group, user)
             return self.atlas.network.delete(Settings.BASE_URL + uri)
+    
+    class _Projects:
+        """Projects API
+        
+        see: https://docs.atlas.mongodb.com/reference/api/projects/
+        """
+        
+        def __init__(self, atlas):
+            """_Projects constructor
+            
+            Args:
+                atlas (Atlas): Atlas instance
+            """
+            self.atlas = atlas
+            
+        def get_all_projects(self, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage, iterable=False):
+            """Get All Projects
+            
+            url: https://docs.atlas.mongodb.com/reference/api/project-get-all/
+            
+            Kwargs:
+                pageNum (int): Page number
+                itemsPerPage (int): Number of Users per Page
+            """
+            
+            # Enforce Atlas limitation if needed
+            if itemsPerPage > Settings.itemsPerPageMax:
+                itemsPerPage = Settings.itemsPerPageMax
+            
+            uri = Settings.api_resources["Projects"]["Get All Projects"]
+            
+            if iterable:
+                return ProjectsGetAll(self.atlas, pageNum, itemsPerPage)
+            else:
+                return self.atlas.network.get(Settings.BASE_URL + uri)
+        
+        def get_one_project(self, groupid):
+            """Get one Project
+            
+            url: https://docs.atlas.mongodb.com/reference/api/project-get-one/
+            
+            Args:
+                groupid (str): Group Id
+            """
+            uri = Settings.api_resources["Projects"]["Get One Project"] % (groupid)
+            return self.atlas.network.get(Settings.BASE_URL + uri)
+        
+        def create_a_project(self, name, orgId=None):
+            """Create a Project
+            
+            url: https://docs.atlas.mongodb.com/reference/api/project-create-one/
+            
+            Args:
+                name (str): Project name
+                
+            Kwargs:
+                orgId (ObjectId): The ID of the organization you want to create the project within.
+            """
+            uri = Settings.api_resources["Projects"]["Create a Project"]
+            
+            project = { "name" : name }
+            if orgId:
+                project["orgId"] = orgId
+            
+            return self.atlas.network.post(Settings.BASE_URL + uri, project)
 
 class AtlasPagination:
     def __init__(self, atlas, fetch, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage):
@@ -197,3 +263,7 @@ class AtlasPagination:
 class DatabaseUsersGetAll(AtlasPagination):
     def __init__(self, atlas, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage):
         super().__init__(atlas, atlas.DatabaseUsers.get_all_database_users, pageNum, itemsPerPage)
+        
+class ProjectsGetAll(AtlasPagination):
+    def __init__(self, atlas, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage):
+        super().__init__(atlas, atlas.Projects.get_all_projects, pageNum, itemsPerPage)

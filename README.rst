@@ -91,9 +91,41 @@ Delete a Database User
     
     c, details = a.DatabaseUsers.delete_a_database_user("test")
     a.isSuccess(c)
+    
+Get a Single Database User
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Others
-^^^^^^
+.. code:: python
+    
+    from atlasapi.atlas import Atlas
+    
+    a = Atlas("<user>","<password>","<groupid>")
+    
+    c, details = a.DatabaseUser.get_a_single_database_user("test")
+    a.isSuccess(c)
+
+Projects
+^^^^^^^^
+
+.. code:: python
+
+    from atlasapi.atlas import Atlas
+    
+    a = Atlas("<user>","<password>","<groupid>")
+    
+    # Get All Projects
+    for project in a.Projects.get_all_projects(iterable=True):
+        print(project["name"])
+        
+    # Get One Project
+    c, details = a.Projects.get_one_project("59a03f423b34b9132757aa0d")
+    
+    # Create a Project
+    c, details = a.Projects.create_a_project("test", "599eed989f78f769464d28cc")
+    a.isCreated(c)
+
+Clusters
+^^^^^^^^
 
 .. code:: python
 
@@ -107,8 +139,6 @@ Others
     # Get a Single Cluster
     c, details = a.Clusters.get_a_single_cluster("cluster-dev")
     
-    # Get a Single Database User
-    c, details = a.DatabaseUser.get_a_single_database_user("test")
 
 Error Types
 -----------

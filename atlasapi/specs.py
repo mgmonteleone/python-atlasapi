@@ -15,12 +15,20 @@ limitations under the License.
 """
 
 from .settings import Settings
+from .errors import ErrRoleException
 
 class RoleSpecs:
     """Roles supported by Atlas"""
+    atlasAdmin = "atlasAdmin"
+    readWriteAnyDatabase = "readWriteAnyDatabase"
+    readAnyDatabase = "readAnyDatabase"
+    backup = "backup"
+    clusterMonitor = "clusterMonitor"
     dbAdmin = "dbAdmin"
-    readWrite = "readWrite"
+    dbAdminAnyDatabase = "dbAdminAnyDatabase"
+    enableSharding = "enableSharding"
     read = "read"
+    readWrite = "readWrite"
 
 class DatabaseUsersPermissionsSpecs:
     """Permissions spec for Database User"""
@@ -64,6 +72,9 @@ class DatabaseUsersPermissionsSpecs:
             
         Kwargs:
             collectionName (str): Collection
+        
+        Raises:
+            ErrRoleException: role not compatible with the databaseName and/or collectionName
         """
         for roleName in roleNames:
             self.add_role(databaseName, roleName, collectionName)
@@ -77,12 +88,21 @@ class DatabaseUsersPermissionsSpecs:
             
         Kwargs:
             collectionName (str): Collection
+            
+        Raises:
+            ErrRoleException: role not compatible with the databaseName and/or collectionName
         """
         role = {"databaseName" : databaseName,
                 "roleName" : roleName}
         
         if collectionName:
             role["collectionName"] = collectionName
+        
+        # Check atlas constraints
+        if collectionName and roleName not in [RoleSpecs.read, RoleSpecs.readWrite]:
+            raise ErrRoleException("Permissions [%s] not available for a collection" % roleName)
+        elif not collectionName and roleName not in [RoleSpecs.read, RoleSpecs.readWrite, RoleSpecs.dbAdmin] and databaseName != "admin":
+            raise ErrRoleException("Permissions [%s] is only available for admin database" % roleName)
         
         if role not in self.roles:
             self.roles.append(role)

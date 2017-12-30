@@ -20,7 +20,9 @@ class Settings:
     
     api_resources = {
         "Database Users" : {
+            "Get a Single Database User" : "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s",
             "Create a Database User" : "/api/atlas/v1.0/groups/%s/databaseUsers",
+            "Update a Database User" : "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s",
             "Delete a Database User" : "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s"
         },
         "Clusters" : {

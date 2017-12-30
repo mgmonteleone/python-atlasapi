@@ -44,6 +44,23 @@ Create a Database User
     c, details = a.DatabaseUsers.create_a_database_user(p)
     a.isCreated(c)
 
+Update a Database User
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. code:: python
+
+    from atlasapi.atlas import Atlas
+    from atlasapi.specs import DatabaseUsersUpdatePermissionsSpecs, RoleSpecs
+
+    a = Atlas("<user>","<password>","<groupid>")
+    
+    # Update roles and password
+    p = DatabaseUsersUpdatePermissionsSpecs("password for test user")
+    p.add_role("test-db", RoleSpecs.read)
+    
+    c, details = a.DatabaseUsers.update_a_database_user("test", p)
+    a.isSuccess(c)
+
 Delete a Database User
 ^^^^^^^^^^^^^^^^^^^^^^
 
@@ -70,7 +87,9 @@ Others
     
     # Get a Single Cluster
     c, details = a.Clusters.get_a_single_cluster("cluster-dev")
-
+    
+    # Get a Single Database User
+    c, details = a.DatabaseUser.get_a_single_database_user("test")
 
 Error Types
 -----------

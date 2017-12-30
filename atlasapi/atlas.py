@@ -94,6 +94,17 @@ class Atlas:
             """
             self.atlas = atlas
         
+        def get_a_single_database_user(self, user):
+            """Get a Database User
+            
+            url: https://docs.atlas.mongodb.com/reference/api/database-users-get-single-user/
+            
+            Args:
+                user (str): User
+            """
+            uri = Settings.api_resources["Database Users"]["Get a Single Database User"] % (self.atlas.group, user)
+            return self.atlas.network.get(Settings.BASE_URL + uri)
+        
         def create_a_database_user(self, permissions):
             """Create a Database User
             
@@ -104,6 +115,18 @@ class Atlas:
             """
             uri = Settings.api_resources["Database Users"]["Create a Database User"] % self.atlas.group
             return self.atlas.network.post(Settings.BASE_URL + uri, permissions.getSpecs())
+        
+        def update_a_database_user(self, user, permissions):
+            """Update a Database User
+            
+            url: https://docs.atlas.mongodb.com/reference/api/database-users-update-a-user/
+            
+            Args:
+                user (str): User
+                permissions (DatabaseUsersUpdatePermissionsSpecs): Permissions to apply
+            """
+            uri = Settings.api_resources["Database Users"]["Update a Database User"] % (self.atlas.group, user)
+            return self.atlas.network.patch(Settings.BASE_URL + uri, permissions.getSpecs())
         
         def delete_a_database_user(self, user):
             """Delete a Database User

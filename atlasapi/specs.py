@@ -103,3 +103,25 @@ class DatabaseUsersPermissionsSpecs:
         
     def clear_roles(self):
         self.roles.clear()
+        
+class DatabaseUsersUpdatePermissionsSpecs(DatabaseUsersPermissionsSpecs):
+    def __init__(self, password=None):
+        """Constructor"""
+        super().__init__(None, password)
+    
+    def getSpecs(self):
+        """Get specs
+        
+        Returns:
+            dict. Representation of the object
+        """
+        
+        content = {}
+        
+        if len(self.roles) != 0:
+            content["roles"] = self.roles
+        
+        if self.password:
+            content["password"] = self.password
+        
+        return content

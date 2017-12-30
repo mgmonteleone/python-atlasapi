@@ -85,7 +85,36 @@ class Network:
         finally:
             if r:
                 r.connection.close()
-                
+    
+    def patch(self, uri, payload):
+        """Patch
+        
+        Args:
+            uri (str): URI
+            payload (dict): Content to patch
+            
+        Returns:
+            Int, Json. HTTP code and API response
+            
+        Raises:
+            Exception. Network issue
+        """
+        r = None
+        
+        try:
+            r = requests.patch(uri,
+                               json=payload,
+                               allow_redirects=True,
+                               timeout=Settings.requests_timeout,
+                               headers={"Content-Type" : "application/json"},
+                               auth=HTTPDigestAuth(self.user, self.password))
+            return (r.status_code, r.json())
+        except:
+            raise
+        finally:
+            if r:
+                r.connection.close()
+    
     def delete(self, uri):
         """Delete
         

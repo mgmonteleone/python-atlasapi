@@ -44,6 +44,9 @@ class Atlas:
     
     def isCreated(self, code):
         return (code == Settings.CREATED)
+    
+    def isAccepted(self, code):
+        return (code == Settings.ACCEPTED)
         
     class _Clusters:
         """Clusters API
@@ -71,6 +74,28 @@ class Atlas:
             code, content = self.get_a_single_cluster(cluster)
             return self.atlas.isSuccess(code)
         
+        def get_all_clusters(self, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage, iterable=False):
+            """Get All Clusters
+            
+            url: https://docs.atlas.mongodb.com/reference/api/clusters-get-all/
+            
+            Kwargs:
+                pageNum (int): Page number
+                itemsPerPage (int): Number of Users per Page
+            """
+            
+            # Enforce Atlas limitation if needed
+            if itemsPerPage > Settings.itemsPerPageMax:
+                itemsPerPage = Settings.itemsPerPageMax
+            
+            uri = Settings.api_resources["Clusters"]["Get All Clusters"] % (self.atlas.group, pageNum, itemsPerPage)
+            
+            if iterable:
+                return ClustersGetAll(self.atlas, pageNum, itemsPerPage)
+            else:
+                return self.atlas.network.get(Settings.BASE_URL + uri)
+            
+        
         def get_a_single_cluster(self, cluster):
             """Get a Single Cluster
             
@@ -81,6 +106,24 @@ class Atlas:
             """
             uri = Settings.api_resources["Clusters"]["Get a Single Cluster"] % (self.atlas.group, cluster)
             return self.atlas.network.get(Settings.BASE_URL + uri)
+        
+        def delete_a_cluster(self, cluster, areYouSure = False):
+            """Delete a Cluster
+            
+            url: https://docs.atlas.mongodb.com/reference/api/clusters-delete-one/
+            
+            Args:
+                cluster (str): Cluster name
+                
+            Kwargs:
+                areYouSure (bool): safe flag to don't delete a cluster by mistake
+            """
+            if areYouSure:
+                uri = Settings.api_resources["Clusters"]["Delete a Cluster"] % (self.atlas.group, cluster)
+                return self.atlas.network.delete(Settings.BASE_URL + uri)
+            else:
+                return 400, { "detail" : "Please set areYouSure=True on delete_a_cluster call if you really want to delete [%s]" % cluster,
+                              "error" : 400}
             
     class _DatabaseUsers:
         """Database Users API
@@ -267,3 +310,7 @@ class DatabaseUsersGetAll(AtlasPagination):
 class ProjectsGetAll(AtlasPagination):
     def __init__(self, atlas, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage):
         super().__init__(atlas, atlas.Projects.get_all_projects, pageNum, itemsPerPage)
+        
+class ClustersGetAll(AtlasPagination):
+    def __init__(self, atlas, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage):
+        super().__init__(atlas, atlas.Clusters.get_all_clusters, pageNum, itemsPerPage)

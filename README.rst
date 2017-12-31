@@ -136,8 +136,19 @@ Clusters
     # Is existing cluster ?
     a.Clusters.is_existing_cluster("cluster-dev")
     
+    # Get All Clusters
+    for cluster in a.Clusters.get_all_clusters(iterable=True):
+        print(cluster["name"])
+    
     # Get a Single Cluster
     c, details = a.Clusters.get_a_single_cluster("cluster-dev")
+    
+    # Delete a Cluster (dry run)
+    c, details = a.Clusters.delete_a_cluster("cluster-dev")
+    
+    # Delete a Cluster (approved)
+    c, details = a.Clusters.delete_a_cluster("cluster-dev", areYouSure=True)
+    a.isAccepted(c)
     
 
 Error Types

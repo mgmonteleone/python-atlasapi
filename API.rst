@@ -28,4 +28,8 @@ Cluster
 
 Status : [WIP]
 
+- Get All Clusters
 - Get a Single Cluster
+- Create a Cluster [0%]
+- Modify a Cluster [0%]
+- Delete a Cluster

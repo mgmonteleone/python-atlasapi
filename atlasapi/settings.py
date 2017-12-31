@@ -27,7 +27,7 @@ class Settings:
             "Delete a Database User" : "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s"
         },
         "Projects" : {
-            "Get All Projects" : "/api/atlas/v1.0/groups",
+            "Get All Projects" : "/api/atlas/v1.0/groups?pageNum=%d&itemsPerPage=%d",
             "Get One Project" : "/api/atlas/v1.0/groups/%s",
             "Create a Project" : "/api/atlas/v1.0/groups"
         },

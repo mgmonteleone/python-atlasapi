@@ -233,7 +233,7 @@ class Atlas:
             if itemsPerPage > Settings.itemsPerPageMax:
                 itemsPerPage = Settings.itemsPerPageMax
             
-            uri = Settings.api_resources["Projects"]["Get All Projects"]
+            uri = Settings.api_resources["Projects"]["Get All Projects"] % (pageNum, itemsPerPage)
             
             if iterable:
                 return ProjectsGetAll(self.atlas, pageNum, itemsPerPage)

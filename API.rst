@@ -23,10 +23,10 @@ Status : [100%]
 - Get One Project
 - Create a Project
 
-Cluster
--------
+Clusters
+--------
 
-Status : [WIP]
+Status : [60%]
 
 - Get All Clusters
 - Get a Single Cluster

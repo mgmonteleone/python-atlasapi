@@ -69,6 +69,9 @@ class Atlas:
             
             Args:
                 cluster (str): The cluster name
+                
+            Returns:
+                bool. The cluster exist or not
             """
             
             code, content = self.get_a_single_cluster(cluster)
@@ -82,6 +85,13 @@ class Atlas:
             Kwargs:
                 pageNum (int): Page number
                 itemsPerPage (int): Number of Users per Page
+                iterable (bool): To return an iterable high level object instead of a low level API response
+                
+            Returns:
+                if iterable:
+                    AtlasPagination. Iterable object representing this function
+                elif:
+                    int, dict. HTTP Code, Response payload
             """
             
             # Enforce Atlas limitation if needed
@@ -147,6 +157,13 @@ class Atlas:
             Kwargs:
                 pageNum (int): Page number
                 itemsPerPage (int): Number of Users per Page
+                iterable (bool): To return an iterable high level object instead of a low level API response
+                
+            Returns:
+                if iterable:
+                    AtlasPagination. Iterable object representing this function
+                elif:
+                    int, dict. HTTP Code, Response payload
             """
             
             # Enforce Atlas limitation if needed
@@ -167,6 +184,9 @@ class Atlas:
             
             Args:
                 user (str): User
+                
+            Returns:
+                int, dict. HTTP Code, Response payload
             """
             uri = Settings.api_resources["Database Users"]["Get a Single Database User"] % (self.atlas.group, user)
             return self.atlas.network.get(Settings.BASE_URL + uri)
@@ -178,6 +198,9 @@ class Atlas:
             
             Args:
                 permissions (DatabaseUsersPermissionsSpec): Permissions to apply
+                
+            Returns:
+                int, dict. HTTP Code, Response payload
             """
             uri = Settings.api_resources["Database Users"]["Create a Database User"] % self.atlas.group
             return self.atlas.network.post(Settings.BASE_URL + uri, permissions.getSpecs())
@@ -190,6 +213,9 @@ class Atlas:
             Args:
                 user (str): User
                 permissions (DatabaseUsersUpdatePermissionsSpecs): Permissions to apply
+                
+            Returns:
+                int, dict. HTTP Code, Response payload
             """
             uri = Settings.api_resources["Database Users"]["Update a Database User"] % (self.atlas.group, user)
             return self.atlas.network.patch(Settings.BASE_URL + uri, permissions.getSpecs())
@@ -201,6 +227,9 @@ class Atlas:
             
             Args:
                 user (str): User to delete
+                
+            Returns:
+                int, dict. HTTP Code, Response payload
             """
             uri = Settings.api_resources["Database Users"]["Delete a Database User"] % (self.atlas.group, user)
             return self.atlas.network.delete(Settings.BASE_URL + uri)
@@ -227,6 +256,13 @@ class Atlas:
             Kwargs:
                 pageNum (int): Page number
                 itemsPerPage (int): Number of Users per Page
+                iterable (bool): To return an iterable high level object instead of a low level API response
+                
+            Returns:
+                if iterable:
+                    AtlasPagination. Iterable object representing this function
+                elif:
+                    int, dict. HTTP Code, Response payload
             """
             
             # Enforce Atlas limitation if needed
@@ -247,6 +283,9 @@ class Atlas:
             
             Args:
                 groupid (str): Group Id
+                
+            Returns:
+                int, dict. HTTP Code, Response payload
             """
             uri = Settings.api_resources["Projects"]["Get One Project"] % (groupid)
             return self.atlas.network.get(Settings.BASE_URL + uri)
@@ -261,6 +300,9 @@ class Atlas:
                 
             Kwargs:
                 orgId (ObjectId): The ID of the organization you want to create the project within.
+                
+            Returns:
+                int, dict. HTTP Code, Response payload
             """
             uri = Settings.api_resources["Projects"]["Create a Project"]
             
@@ -271,7 +313,17 @@ class Atlas:
             return self.atlas.network.post(Settings.BASE_URL + uri, project)
 
 class AtlasPagination:
+    """Atlas Pagination Generic Implementation"""
+    
     def __init__(self, atlas, fetch, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage):
+        """Constructor
+        
+        Args:
+            atlas (Atlas): Atlas instance
+            fetch (function): The function "get_all" to call
+            pageNum (int): Page number
+            itemsPerPage (int): Number of Users per Page
+        """
         self.atlas = atlas
         self.fetch = fetch
         self.pageNum = pageNum
@@ -284,7 +336,10 @@ class AtlasPagination:
         total = pageNum * self.itemsPerPage
         
         while (pageNum * self.itemsPerPage - total < self.itemsPerPage):
+            # fetch the API
             c, details = self.fetch(pageNum, self.itemsPerPage)
+            
+            # handle errors
             if not self.atlas.isSuccess(c):
                 raise ErrPaginationException()
             
@@ -304,13 +359,16 @@ class AtlasPagination:
             pageNum += 1
             
 class DatabaseUsersGetAll(AtlasPagination):
+    """Pagination for Database User / Get All"""
     def __init__(self, atlas, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage):
         super().__init__(atlas, atlas.DatabaseUsers.get_all_database_users, pageNum, itemsPerPage)
         
 class ProjectsGetAll(AtlasPagination):
+    """Pagination for Projects / Get All"""
     def __init__(self, atlas, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage):
         super().__init__(atlas, atlas.Projects.get_all_projects, pageNum, itemsPerPage)
         
 class ClustersGetAll(AtlasPagination):
+    """Pagination for Clusters / Get All"""
     def __init__(self, atlas, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage):
         super().__init__(atlas, atlas.Clusters.get_all_clusters, pageNum, itemsPerPage)

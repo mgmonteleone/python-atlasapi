@@ -161,7 +161,7 @@ Alerts
     a = Atlas("<user>","<password>","<groupid>")
     
     # Get All Alerts in OPEN status
-    for alert in a.Alerts.get_all_alerts(iterable=True, status=AlertStatusSpec.OPEN):
+    for alert in a.Alerts.get_all_alerts(AlertStatusSpec.OPEN, iterable=True):
         print(alert["id"])
     
     # Get an Alert

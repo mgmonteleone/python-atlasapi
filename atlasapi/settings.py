@@ -38,7 +38,7 @@ class Settings:
         },
         "Alerts" : {
             "Get All Alerts" : "/api/atlas/v1.0/groups/%s/alerts?pageNum=%d&itemsPerPage=%d",
-            "Get All Alerts with status" : "/api/atlas/v1.0/groups/%s/alerts?pageNum=%d&itemsPerPage=%d&status=%s",
+            "Get All Alerts with status" : "/api/atlas/v1.0/groups/%s/alerts?status=%s&pageNum=%d&itemsPerPage=%d",
             "Get an Alert" : "/api/atlas/v1.0/groups/%s/alerts/%s",
             "Acknowledge an Alert" : "/api/atlas/v1.0/groups/%s/alerts/%s"
         }
@@ -50,6 +50,7 @@ class Settings:
     # Atlas default pagination
     pageNum = 1
     itemsPerPage = 100
+    itemsPerPageMin = 1
     itemsPerPageMax = 100
     
     # Requests

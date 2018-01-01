@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='atlasapi',
-    version='0.5.0',
+    version='0.5.2',
     python_requires='>=3.5',
     packages=find_packages(),
     install_requires=['requests', 'python-dateutil'],
@@ -12,10 +12,10 @@ setup(
     author="Yellow Pages Inc.",
     author_email="cloud@yp.ca",
     license="Apache License 2.0",
-    description="A python package for MongoDB Atlas Cloud provider",
+    description="Expose MongoDB Atlas Cloud provider APIs",
     long_description=open('README.rst').read(),
     url="https://github.com/mickybart/python-atlasapi",
-    keywords=["atlas", "mongo", "cloud"],
+    keywords=["atlas", "mongo", "mongodb", "cloud", "api"],
     classifiers=[
         # How mature is this project? Common values are
         #   3 - Alpha

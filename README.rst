@@ -183,7 +183,23 @@ Alerts
 Error Types
 -----------
 
+About 'c, details' on all examples
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+- 'c'
+    HTTP return code (4xx or 5xx for an error, 2xx otherwise)
+- 'details'
+    Response payload
+
+Exceptions
+^^^^^^^^^^
+
+- ErrRoleException
+    A role is not compatible with Atlas
+- ErrPaginationException
+    An issue occurs during a "Get All" function with 'iterable=True'
+- ErrPaginationLimitsException
+    Out of limit on 'pageNum' or 'itemsPerPage' parameters
 
 Internal Notes
 --------------

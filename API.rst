@@ -42,3 +42,23 @@ Status : [100%]
 - Get All Alerts
 - Get an Alert
 - Acknowledge an Alert (include Unacknowledge)
+
+Alert Configurations
+--------------------
+
+Status : [0%]
+
+VPC
+---
+
+Status : [0%]
+
+Monitoring and Logs
+-------------------
+
+Status : [0%]
+
+IP Whitelist
+------------
+
+Status : [0%]

@@ -19,6 +19,9 @@ from .settings import Settings
 from .network import Network
 from .errors import ErrPaginationException
 
+from datetime import datetime, timezone
+from dateutil.relativedelta import relativedelta
+
 class Atlas:
     def __init__(self, user, password, group):
         """Atlas constructor
@@ -38,6 +41,7 @@ class Atlas:
         self.Clusters = Atlas._Clusters(self)
         self.DatabaseUsers = Atlas._DatabaseUsers(self)
         self.Projects = Atlas._Projects(self)
+        self.Alerts = Atlas._Alerts(self)
     
     def isSuccess(self, code):
         return (code == Settings.SUCCESS)
@@ -311,6 +315,129 @@ class Atlas:
                 project["orgId"] = orgId
             
             return self.atlas.network.post(Settings.BASE_URL + uri, project)
+        
+    class _Alerts:
+        """Clusters API
+        
+        see: https://docs.atlas.mongodb.com/reference/api/alerts/
+        """
+        
+        def __init__(self, atlas):
+            """_Cluster constructor
+            
+            Args:
+                atlas (Atlas): Atlas instance
+            """
+            self.atlas = atlas
+        
+        def get_all_alerts(self, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage, iterable=False, status=None):
+            """Get All Alerts
+            
+            url: https://docs.atlas.mongodb.com/reference/api/alerts-get-all-alerts/
+            
+            Kwargs:
+                pageNum (int): Page number
+                itemsPerPage (int): Number of Users per Page
+                iterable (bool): To return an iterable high level object instead of a low level API response
+                status (AlertStatusSpec): filter on alerts status
+                
+            Returns:
+                if iterable:
+                    AtlasPagination. Iterable object representing this function
+                elif:
+                    int, dict. HTTP Code, Response payload
+            """
+            
+            # Enforce Atlas limitation if needed
+            if itemsPerPage > Settings.itemsPerPageMax:
+                itemsPerPage = Settings.itemsPerPageMax
+            
+            if status:
+                uri = Settings.api_resources["Alerts"]["Get All Alerts with status"] % (self.atlas.group, pageNum, itemsPerPage, status)
+            else:
+                uri = Settings.api_resources["Alerts"]["Get All Alerts"] % (self.atlas.group, pageNum, itemsPerPage)
+            
+            if iterable:
+                return AlertsGetAll(self.atlas, pageNum, itemsPerPage, status)
+            else:
+                return self.atlas.network.get(Settings.BASE_URL + uri)
+            
+        
+        def get_an_alert(self, alert):
+            """Get an Alert 
+            
+            url: https://docs.atlas.mongodb.com/reference/api/alerts-get-alert/
+            
+            Args:
+                alert (str): The alert id
+                
+            Returns:
+                int, dict. HTTP Code, Response payload
+            """
+            uri = Settings.api_resources["Alerts"]["Get an Alert"] % (self.atlas.group, alert)
+            return self.atlas.network.get(Settings.BASE_URL + uri)
+        
+        def acknowledge_an_alert(self, alert, until, comment=None):
+            """Acknowledge an Alert
+            
+            url: https://docs.atlas.mongodb.com/reference/api/alerts-acknowledge-alert/
+            
+            Args:
+                alert (str): The alert id
+                until (datetime): Acknowledge until
+                
+            Kwargs:
+                comment (str): The acknowledge comment
+            
+            Returns:
+                int, dict. HTTP Code, Response payload
+            """
+            
+            data = { "acknowledgedUntil" : until.isoformat(timespec='seconds') }
+            if comment:
+                data["acknowledgementComment"] = comment
+            
+            uri = Settings.api_resources["Alerts"]["Acknowledge an Alert"] % (self.atlas.group, alert)
+            return self.atlas.network.patch(Settings.BASE_URL + uri, data)
+        
+        def unacknowledge_an_alert(self, alert):
+            """Acknowledge an Alert
+            
+            url: https://docs.atlas.mongodb.com/reference/api/alerts-acknowledge-alert/
+            
+            Args:
+                alert (str): The alert id
+                
+            Returns:
+                int, dict. HTTP Code, Response payload
+            """
+            
+            # see https://docs.atlas.mongodb.com/reference/api/alerts-acknowledge-alert/#request-body-parameters
+            # To unacknowledge a previously acknowledged alert, set the field value to the past.
+            now = datetime.now(timezone.utc)
+            until = now - relativedelta(days=1)
+            return self.acknowledge_an_alert(alert, until)
+        
+        def acknowledge_an_alert_forever(self, alert, comment=None):
+            """Acknowledge an Alert forever
+            
+            url: https://docs.atlas.mongodb.com/reference/api/alerts-acknowledge-alert/
+            
+            Args:
+                alert (str): The alert id
+                
+            Kwargs:
+                comment (str): The acknowledge comment
+            
+            Returns:
+                int, dict. HTTP Code, Response payload
+            """
+            
+            # see https://docs.atlas.mongodb.com/reference/api/alerts-acknowledge-alert/#request-body-parameters
+            # To acknowledge an alert “forever”, set the field value to 100 years in the future.
+            now = datetime.now(timezone.utc)
+            until = now + relativedelta(years=100)
+            return self.acknowledge_an_alert(alert, until, comment)
 
 class AtlasPagination:
     """Atlas Pagination Generic Implementation"""
@@ -372,3 +499,13 @@ class ClustersGetAll(AtlasPagination):
     """Pagination for Clusters / Get All"""
     def __init__(self, atlas, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage):
         super().__init__(atlas, atlas.Clusters.get_all_clusters, pageNum, itemsPerPage)
+        
+class AlertsGetAll(AtlasPagination):
+    """Pagination for Alerts / Get All"""
+    def __init__(self, atlas, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage, status=None):
+        super().__init__(atlas, self.fetch, pageNum, itemsPerPage)
+        self.get_all_alerts = atlas.Alerts.get_all_alerts
+        self.status = status
+        
+    def fetch(self, pageNum, itemsPerPage):
+        return self.get_all_alerts(pageNum, itemsPerPage, status=self.status)

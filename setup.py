@@ -6,7 +6,7 @@ setup(
     version='0.0.1',
     python_requires='>=3.5',
     packages=find_packages(),
-    install_requires=['requests'],
+    install_requires=['requests', 'python-dateutil'],
 
     # Metadata
     author="Yellow Pages Inc.",

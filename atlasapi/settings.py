@@ -35,6 +35,12 @@ class Settings:
             "Get All Clusters" : "/api/atlas/v1.0/groups/%s/clusters?pageNum=%d&itemsPerPage=%d",
             "Get a Single Cluster" : "/api/atlas/v1.0/groups/%s/clusters/%s",
             "Delete a Cluster" : "/api/atlas/v1.0/groups/%s/clusters/%s"
+        },
+        "Alerts" : {
+            "Get All Alerts" : "/api/atlas/v1.0/groups/%s/alerts?pageNum=%d&itemsPerPage=%d",
+            "Get All Alerts with status" : "/api/atlas/v1.0/groups/%s/alerts?pageNum=%d&itemsPerPage=%d&status=%s",
+            "Get an Alert" : "/api/atlas/v1.0/groups/%s/alerts/%s",
+            "Acknowledge an Alert" : "/api/atlas/v1.0/groups/%s/alerts/%s"
         }
     }
     

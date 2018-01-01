@@ -163,3 +163,8 @@ class DatabaseUsersUpdatePermissionsSpecs(DatabaseUsersPermissionsSpecs):
             content["password"] = self.password
         
         return content
+
+class AlertStatusSpec:
+    TRACKING = "TRACKING"
+    OPEN = "OPEN"
+    CLOSED = "CLOSED"

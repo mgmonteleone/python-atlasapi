@@ -33,3 +33,12 @@ Status : [60%]
 - Create a Cluster [0%]
 - Modify a Cluster [0%]
 - Delete a Cluster
+
+Alerts
+------
+
+Status : [100%]
+
+- Get All Alerts
+- Get an Alert
+- Acknowledge an Alert (include Unacknowledge)

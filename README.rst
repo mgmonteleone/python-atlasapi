@@ -149,7 +149,36 @@ Clusters
     # Delete a Cluster (approved)
     c, details = a.Clusters.delete_a_cluster("cluster-dev", areYouSure=True)
     a.isAccepted(c)
+
+Alerts
+^^^^^^
+
+.. code:: python
+
+    from atlasapi.atlas import Atlas
+    from atlasapi.specs import AlertStatusSpec
     
+    a = Atlas("<user>","<password>","<groupid>")
+    
+    # Get All Alerts in OPEN status
+    for alert in a.Alerts.get_all_alerts(iterable=True, status=AlertStatusSpec.OPEN):
+        print(alert["id"])
+    
+    # Get an Alert
+    c, details = a.Alerts.get_an_alert("597f221fdf9db113ce1755cd")
+    
+    # Acknowledge an Alert
+    #  until (now + 6 hours)
+    from datetime import datetime, timezone, timedelta
+    now = datetime.now(timezone.utc)
+    until = now + timedelta(hours=6)
+    c, details = a.Alerts.acknowledge_an_alert("597f221fdf9db113ce1755cd", until, "Acknowledge reason")
+    
+    #  forever
+    c, details = a.Alerts.acknowledge_an_alert_forever("597f221fdf9db113ce1755cd", "Acknowledge reason")
+    
+    # Unacknowledge an Alert
+    c, details = a.Alerts.unacknowledge_an_alert("597f221fdf9db113ce1755cd")
 
 Error Types
 -----------

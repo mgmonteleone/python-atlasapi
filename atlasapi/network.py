@@ -1,17 +1,21 @@
+# Copyright (c) 2018 Yellow Pages Inc.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 """
-Copyright (c) 2017 Yellow Pages Inc.
+Network module
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+Permit to communicate with external APIs
 """
 
 import requests
@@ -20,14 +24,13 @@ from .settings import Settings
 from .errors import *
 
 class Network:
+    """Network constructor
+    
+    Args:
+        user (str): user
+        password (str): password
+    """
     def __init__(self, user, password):
-        """Network constructor
-        
-        Args:
-            user (str): user
-            password (str): password
-        
-        """
         self.user = user
         self.password = password
 
@@ -39,7 +42,7 @@ class Network:
             details (dict): Response payload
         
         Returns:
-            dict. Response payload
+            dict: Response payload
             
         Raises:
             ErrAtlasBadRequest
@@ -49,6 +52,7 @@ class Network:
             ErrAtlasMethodNotAllowed
             ErrAtlasConflict
             ErrAtlasServerErrors
+        
         """
         if c in [Settings.SUCCESS, Settings.CREATED, Settings.ACCEPTED]:
             return details
@@ -69,16 +73,16 @@ class Network:
             raise ErrAtlasServerErrors(c, details)
     
     def get(self, uri):
-        """Get
+        """Get request
         
         Args:
             uri (str): URI
             
         Returns:
-            Json. API response
+            Json: API response
             
         Raises:
-            Exception. Network issue
+            Exception: Network issue
         """
         r = None
         
@@ -96,17 +100,17 @@ class Network:
                 r.connection.close()
     
     def post(self, uri, payload):
-        """Post
+        """Post request
         
         Args:
             uri (str): URI
             payload (dict): Content to post 
             
         Returns:
-            Json. API response
+            Json: API response
             
         Raises:
-            Exception. Network issue
+            Exception: Network issue
         """
         r = None
         
@@ -125,17 +129,17 @@ class Network:
                 r.connection.close()
     
     def patch(self, uri, payload):
-        """Patch
+        """Patch request
         
         Args:
             uri (str): URI
             payload (dict): Content to patch
             
         Returns:
-            Json. API response
+            Json: API response
             
         Raises:
-            Exception. Network issue
+            Exception: Network issue
         """
         r = None
         
@@ -154,16 +158,16 @@ class Network:
                 r.connection.close()
     
     def delete(self, uri):
-        """Delete
+        """Delete request
         
         Args:
             uri (str): URI
             
         Returns:
-            Json. API response
+            Json: API response
             
         Raises:
-            Exception. Network issue
+            Exception: Network issue
         """
         r = None
         

@@ -14,10 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import requests
 from .settings import Settings
 from .network import Network
-from .errors import ErrPaginationException, ErrPaginationLimitsException
+from .errors import *
 
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
@@ -42,15 +41,6 @@ class Atlas:
         self.DatabaseUsers = Atlas._DatabaseUsers(self)
         self.Projects = Atlas._Projects(self)
         self.Alerts = Atlas._Alerts(self)
-    
-    def isSuccess(self, code):
-        return (code == Settings.SUCCESS)
-    
-    def isCreated(self, code):
-        return (code == Settings.CREATED)
-    
-    def isAccepted(self, code):
-        return (code == Settings.ACCEPTED)
         
     class _Clusters:
         """Clusters API
@@ -78,9 +68,12 @@ class Atlas:
                 bool. The cluster exist or not
             """
             
-            code, content = self.get_a_single_cluster(cluster)
-            return self.atlas.isSuccess(code)
-        
+            try:
+                self.get_a_single_cluster(cluster)
+                return True
+            except ErrAtlasNotFound:
+                return False
+            
         def get_all_clusters(self, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage, iterable=False):
             """Get All Clusters
             
@@ -95,14 +88,14 @@ class Atlas:
                 if iterable:
                     AtlasPagination. Iterable object representing this function
                 elif:
-                    int, dict. HTTP Code, Response payload
+                    dict. Response payload
                     
             Raises:
-                ErrPaginationLimitsException. Out of limits
+                ErrPaginationLimits. Out of limits
             """
             
             # Check limits and raise an Exception if needed
-            ErrPaginationLimitsException.checkAndRaise(pageNum, itemsPerPage)
+            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
             
             if iterable:
                 return ClustersGetAll(self.atlas, pageNum, itemsPerPage)
@@ -117,10 +110,13 @@ class Atlas:
             
             Args:
                 cluster (str): The cluster name
+            
+            Returns:
+                dict. Response payload
             """
             uri = Settings.api_resources["Clusters"]["Get a Single Cluster"] % (self.atlas.group, cluster)
             return self.atlas.network.get(Settings.BASE_URL + uri)
-        
+            
         def delete_a_cluster(self, cluster, areYouSure = False):
             """Delete a Cluster
             
@@ -131,13 +127,18 @@ class Atlas:
                 
             Kwargs:
                 areYouSure (bool): safe flag to don't delete a cluster by mistake
+                
+            Returns:
+                dict. Response payload
+                
+            Raises
+                ErrConfirmationRequested. Need a confirmation to delete the cluster
             """
             if areYouSure:
                 uri = Settings.api_resources["Clusters"]["Delete a Cluster"] % (self.atlas.group, cluster)
                 return self.atlas.network.delete(Settings.BASE_URL + uri)
             else:
-                return 400, { "detail" : "Please set areYouSure=True on delete_a_cluster call if you really want to delete [%s]" % cluster,
-                              "error" : 400}
+                raise ErrConfirmationRequested("Please set areYouSure=True on delete_a_cluster call if you really want to delete [%s]" % cluster)
             
     class _DatabaseUsers:
         """Database Users API
@@ -167,14 +168,14 @@ class Atlas:
                 if iterable:
                     AtlasPagination. Iterable object representing this function
                 elif:
-                    int, dict. HTTP Code, Response payload
+                    dict. Response payload
                     
             Raises:
-                ErrPaginationLimitsException. Out of limits
+                ErrPaginationLimits. Out of limits
             """
             
             # Check limits and raise an Exception if needed
-            ErrPaginationLimitsException.checkAndRaise(pageNum, itemsPerPage)
+            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
             
             if iterable:
                 return DatabaseUsersGetAll(self.atlas, pageNum, itemsPerPage)
@@ -191,7 +192,7 @@ class Atlas:
                 user (str): User
                 
             Returns:
-                int, dict. HTTP Code, Response payload
+                dict. Response payload
             """
             uri = Settings.api_resources["Database Users"]["Get a Single Database User"] % (self.atlas.group, user)
             return self.atlas.network.get(Settings.BASE_URL + uri)
@@ -205,7 +206,7 @@ class Atlas:
                 permissions (DatabaseUsersPermissionsSpec): Permissions to apply
                 
             Returns:
-                int, dict. HTTP Code, Response payload
+                dict. Response payload
             """
             uri = Settings.api_resources["Database Users"]["Create a Database User"] % self.atlas.group
             return self.atlas.network.post(Settings.BASE_URL + uri, permissions.getSpecs())
@@ -220,7 +221,7 @@ class Atlas:
                 permissions (DatabaseUsersUpdatePermissionsSpecs): Permissions to apply
                 
             Returns:
-                int, dict. HTTP Code, Response payload
+                dict. Response payload
             """
             uri = Settings.api_resources["Database Users"]["Update a Database User"] % (self.atlas.group, user)
             return self.atlas.network.patch(Settings.BASE_URL + uri, permissions.getSpecs())
@@ -234,7 +235,7 @@ class Atlas:
                 user (str): User to delete
                 
             Returns:
-                int, dict. HTTP Code, Response payload
+                dict. Response payload
             """
             uri = Settings.api_resources["Database Users"]["Delete a Database User"] % (self.atlas.group, user)
             return self.atlas.network.delete(Settings.BASE_URL + uri)
@@ -267,14 +268,14 @@ class Atlas:
                 if iterable:
                     AtlasPagination. Iterable object representing this function
                 elif:
-                    int, dict. HTTP Code, Response payload
+                    dict. Response payload
                     
             Raises:
-                ErrPaginationLimitsException. Out of limits
+                ErrPaginationLimits. Out of limits
             """
             
             # Check limits and raise an Exception if needed
-            ErrPaginationLimitsException.checkAndRaise(pageNum, itemsPerPage)
+            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
             
             if iterable:
                 return ProjectsGetAll(self.atlas, pageNum, itemsPerPage)
@@ -291,7 +292,7 @@ class Atlas:
                 groupid (str): Group Id
                 
             Returns:
-                int, dict. HTTP Code, Response payload
+                dict. Response payload
             """
             uri = Settings.api_resources["Projects"]["Get One Project"] % (groupid)
             return self.atlas.network.get(Settings.BASE_URL + uri)
@@ -308,7 +309,7 @@ class Atlas:
                 orgId (ObjectId): The ID of the organization you want to create the project within.
                 
             Returns:
-                int, dict. HTTP Code, Response payload
+                dict. Response payload
             """
             uri = Settings.api_resources["Projects"]["Create a Project"]
             
@@ -347,14 +348,14 @@ class Atlas:
                 if iterable:
                     AtlasPagination. Iterable object representing this function
                 elif:
-                    int, dict. HTTP Code, Response payload
+                    dict. Response payload
                     
             Raises:
-                ErrPaginationLimitsException. Out of limits
+                ErrPaginationLimits. Out of limits
             """
             
             # Check limits and raise an Exception if needed
-            ErrPaginationLimitsException.checkAndRaise(pageNum, itemsPerPage)
+            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
             
             if iterable:
                 return AlertsGetAll(self.atlas, status, pageNum, itemsPerPage)
@@ -376,7 +377,7 @@ class Atlas:
                 alert (str): The alert id
                 
             Returns:
-                int, dict. HTTP Code, Response payload
+                dict. Response payload
             """
             uri = Settings.api_resources["Alerts"]["Get an Alert"] % (self.atlas.group, alert)
             return self.atlas.network.get(Settings.BASE_URL + uri)
@@ -394,7 +395,7 @@ class Atlas:
                 comment (str): The acknowledge comment
             
             Returns:
-                int, dict. HTTP Code, Response payload
+                dict. Response payload
             """
             
             data = { "acknowledgedUntil" : until.isoformat(timespec='seconds') }
@@ -413,7 +414,7 @@ class Atlas:
                 alert (str): The alert id
                 
             Returns:
-                int, dict. HTTP Code, Response payload
+                dict. Response payload
             """
             
             # see https://docs.atlas.mongodb.com/reference/api/alerts-acknowledge-alert/#request-body-parameters
@@ -434,7 +435,7 @@ class Atlas:
                 comment (str): The acknowledge comment
             
             Returns:
-                int, dict. HTTP Code, Response payload
+                dict. Response payload
             """
             
             # see https://docs.atlas.mongodb.com/reference/api/alerts-acknowledge-alert/#request-body-parameters
@@ -468,11 +469,10 @@ class AtlasPagination:
         
         while (pageNum * self.itemsPerPage - total < self.itemsPerPage):
             # fetch the API
-            c, details = self.fetch(pageNum, self.itemsPerPage)
-            
-            # handle errors
-            if not self.atlas.isSuccess(c):
-                raise ErrPaginationException()
+            try:
+                details = self.fetch(pageNum, self.itemsPerPage)
+            except:
+                raise ErrPagination()
             
             # set the real total
             total = details["totalCount"]

@@ -17,6 +17,7 @@ limitations under the License.
 import requests
 from requests.auth import HTTPDigestAuth
 from .settings import Settings
+from .errors import *
 
 class Network:
     def __init__(self, user, password):
@@ -29,6 +30,43 @@ class Network:
         """
         self.user = user
         self.password = password
+
+    def answer(self, c, details):
+        """Answer will provide all necessary feedback for the caller
+        
+        Args:
+            c (int): HTTP Code
+            details (dict): Response payload
+        
+        Returns:
+            dict. Response payload
+            
+        Raises:
+            ErrAtlasBadRequest
+            ErrAtlasUnauthorized
+            ErrAtlasForbidden
+            ErrAtlasNotFound
+            ErrAtlasMethodNotAllowed
+            ErrAtlasConflict
+            ErrAtlasServerErrors
+        """
+        if c in [Settings.SUCCESS, Settings.CREATED, Settings.ACCEPTED]:
+            return details
+        elif c == Settings.BAD_REQUEST:
+            raise ErrAtlasBadRequest(c, details)
+        elif c == Settings.UNAUTHORIZED:
+            raise ErrAtlasUnauthorized(c, details)
+        elif c == Settings.FORBIDDEN:
+            raise ErrAtlasForbidden(c, details)
+        elif c == Settings.NOTFOUND:
+            raise ErrAtlasNotFound(c, details)
+        elif c == Settings.METHOD_NOT_ALLOWED:
+            raise ErrAtlasMethodNotAllowed(c, details)
+        elif c == Settings.CONFLICT:
+            raise ErrAtlasConflict(c, details)
+        else:
+            # Settings.SERVER_ERRORS
+            raise ErrAtlasServerErrors(c, details)
     
     def get(self, uri):
         """Get
@@ -37,7 +75,7 @@ class Network:
             uri (str): URI
             
         Returns:
-            Int, Json. HTTP code and API response
+            Json. API response
             
         Raises:
             Exception. Network issue
@@ -50,7 +88,7 @@ class Network:
                              timeout=Settings.requests_timeout,
                              headers={},
                              auth=HTTPDigestAuth(self.user, self.password))
-            return (r.status_code, r.json())
+            return self.answer(r.status_code, r.json())
         except:
             raise
         finally:
@@ -65,7 +103,7 @@ class Network:
             payload (dict): Content to post 
             
         Returns:
-            Int, Json. HTTP code and API response
+            Json. API response
             
         Raises:
             Exception. Network issue
@@ -79,7 +117,7 @@ class Network:
                               timeout=Settings.requests_timeout,
                               headers={"Content-Type" : "application/json"},
                               auth=HTTPDigestAuth(self.user, self.password))
-            return (r.status_code, r.json())
+            return self.answer(r.status_code, r.json())
         except:
             raise
         finally:
@@ -94,7 +132,7 @@ class Network:
             payload (dict): Content to patch
             
         Returns:
-            Int, Json. HTTP code and API response
+            Json. API response
             
         Raises:
             Exception. Network issue
@@ -108,7 +146,7 @@ class Network:
                                timeout=Settings.requests_timeout,
                                headers={"Content-Type" : "application/json"},
                                auth=HTTPDigestAuth(self.user, self.password))
-            return (r.status_code, r.json())
+            return self.answer(r.status_code, r.json())
         except:
             raise
         finally:
@@ -122,7 +160,7 @@ class Network:
             uri (str): URI
             
         Returns:
-            Int, Json. HTTP code and API response
+            Json. API response
             
         Raises:
             Exception. Network issue
@@ -135,7 +173,7 @@ class Network:
                                 timeout=Settings.requests_timeout,
                                 headers={},
                                 auth=HTTPDigestAuth(self.user, self.password))
-            return (r.status_code, r.json())
+            return self.answer(r.status_code, r.json())
         except:
             raise
         finally:

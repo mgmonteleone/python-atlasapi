@@ -138,7 +138,7 @@ Clusters
     # Get a Single Cluster
     details = a.Clusters.get_a_single_cluster("cluster-dev")
     
-    # Delete a Cluster (dry run)
+    # Delete a Cluster (dry run, raise ErrConfirmationRequested)
     details = a.Clusters.delete_a_cluster("cluster-dev")
     
     # Delete a Cluster (approved)
@@ -217,6 +217,8 @@ Exceptions
     This is typically the response to a request to create or modify a property of an entity that is unique when an existing entity already exists with the same value for that property.
 - ErrAtlasServerErrors
     Something unexpected went wrong.
+- ErrConfirmationRequested
+    Confirmation requested to execute the call.
 
 Internal Notes
 --------------

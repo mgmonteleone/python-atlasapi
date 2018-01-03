@@ -1,0 +1,572 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Nested class for atlasapi.atlas::Atlas &#8212; atlasapi 0.5.4 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.5.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="atlasapi package" href="atlasapi.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="atlasapi.html" title="atlasapi package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">atlasapi 0.5.4 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="nested-class-for-atlasapi-atlas-atlas">
+<h1>Nested class for atlasapi.atlas::Atlas<a class="headerlink" href="#nested-class-for-atlasapi-atlas-atlas" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="atlas-cluster">
+<h2>Atlas._Cluster<a class="headerlink" href="#atlas-cluster" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="atlasapi.atlas.Atlas._Clusters">
+<em class="property">class </em><code class="descclassname">Atlas.</code><code class="descname">_Clusters</code><span class="sig-paren">(</span><em>atlas</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._Clusters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Clusters API</p>
+<p>see: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/clusters/">https://docs.atlas.mongodb.com/reference/api/clusters/</a></p>
+<p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>atlas</strong> (<a class="reference internal" href="atlasapi.html#atlasapi.atlas.Atlas" title="atlasapi.atlas.Atlas"><em>Atlas</em></a>) – Atlas instance</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="atlasapi.atlas.Atlas._Clusters.delete_a_cluster">
+<code class="descname">delete_a_cluster</code><span class="sig-paren">(</span><em>cluster</em>, <em>areYouSure=False</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._Clusters.delete_a_cluster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a Cluster</p>
+<p>url: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/clusters-delete-one/">https://docs.atlas.mongodb.com/reference/api/clusters-delete-one/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cluster</strong> (<em>str</em>) – Cluster name</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><strong>areYouSure</strong> (<em>bool</em>) – safe flag to don’t delete a cluster by mistake</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Response payload</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">ErrConfirmationRequested</span></code> – Need a confirmation to delete the cluster</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.atlas.Atlas._Clusters.get_a_single_cluster">
+<code class="descname">get_a_single_cluster</code><span class="sig-paren">(</span><em>cluster</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._Clusters.get_a_single_cluster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a Single Cluster</p>
+<p>url: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/clusters-get-one/">https://docs.atlas.mongodb.com/reference/api/clusters-get-one/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cluster</strong> (<em>str</em>) – The cluster name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Response payload</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.atlas.Atlas._Clusters.get_all_clusters">
+<code class="descname">get_all_clusters</code><span class="sig-paren">(</span><em>pageNum=1</em>, <em>itemsPerPage=100</em>, <em>iterable=False</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._Clusters.get_all_clusters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get All Clusters</p>
+<p>url: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/clusters-get-all/">https://docs.atlas.mongodb.com/reference/api/clusters-get-all/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first simple">
+<li><strong>pageNum</strong> (<em>int</em>) – Page number</li>
+<li><strong>itemsPerPage</strong> (<em>int</em>) – Number of Users per Page</li>
+<li><strong>iterable</strong> (<em>bool</em>) – To return an iterable high level object instead of a low level API response</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Iterable object representing this function OR Response payload</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="atlasapi.html#atlasapi.atlas.AtlasPagination" title="atlasapi.atlas.AtlasPagination">AtlasPagination</a> or dict</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">ErrPaginationLimits</span></code> – Out of limits</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.atlas.Atlas._Clusters.is_existing_cluster">
+<code class="descname">is_existing_cluster</code><span class="sig-paren">(</span><em>cluster</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._Clusters.is_existing_cluster" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if the cluster exists</p>
+<p>Not part of Atlas api but provided to simplify some code</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cluster</strong> (<em>str</em>) – The cluster name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The cluster exists or not</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="atlas-databaseusers">
+<h2>Atlas._DatabaseUsers<a class="headerlink" href="#atlas-databaseusers" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="atlasapi.atlas.Atlas._DatabaseUsers">
+<em class="property">class </em><code class="descclassname">Atlas.</code><code class="descname">_DatabaseUsers</code><span class="sig-paren">(</span><em>atlas</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._DatabaseUsers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Database Users API</p>
+<p>see: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/database-users/">https://docs.atlas.mongodb.com/reference/api/database-users/</a></p>
+<p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>atlas</strong> (<a class="reference internal" href="atlasapi.html#atlasapi.atlas.Atlas" title="atlasapi.atlas.Atlas"><em>Atlas</em></a>) – Atlas instance</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="atlasapi.atlas.Atlas._DatabaseUsers.create_a_database_user">
+<code class="descname">create_a_database_user</code><span class="sig-paren">(</span><em>permissions</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._DatabaseUsers.create_a_database_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a Database User</p>
+<p>url: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/database-users-create-a-user/">https://docs.atlas.mongodb.com/reference/api/database-users-create-a-user/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>permissions</strong> (<em>DatabaseUsersPermissionsSpec</em>) – Permissions to apply</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Response payload</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.atlas.Atlas._DatabaseUsers.delete_a_database_user">
+<code class="descname">delete_a_database_user</code><span class="sig-paren">(</span><em>user</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._DatabaseUsers.delete_a_database_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a Database User</p>
+<p>url: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/database-users-delete-a-user/">https://docs.atlas.mongodb.com/reference/api/database-users-delete-a-user/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>user</strong> (<em>str</em>) – User to delete</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Response payload</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.atlas.Atlas._DatabaseUsers.get_a_single_database_user">
+<code class="descname">get_a_single_database_user</code><span class="sig-paren">(</span><em>user</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._DatabaseUsers.get_a_single_database_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a Database User</p>
+<p>url: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/database-users-get-single-user/">https://docs.atlas.mongodb.com/reference/api/database-users-get-single-user/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>user</strong> (<em>str</em>) – User</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Response payload</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.atlas.Atlas._DatabaseUsers.get_all_database_users">
+<code class="descname">get_all_database_users</code><span class="sig-paren">(</span><em>pageNum=1</em>, <em>itemsPerPage=100</em>, <em>iterable=False</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._DatabaseUsers.get_all_database_users" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get All Database Users</p>
+<p>url: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/database-users-get-all-users/">https://docs.atlas.mongodb.com/reference/api/database-users-get-all-users/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first simple">
+<li><strong>pageNum</strong> (<em>int</em>) – Page number</li>
+<li><strong>itemsPerPage</strong> (<em>int</em>) – Number of Users per Page</li>
+<li><strong>iterable</strong> (<em>bool</em>) – To return an iterable high level object instead of a low level API response</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Iterable object representing this function OR Response payload</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="atlasapi.html#atlasapi.atlas.AtlasPagination" title="atlasapi.atlas.AtlasPagination">AtlasPagination</a> or dict</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">ErrPaginationLimits</span></code> – Out of limits</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.atlas.Atlas._DatabaseUsers.update_a_database_user">
+<code class="descname">update_a_database_user</code><span class="sig-paren">(</span><em>user</em>, <em>permissions</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._DatabaseUsers.update_a_database_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update a Database User</p>
+<p>url: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/database-users-update-a-user/">https://docs.atlas.mongodb.com/reference/api/database-users-update-a-user/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>user</strong> (<em>str</em>) – User</li>
+<li><strong>permissions</strong> (<a class="reference internal" href="atlasapi.html#atlasapi.specs.DatabaseUsersUpdatePermissionsSpecs" title="atlasapi.specs.DatabaseUsersUpdatePermissionsSpecs"><em>DatabaseUsersUpdatePermissionsSpecs</em></a>) – Permissions to apply</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Response payload</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="atlas-projects">
+<h2>Atlas._Projects<a class="headerlink" href="#atlas-projects" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="atlasapi.atlas.Atlas._Projects">
+<em class="property">class </em><code class="descclassname">Atlas.</code><code class="descname">_Projects</code><span class="sig-paren">(</span><em>atlas</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._Projects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Projects API</p>
+<p>see: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/projects/">https://docs.atlas.mongodb.com/reference/api/projects/</a></p>
+<p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>atlas</strong> (<a class="reference internal" href="atlasapi.html#atlasapi.atlas.Atlas" title="atlasapi.atlas.Atlas"><em>Atlas</em></a>) – Atlas instance</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="atlasapi.atlas.Atlas._Projects.create_a_project">
+<code class="descname">create_a_project</code><span class="sig-paren">(</span><em>name</em>, <em>orgId=None</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._Projects.create_a_project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a Project</p>
+<p>url: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/project-create-one/">https://docs.atlas.mongodb.com/reference/api/project-create-one/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<em>str</em>) – Project name</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><strong>orgId</strong> (<em>ObjectId</em>) – The ID of the organization you want to create the project within.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Response payload</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.atlas.Atlas._Projects.get_all_projects">
+<code class="descname">get_all_projects</code><span class="sig-paren">(</span><em>pageNum=1</em>, <em>itemsPerPage=100</em>, <em>iterable=False</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._Projects.get_all_projects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get All Projects</p>
+<p>url: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/project-get-all/">https://docs.atlas.mongodb.com/reference/api/project-get-all/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first simple">
+<li><strong>pageNum</strong> (<em>int</em>) – Page number</li>
+<li><strong>itemsPerPage</strong> (<em>int</em>) – Number of Users per Page</li>
+<li><strong>iterable</strong> (<em>bool</em>) – To return an iterable high level object instead of a low level API response</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Iterable object representing this function OR Response payload</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="atlasapi.html#atlasapi.atlas.AtlasPagination" title="atlasapi.atlas.AtlasPagination">AtlasPagination</a> or dict</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">ErrPaginationLimits</span></code> – Out of limits</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.atlas.Atlas._Projects.get_one_project">
+<code class="descname">get_one_project</code><span class="sig-paren">(</span><em>groupid</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._Projects.get_one_project" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get one Project</p>
+<p>url: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/project-get-one/">https://docs.atlas.mongodb.com/reference/api/project-get-one/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>groupid</strong> (<em>str</em>) – Group Id</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Response payload</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="atlas-alerts">
+<h2>Atlas._Alerts<a class="headerlink" href="#atlas-alerts" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="atlasapi.atlas.Atlas._Alerts">
+<em class="property">class </em><code class="descclassname">Atlas.</code><code class="descname">_Alerts</code><span class="sig-paren">(</span><em>atlas</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._Alerts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Alerts API</p>
+<p>see: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/alerts/">https://docs.atlas.mongodb.com/reference/api/alerts/</a></p>
+<p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>atlas</strong> (<a class="reference internal" href="atlasapi.html#atlasapi.atlas.Atlas" title="atlasapi.atlas.Atlas"><em>Atlas</em></a>) – Atlas instance</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="atlasapi.atlas.Atlas._Alerts.acknowledge_an_alert">
+<code class="descname">acknowledge_an_alert</code><span class="sig-paren">(</span><em>alert</em>, <em>until</em>, <em>comment=None</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._Alerts.acknowledge_an_alert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acknowledge an Alert</p>
+<p>url: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/alerts-acknowledge-alert/">https://docs.atlas.mongodb.com/reference/api/alerts-acknowledge-alert/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>alert</strong> (<em>str</em>) – The alert id</li>
+<li><strong>until</strong> (<em>datetime</em>) – Acknowledge until</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first"><strong>comment</strong> (<em>str</em>) – The acknowledge comment</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Response payload</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.atlas.Atlas._Alerts.acknowledge_an_alert_forever">
+<code class="descname">acknowledge_an_alert_forever</code><span class="sig-paren">(</span><em>alert</em>, <em>comment=None</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._Alerts.acknowledge_an_alert_forever" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acknowledge an Alert forever</p>
+<p>url: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/alerts-acknowledge-alert/">https://docs.atlas.mongodb.com/reference/api/alerts-acknowledge-alert/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>alert</strong> (<em>str</em>) – The alert id</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><strong>comment</strong> (<em>str</em>) – The acknowledge comment</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Response payload</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.atlas.Atlas._Alerts.get_all_alerts">
+<code class="descname">get_all_alerts</code><span class="sig-paren">(</span><em>status=None</em>, <em>pageNum=1</em>, <em>itemsPerPage=100</em>, <em>iterable=False</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._Alerts.get_all_alerts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get All Alerts</p>
+<p>url: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/alerts-get-all-alerts/">https://docs.atlas.mongodb.com/reference/api/alerts-get-all-alerts/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><ul class="first simple">
+<li><strong>status</strong> (<a class="reference internal" href="atlasapi.html#atlasapi.specs.AlertStatusSpec" title="atlasapi.specs.AlertStatusSpec"><em>AlertStatusSpec</em></a>) – filter on alerts status</li>
+<li><strong>pageNum</strong> (<em>int</em>) – Page number</li>
+<li><strong>itemsPerPage</strong> (<em>int</em>) – Number of Users per Page</li>
+<li><strong>iterable</strong> (<em>bool</em>) – To return an iterable high level object instead of a low level API response</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Iterable object representing this function OR Response payload</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first"><a class="reference internal" href="atlasapi.html#atlasapi.atlas.AtlasPagination" title="atlasapi.atlas.AtlasPagination">AtlasPagination</a> or dict</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">ErrPaginationLimits</span></code> – Out of limits</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.atlas.Atlas._Alerts.get_an_alert">
+<code class="descname">get_an_alert</code><span class="sig-paren">(</span><em>alert</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._Alerts.get_an_alert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get an Alert</p>
+<p>url: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/alerts-get-alert/">https://docs.atlas.mongodb.com/reference/api/alerts-get-alert/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>alert</strong> (<em>str</em>) – The alert id</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Response payload</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.atlas.Atlas._Alerts.unacknowledge_an_alert">
+<code class="descname">unacknowledge_an_alert</code><span class="sig-paren">(</span><em>alert</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas._Alerts.unacknowledge_an_alert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acknowledge an Alert</p>
+<p>url: <a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/alerts-acknowledge-alert/">https://docs.atlas.mongodb.com/reference/api/alerts-acknowledge-alert/</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>alert</strong> (<em>str</em>) – The alert id</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Response payload</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="atlasapi.html"
+                        title="previous chapter">atlasapi package</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="atlasapi.html" title="atlasapi package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">atlasapi 0.5.4 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Yellow Pages Inc.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
+    </div>
+  </body>
+</html>

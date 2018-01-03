@@ -1,0 +1,975 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>atlasapi package &#8212; atlasapi 0.5.4 documentation</title>
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.5.4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Nested class for atlasapi.atlas::Atlas" href="atlasapi-atlas-nested.html" />
+    <link rel="prev" title="Welcome to atlasapi’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="atlasapi-atlas-nested.html" title="Nested class for atlasapi.atlas::Atlas"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to atlasapi’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">atlasapi 0.5.4 documentation</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="atlasapi-package">
+<h1>atlasapi package<a class="headerlink" href="#atlasapi-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-atlasapi.atlas">
+<span id="atlasapi-atlas-module"></span><h2>atlasapi.atlas module<a class="headerlink" href="#module-atlasapi.atlas" title="Permalink to this headline">¶</a></h2>
+<p>Atlas module</p>
+<p>Core module which provides access to MongoDB Atlas Cloud Provider APIs</p>
+<dl class="class">
+<dt id="atlasapi.atlas.AlertsGetAll">
+<em class="property">class </em><code class="descclassname">atlasapi.atlas.</code><code class="descname">AlertsGetAll</code><span class="sig-paren">(</span><em>atlas</em>, <em>status</em>, <em>pageNum</em>, <em>itemsPerPage</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.AlertsGetAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#atlasapi.atlas.AtlasPagination" title="atlasapi.atlas.AtlasPagination"><code class="xref py py-class docutils literal"><span class="pre">atlasapi.atlas.AtlasPagination</span></code></a></p>
+<p>Pagination for Alerts : Get All</p>
+<dl class="method">
+<dt id="atlasapi.atlas.AlertsGetAll.fetch">
+<code class="descname">fetch</code><span class="sig-paren">(</span><em>pageNum</em>, <em>itemsPerPage</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.AlertsGetAll.fetch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Intermediate fetching</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pageNum</strong> (<em>int</em>) – Page number</li>
+<li><strong>itemsPerPage</strong> (<em>int</em>) – Number of Users per Page</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Response payload</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="atlasapi.atlas.Atlas">
+<em class="property">class </em><code class="descclassname">atlasapi.atlas.</code><code class="descname">Atlas</code><span class="sig-paren">(</span><em>user</em>, <em>password</em>, <em>group</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.Atlas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Atlas constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>user</strong> (<em>str</em>) – Atlas user</li>
+<li><strong>password</strong> (<em>str</em>) – Atlas password</li>
+<li><strong>group</strong> (<em>str</em>) – Atlas group</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="atlasapi.atlas.AtlasPagination">
+<em class="property">class </em><code class="descclassname">atlasapi.atlas.</code><code class="descname">AtlasPagination</code><span class="sig-paren">(</span><em>atlas</em>, <em>fetch</em>, <em>pageNum</em>, <em>itemsPerPage</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.AtlasPagination" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Atlas Pagination Generic Implementation</p>
+<p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>atlas</strong> (<a class="reference internal" href="#atlasapi.atlas.Atlas" title="atlasapi.atlas.Atlas"><em>Atlas</em></a>) – Atlas instance</li>
+<li><strong>fetch</strong> (<em>function</em>) – The function “get_all” to call</li>
+<li><strong>pageNum</strong> (<em>int</em>) – Page number</li>
+<li><strong>itemsPerPage</strong> (<em>int</em>) – Number of Users per Page</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="atlasapi.atlas.ClustersGetAll">
+<em class="property">class </em><code class="descclassname">atlasapi.atlas.</code><code class="descname">ClustersGetAll</code><span class="sig-paren">(</span><em>atlas</em>, <em>pageNum</em>, <em>itemsPerPage</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.ClustersGetAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#atlasapi.atlas.AtlasPagination" title="atlasapi.atlas.AtlasPagination"><code class="xref py py-class docutils literal"><span class="pre">atlasapi.atlas.AtlasPagination</span></code></a></p>
+<p>Pagination for Clusters : Get All</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="atlasapi.atlas.DatabaseUsersGetAll">
+<em class="property">class </em><code class="descclassname">atlasapi.atlas.</code><code class="descname">DatabaseUsersGetAll</code><span class="sig-paren">(</span><em>atlas</em>, <em>pageNum</em>, <em>itemsPerPage</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.DatabaseUsersGetAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#atlasapi.atlas.AtlasPagination" title="atlasapi.atlas.AtlasPagination"><code class="xref py py-class docutils literal"><span class="pre">atlasapi.atlas.AtlasPagination</span></code></a></p>
+<p>Pagination for Database User : Get All</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="atlasapi.atlas.ProjectsGetAll">
+<em class="property">class </em><code class="descclassname">atlasapi.atlas.</code><code class="descname">ProjectsGetAll</code><span class="sig-paren">(</span><em>atlas</em>, <em>pageNum</em>, <em>itemsPerPage</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.atlas.ProjectsGetAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#atlasapi.atlas.AtlasPagination" title="atlasapi.atlas.AtlasPagination"><code class="xref py py-class docutils literal"><span class="pre">atlasapi.atlas.AtlasPagination</span></code></a></p>
+<p>Pagination for Projects : Get All</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-atlasapi.errors">
+<span id="atlasapi-errors-module"></span><h2>atlasapi.errors module<a class="headerlink" href="#module-atlasapi.errors" title="Permalink to this headline">¶</a></h2>
+<p>Errors module</p>
+<p>Provides all specific Exceptions</p>
+<dl class="exception">
+<dt id="atlasapi.errors.ErrAtlasBadRequest">
+<em class="property">exception </em><code class="descclassname">atlasapi.errors.</code><code class="descname">ErrAtlasBadRequest</code><span class="sig-paren">(</span><em>c</em>, <em>details</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.errors.ErrAtlasBadRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#atlasapi.errors.ErrAtlasGeneric" title="atlasapi.errors.ErrAtlasGeneric"><code class="xref py py-class docutils literal"><span class="pre">atlasapi.errors.ErrAtlasGeneric</span></code></a></p>
+<p>Atlas : Bad Request</p>
+<p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>c</strong> (<em>int</em>) – HTTP code</li>
+<li><strong>details</strong> (<em>dict</em>) – Response payload</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="exception">
+<dt id="atlasapi.errors.ErrAtlasConflict">
+<em class="property">exception </em><code class="descclassname">atlasapi.errors.</code><code class="descname">ErrAtlasConflict</code><span class="sig-paren">(</span><em>c</em>, <em>details</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.errors.ErrAtlasConflict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#atlasapi.errors.ErrAtlasGeneric" title="atlasapi.errors.ErrAtlasGeneric"><code class="xref py py-class docutils literal"><span class="pre">atlasapi.errors.ErrAtlasGeneric</span></code></a></p>
+<p>Atlas : Conflict</p>
+<p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>c</strong> (<em>int</em>) – HTTP code</li>
+<li><strong>details</strong> (<em>dict</em>) – Response payload</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="exception">
+<dt id="atlasapi.errors.ErrAtlasForbidden">
+<em class="property">exception </em><code class="descclassname">atlasapi.errors.</code><code class="descname">ErrAtlasForbidden</code><span class="sig-paren">(</span><em>c</em>, <em>details</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.errors.ErrAtlasForbidden" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#atlasapi.errors.ErrAtlasGeneric" title="atlasapi.errors.ErrAtlasGeneric"><code class="xref py py-class docutils literal"><span class="pre">atlasapi.errors.ErrAtlasGeneric</span></code></a></p>
+<p>Atlas : Forbidden</p>
+<p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>c</strong> (<em>int</em>) – HTTP code</li>
+<li><strong>details</strong> (<em>dict</em>) – Response payload</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="exception">
+<dt id="atlasapi.errors.ErrAtlasGeneric">
+<em class="property">exception </em><code class="descclassname">atlasapi.errors.</code><code class="descname">ErrAtlasGeneric</code><span class="sig-paren">(</span><em>msg</em>, <em>c</em>, <em>details</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.errors.ErrAtlasGeneric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+<p>Atlas Generic Exception</p>
+<p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>msg</strong> (<em>str</em>) – Short description of the error</li>
+<li><strong>c</strong> (<em>int</em>) – HTTP code</li>
+<li><strong>details</strong> (<em>dict</em>) – Response payload</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="atlasapi.errors.ErrAtlasGeneric.getAtlasResponse">
+<code class="descname">getAtlasResponse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.errors.ErrAtlasGeneric.getAtlasResponse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get details about the Atlas response</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">HTTP code, Response payload</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">int, str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="atlasapi.errors.ErrAtlasMethodNotAllowed">
+<em class="property">exception </em><code class="descclassname">atlasapi.errors.</code><code class="descname">ErrAtlasMethodNotAllowed</code><span class="sig-paren">(</span><em>c</em>, <em>details</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.errors.ErrAtlasMethodNotAllowed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#atlasapi.errors.ErrAtlasGeneric" title="atlasapi.errors.ErrAtlasGeneric"><code class="xref py py-class docutils literal"><span class="pre">atlasapi.errors.ErrAtlasGeneric</span></code></a></p>
+<p>Atlas : Method Not Allowed</p>
+<p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>c</strong> (<em>int</em>) – HTTP code</li>
+<li><strong>details</strong> (<em>dict</em>) – Response payload</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="exception">
+<dt id="atlasapi.errors.ErrAtlasNotFound">
+<em class="property">exception </em><code class="descclassname">atlasapi.errors.</code><code class="descname">ErrAtlasNotFound</code><span class="sig-paren">(</span><em>c</em>, <em>details</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.errors.ErrAtlasNotFound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#atlasapi.errors.ErrAtlasGeneric" title="atlasapi.errors.ErrAtlasGeneric"><code class="xref py py-class docutils literal"><span class="pre">atlasapi.errors.ErrAtlasGeneric</span></code></a></p>
+<p>Atlas : Not Found</p>
+<p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>c</strong> (<em>int</em>) – HTTP code</li>
+<li><strong>details</strong> (<em>dict</em>) – Response payload</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="exception">
+<dt id="atlasapi.errors.ErrAtlasServerErrors">
+<em class="property">exception </em><code class="descclassname">atlasapi.errors.</code><code class="descname">ErrAtlasServerErrors</code><span class="sig-paren">(</span><em>c</em>, <em>details</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.errors.ErrAtlasServerErrors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#atlasapi.errors.ErrAtlasGeneric" title="atlasapi.errors.ErrAtlasGeneric"><code class="xref py py-class docutils literal"><span class="pre">atlasapi.errors.ErrAtlasGeneric</span></code></a></p>
+<p>Atlas : Server Errors</p>
+<p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>c</strong> (<em>int</em>) – HTTP code</li>
+<li><strong>details</strong> (<em>dict</em>) – Response payload</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="exception">
+<dt id="atlasapi.errors.ErrAtlasUnauthorized">
+<em class="property">exception </em><code class="descclassname">atlasapi.errors.</code><code class="descname">ErrAtlasUnauthorized</code><span class="sig-paren">(</span><em>c</em>, <em>details</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.errors.ErrAtlasUnauthorized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#atlasapi.errors.ErrAtlasGeneric" title="atlasapi.errors.ErrAtlasGeneric"><code class="xref py py-class docutils literal"><span class="pre">atlasapi.errors.ErrAtlasGeneric</span></code></a></p>
+<p>Atlas : Unauthorized</p>
+<p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>c</strong> (<em>int</em>) – HTTP code</li>
+<li><strong>details</strong> (<em>dict</em>) – Response payload</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="exception">
+<dt id="atlasapi.errors.ErrConfirmationRequested">
+<em class="property">exception </em><code class="descclassname">atlasapi.errors.</code><code class="descname">ErrConfirmationRequested</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.errors.ErrConfirmationRequested" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+<p>No Confirmation provided</p>
+<p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>msg</strong> (<em>str</em>) – Short description of the error</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="exception">
+<dt id="atlasapi.errors.ErrPagination">
+<em class="property">exception </em><code class="descclassname">atlasapi.errors.</code><code class="descname">ErrPagination</code><a class="headerlink" href="#atlasapi.errors.ErrPagination" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+<p>An issue occurs during a “Get All” function</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="atlasapi.errors.ErrPaginationLimits">
+<em class="property">exception </em><code class="descclassname">atlasapi.errors.</code><code class="descname">ErrPaginationLimits</code><span class="sig-paren">(</span><em>error_code</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.errors.ErrPaginationLimits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+<p>Out of limit on ‘pageNum’ or ‘itemsPerPage’ parameters</p>
+<p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>error_code</strong> (<em>int</em>) – ERR_PAGE_NUM or ERR_ITEMS_PER_PAGE</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="atlasapi.errors.ErrPaginationLimits.ERR_ITEMS_PER_PAGE">
+<code class="descname">ERR_ITEMS_PER_PAGE</code><em class="property"> = 1</em><a class="headerlink" href="#atlasapi.errors.ErrPaginationLimits.ERR_ITEMS_PER_PAGE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.errors.ErrPaginationLimits.ERR_PAGE_NUM">
+<code class="descname">ERR_PAGE_NUM</code><em class="property"> = 0</em><a class="headerlink" href="#atlasapi.errors.ErrPaginationLimits.ERR_PAGE_NUM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.errors.ErrPaginationLimits.checkAndRaise">
+<code class="descname">checkAndRaise</code><span class="sig-paren">(</span><em>pageNum</em>, <em>itemsPerPage</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.errors.ErrPaginationLimits.checkAndRaise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check and Raise an Exception if needed</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pageNum</strong> (<em>int</em>) – Page number</li>
+<li><strong>itemsPerPage</strong> (<em>int</em>) – Number of items per Page</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#atlasapi.errors.ErrPaginationLimits" title="atlasapi.errors.ErrPaginationLimits"><code class="xref py py-exc docutils literal"><span class="pre">ErrPaginationLimits</span></code></a> – If we are out of limits</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="atlasapi.errors.ErrRole">
+<em class="property">exception </em><code class="descclassname">atlasapi.errors.</code><code class="descname">ErrRole</code><a class="headerlink" href="#atlasapi.errors.ErrRole" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></p>
+<p>A role is not compatible with Atlas</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-atlasapi.network">
+<span id="atlasapi-network-module"></span><h2>atlasapi.network module<a class="headerlink" href="#module-atlasapi.network" title="Permalink to this headline">¶</a></h2>
+<p>Network module</p>
+<p>Permit to communicate with external APIs</p>
+<dl class="class">
+<dt id="atlasapi.network.Network">
+<em class="property">class </em><code class="descclassname">atlasapi.network.</code><code class="descname">Network</code><span class="sig-paren">(</span><em>user</em>, <em>password</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.network.Network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Network constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>user</strong> (<em>str</em>) – user</li>
+<li><strong>password</strong> (<em>str</em>) – password</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="atlasapi.network.Network.answer">
+<code class="descname">answer</code><span class="sig-paren">(</span><em>c</em>, <em>details</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.network.Network.answer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Answer will provide all necessary feedback for the caller</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>c</strong> (<em>int</em>) – HTTP Code</li>
+<li><strong>details</strong> (<em>dict</em>) – Response payload</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Response payload</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">dict</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><ul class="first last simple">
+<li><code class="xref py py-exc docutils literal"><span class="pre">ErrAtlasBadRequest</span></code></li>
+<li><code class="xref py py-exc docutils literal"><span class="pre">ErrAtlasUnauthorized</span></code></li>
+<li><code class="xref py py-exc docutils literal"><span class="pre">ErrAtlasForbidden</span></code></li>
+<li><code class="xref py py-exc docutils literal"><span class="pre">ErrAtlasNotFound</span></code></li>
+<li><code class="xref py py-exc docutils literal"><span class="pre">ErrAtlasMethodNotAllowed</span></code></li>
+<li><code class="xref py py-exc docutils literal"><span class="pre">ErrAtlasConflict</span></code></li>
+<li><code class="xref py py-exc docutils literal"><span class="pre">ErrAtlasServerErrors</span></code></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.network.Network.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><em>uri</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.network.Network.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete request</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>uri</strong> (<em>str</em>) – URI</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">API response</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Json</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">Exception</span></code> – Network issue</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.network.Network.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>uri</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.network.Network.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get request</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>uri</strong> (<em>str</em>) – URI</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">API response</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Json</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-exc docutils literal"><span class="pre">Exception</span></code> – Network issue</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.network.Network.patch">
+<code class="descname">patch</code><span class="sig-paren">(</span><em>uri</em>, <em>payload</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.network.Network.patch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Patch request</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>uri</strong> (<em>str</em>) – URI</li>
+<li><strong>payload</strong> (<em>dict</em>) – Content to patch</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">API response</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">Json</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">Exception</span></code> – Network issue</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.network.Network.post">
+<code class="descname">post</code><span class="sig-paren">(</span><em>uri</em>, <em>payload</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.network.Network.post" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post request</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>uri</strong> (<em>str</em>) – URI</li>
+<li><strong>payload</strong> (<em>dict</em>) – Content to post</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">API response</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first">Json</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">Exception</span></code> – Network issue</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-atlasapi.settings">
+<span id="atlasapi-settings-module"></span><h2>atlasapi.settings module<a class="headerlink" href="#module-atlasapi.settings" title="Permalink to this headline">¶</a></h2>
+<p>Settings module</p>
+<p>Provide few constants, APIs endpoint, …</p>
+<dl class="class">
+<dt id="atlasapi.settings.Settings">
+<em class="property">class </em><code class="descclassname">atlasapi.settings.</code><code class="descname">Settings</code><a class="headerlink" href="#atlasapi.settings.Settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.ACCEPTED">
+<code class="descname">ACCEPTED</code><em class="property"> = 202</em><a class="headerlink" href="#atlasapi.settings.Settings.ACCEPTED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.BAD_REQUEST">
+<code class="descname">BAD_REQUEST</code><em class="property"> = 400</em><a class="headerlink" href="#atlasapi.settings.Settings.BAD_REQUEST" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.BASE_URL">
+<code class="descname">BASE_URL</code><em class="property"> = 'https://cloud.mongodb.com'</em><a class="headerlink" href="#atlasapi.settings.Settings.BASE_URL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.CONFLICT">
+<code class="descname">CONFLICT</code><em class="property"> = 409</em><a class="headerlink" href="#atlasapi.settings.Settings.CONFLICT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.CREATED">
+<code class="descname">CREATED</code><em class="property"> = 201</em><a class="headerlink" href="#atlasapi.settings.Settings.CREATED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.FORBIDDEN">
+<code class="descname">FORBIDDEN</code><em class="property"> = 403</em><a class="headerlink" href="#atlasapi.settings.Settings.FORBIDDEN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.METHOD_NOT_ALLOWED">
+<code class="descname">METHOD_NOT_ALLOWED</code><em class="property"> = 405</em><a class="headerlink" href="#atlasapi.settings.Settings.METHOD_NOT_ALLOWED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.NOTFOUND">
+<code class="descname">NOTFOUND</code><em class="property"> = 404</em><a class="headerlink" href="#atlasapi.settings.Settings.NOTFOUND" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.SERVER_ERRORS">
+<code class="descname">SERVER_ERRORS</code><em class="property"> = 500</em><a class="headerlink" href="#atlasapi.settings.Settings.SERVER_ERRORS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.SUCCESS">
+<code class="descname">SUCCESS</code><em class="property"> = 200</em><a class="headerlink" href="#atlasapi.settings.Settings.SUCCESS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.UNAUTHORIZED">
+<code class="descname">UNAUTHORIZED</code><em class="property"> = 401</em><a class="headerlink" href="#atlasapi.settings.Settings.UNAUTHORIZED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.api_resources">
+<code class="descname">api_resources</code><em class="property"> = {'Database Users': {'Get All Database Users': '/api/atlas/v1.0/groups/%s/databaseUsers?pageNum=%d&amp;itemsPerPage=%d', 'Get a Single Database User': '/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s', 'Create a Database User': '/api/atlas/v1.0/groups/%s/databaseUsers', 'Update a Database User': '/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s', 'Delete a Database User': '/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s'}, 'Projects': {'Get All Projects': '/api/atlas/v1.0/groups?pageNum=%d&amp;itemsPerPage=%d', 'Get One Project': '/api/atlas/v1.0/groups/%s', 'Create a Project': '/api/atlas/v1.0/groups'}, 'Clusters': {'Get All Clusters': '/api/atlas/v1.0/groups/%s/clusters?pageNum=%d&amp;itemsPerPage=%d', 'Get a Single Cluster': '/api/atlas/v1.0/groups/%s/clusters/%s', 'Delete a Cluster': '/api/atlas/v1.0/groups/%s/clusters/%s'}, 'Alerts': {'Get All Alerts': '/api/atlas/v1.0/groups/%s/alerts?pageNum=%d&amp;itemsPerPage=%d', 'Get All Alerts with status': '/api/atlas/v1.0/groups/%s/alerts?status=%s&amp;pageNum=%d&amp;itemsPerPage=%d', 'Get an Alert': '/api/atlas/v1.0/groups/%s/alerts/%s', 'Acknowledge an Alert': '/api/atlas/v1.0/groups/%s/alerts/%s'}}</em><a class="headerlink" href="#atlasapi.settings.Settings.api_resources" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.databaseName">
+<code class="descname">databaseName</code><em class="property"> = 'admin'</em><a class="headerlink" href="#atlasapi.settings.Settings.databaseName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.itemsPerPage">
+<code class="descname">itemsPerPage</code><em class="property"> = 100</em><a class="headerlink" href="#atlasapi.settings.Settings.itemsPerPage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.itemsPerPageMax">
+<code class="descname">itemsPerPageMax</code><em class="property"> = 100</em><a class="headerlink" href="#atlasapi.settings.Settings.itemsPerPageMax" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.itemsPerPageMin">
+<code class="descname">itemsPerPageMin</code><em class="property"> = 1</em><a class="headerlink" href="#atlasapi.settings.Settings.itemsPerPageMin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.pageNum">
+<code class="descname">pageNum</code><em class="property"> = 1</em><a class="headerlink" href="#atlasapi.settings.Settings.pageNum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.settings.Settings.requests_timeout">
+<code class="descname">requests_timeout</code><em class="property"> = 10</em><a class="headerlink" href="#atlasapi.settings.Settings.requests_timeout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-atlasapi.specs">
+<span id="atlasapi-specs-module"></span><h2>atlasapi.specs module<a class="headerlink" href="#module-atlasapi.specs" title="Permalink to this headline">¶</a></h2>
+<p>Specs module</p>
+<p>Provides some high level objects useful to use the Atlas API.</p>
+<dl class="class">
+<dt id="atlasapi.specs.AlertStatusSpec">
+<em class="property">class </em><code class="descclassname">atlasapi.specs.</code><code class="descname">AlertStatusSpec</code><a class="headerlink" href="#atlasapi.specs.AlertStatusSpec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Alert Status</p>
+<dl class="attribute">
+<dt id="atlasapi.specs.AlertStatusSpec.CLOSED">
+<code class="descname">CLOSED</code><em class="property"> = 'CLOSED'</em><a class="headerlink" href="#atlasapi.specs.AlertStatusSpec.CLOSED" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.specs.AlertStatusSpec.OPEN">
+<code class="descname">OPEN</code><em class="property"> = 'OPEN'</em><a class="headerlink" href="#atlasapi.specs.AlertStatusSpec.OPEN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.specs.AlertStatusSpec.TRACKING">
+<code class="descname">TRACKING</code><em class="property"> = 'TRACKING'</em><a class="headerlink" href="#atlasapi.specs.AlertStatusSpec.TRACKING" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="atlasapi.specs.DatabaseUsersPermissionsSpecs">
+<em class="property">class </em><code class="descclassname">atlasapi.specs.</code><code class="descname">DatabaseUsersPermissionsSpecs</code><span class="sig-paren">(</span><em>username</em>, <em>password</em>, <em>databaseName='admin'</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.specs.DatabaseUsersPermissionsSpecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Permissions spec for Database User</p>
+<p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>username</strong> (<em>str</em>) – Username of the DB</li>
+<li><strong>password</strong> (<em>str</em>) – Password for the username</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last"><strong>databaseName</strong> (<em>str</em>) – Auth Database Name</p>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="atlasapi.specs.DatabaseUsersPermissionsSpecs.add_role">
+<code class="descname">add_role</code><span class="sig-paren">(</span><em>databaseName</em>, <em>roleName</em>, <em>collectionName=None</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.specs.DatabaseUsersPermissionsSpecs.add_role" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add one role</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>databaseName</strong> (<em>str</em>) – Database Name</li>
+<li><strong>roleName</strong> (<a class="reference internal" href="#atlasapi.specs.RoleSpecs" title="atlasapi.specs.RoleSpecs"><em>RoleSpecs</em></a>) – role</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first"><strong>collectionName</strong> (<em>str</em>) – Collection</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">ErrRole</span></code> – role not compatible with the databaseName and/or collectionName</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.specs.DatabaseUsersPermissionsSpecs.add_roles">
+<code class="descname">add_roles</code><span class="sig-paren">(</span><em>databaseName</em>, <em>roleNames</em>, <em>collectionName=None</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.specs.DatabaseUsersPermissionsSpecs.add_roles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add multiple roles</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>databaseName</strong> (<em>str</em>) – Database Name</li>
+<li><strong>roleNames</strong> (<em>list of RoleSpecs</em>) – roles</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first"><strong>collectionName</strong> (<em>str</em>) – Collection</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-exc docutils literal"><span class="pre">ErrRoleException</span></code> – role not compatible with the databaseName and/or collectionName</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.specs.DatabaseUsersPermissionsSpecs.clear_roles">
+<code class="descname">clear_roles</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.specs.DatabaseUsersPermissionsSpecs.clear_roles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.specs.DatabaseUsersPermissionsSpecs.getSpecs">
+<code class="descname">getSpecs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.specs.DatabaseUsersPermissionsSpecs.getSpecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get specs</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Representation of the object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.specs.DatabaseUsersPermissionsSpecs.remove_role">
+<code class="descname">remove_role</code><span class="sig-paren">(</span><em>databaseName</em>, <em>roleName</em>, <em>collectionName=None</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.specs.DatabaseUsersPermissionsSpecs.remove_role" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove one role</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>databaseName</strong> (<em>str</em>) – Database Name</li>
+<li><strong>roleName</strong> (<a class="reference internal" href="#atlasapi.specs.RoleSpecs" title="atlasapi.specs.RoleSpecs"><em>RoleSpecs</em></a>) – role</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last"><strong>collectionName</strong> (<em>str</em>) – Collection</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="atlasapi.specs.DatabaseUsersPermissionsSpecs.remove_roles">
+<code class="descname">remove_roles</code><span class="sig-paren">(</span><em>databaseName</em>, <em>roleNames</em>, <em>collectionName=None</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.specs.DatabaseUsersPermissionsSpecs.remove_roles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove multiple roles</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>databaseName</strong> (<em>str</em>) – Database Name</li>
+<li><strong>roleNames</strong> (<em>list of RoleSpecs</em>) – roles</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last"><strong>collectionName</strong> (<em>str</em>) – Collection</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="atlasapi.specs.DatabaseUsersUpdatePermissionsSpecs">
+<em class="property">class </em><code class="descclassname">atlasapi.specs.</code><code class="descname">DatabaseUsersUpdatePermissionsSpecs</code><span class="sig-paren">(</span><em>password=None</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.specs.DatabaseUsersUpdatePermissionsSpecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#atlasapi.specs.DatabaseUsersPermissionsSpecs" title="atlasapi.specs.DatabaseUsersPermissionsSpecs"><code class="xref py py-class docutils literal"><span class="pre">atlasapi.specs.DatabaseUsersPermissionsSpecs</span></code></a></p>
+<p>Update Permissions spec for Database User</p>
+<p>Constructor</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Keyword Arguments:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body"><strong>password</strong> (<em>str</em>) – Password for the username</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="atlasapi.specs.DatabaseUsersUpdatePermissionsSpecs.getSpecs">
+<code class="descname">getSpecs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.specs.DatabaseUsersUpdatePermissionsSpecs.getSpecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get specs</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Representation of the object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">dict</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="atlasapi.specs.RoleSpecs">
+<em class="property">class </em><code class="descclassname">atlasapi.specs.</code><code class="descname">RoleSpecs</code><a class="headerlink" href="#atlasapi.specs.RoleSpecs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Roles supported by Atlas</p>
+<dl class="attribute">
+<dt id="atlasapi.specs.RoleSpecs.atlasAdmin">
+<code class="descname">atlasAdmin</code><em class="property"> = 'atlasAdmin'</em><a class="headerlink" href="#atlasapi.specs.RoleSpecs.atlasAdmin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.specs.RoleSpecs.backup">
+<code class="descname">backup</code><em class="property"> = 'backup'</em><a class="headerlink" href="#atlasapi.specs.RoleSpecs.backup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.specs.RoleSpecs.clusterMonitor">
+<code class="descname">clusterMonitor</code><em class="property"> = 'clusterMonitor'</em><a class="headerlink" href="#atlasapi.specs.RoleSpecs.clusterMonitor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.specs.RoleSpecs.dbAdmin">
+<code class="descname">dbAdmin</code><em class="property"> = 'dbAdmin'</em><a class="headerlink" href="#atlasapi.specs.RoleSpecs.dbAdmin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.specs.RoleSpecs.dbAdminAnyDatabase">
+<code class="descname">dbAdminAnyDatabase</code><em class="property"> = 'dbAdminAnyDatabase'</em><a class="headerlink" href="#atlasapi.specs.RoleSpecs.dbAdminAnyDatabase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.specs.RoleSpecs.enableSharding">
+<code class="descname">enableSharding</code><em class="property"> = 'enableSharding'</em><a class="headerlink" href="#atlasapi.specs.RoleSpecs.enableSharding" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.specs.RoleSpecs.read">
+<code class="descname">read</code><em class="property"> = 'read'</em><a class="headerlink" href="#atlasapi.specs.RoleSpecs.read" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.specs.RoleSpecs.readAnyDatabase">
+<code class="descname">readAnyDatabase</code><em class="property"> = 'readAnyDatabase'</em><a class="headerlink" href="#atlasapi.specs.RoleSpecs.readAnyDatabase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.specs.RoleSpecs.readWrite">
+<code class="descname">readWrite</code><em class="property"> = 'readWrite'</em><a class="headerlink" href="#atlasapi.specs.RoleSpecs.readWrite" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="atlasapi.specs.RoleSpecs.readWriteAnyDatabase">
+<code class="descname">readWriteAnyDatabase</code><em class="property"> = 'readWriteAnyDatabase'</em><a class="headerlink" href="#atlasapi.specs.RoleSpecs.readWriteAnyDatabase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to atlasapi’s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="atlasapi-atlas-nested.html"
+                        title="next chapter">Nested class for atlasapi.atlas::Atlas</a></p>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="atlasapi-atlas-nested.html" title="Nested class for atlasapi.atlas::Atlas"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to atlasapi’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">atlasapi 0.5.4 documentation</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2018, Yellow Pages Inc.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.5.
+    </div>
+  </body>
+</html>

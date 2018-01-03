@@ -3,12 +3,13 @@ Atlas API
 
 A Python package for MongoDB Atlas Cloud provider.
 
-
 `Atlas API <https://docs.atlas.mongodb.com/api/>`__
 
 `Configure Atlas API Access <https://docs.atlas.mongodb.com/configure-api-access/>`__
 
 `Current state of the python-atlasapi support <https://github.com/mickybart/python-atlasapi/blob/master/API.rst>`__
+
+`Code documentation (sphinx) <https://mickybart.github.io/python-atlasapi/>`__
 
 Installation
 ------------
@@ -223,7 +224,7 @@ Exceptions
 Internal Notes
 --------------
 
-
+`Code documentation (sphinx) <https://mickybart.github.io/python-atlasapi/>`__
 
 Bugs or Issues
 --------------

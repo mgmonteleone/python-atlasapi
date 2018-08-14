@@ -1,11 +1,11 @@
 # Copyright (c) 2018 Yellow Pages Inc.
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-# 
+#
 #     http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,27 +23,29 @@ from requests.auth import HTTPDigestAuth
 from .settings import Settings
 from .errors import *
 
+
 class Network:
     """Network constructor
-    
+
     Args:
         user (str): user
         password (str): password
     """
+
     def __init__(self, user, password):
         self.user = user
         self.password = password
 
     def answer(self, c, details):
         """Answer will provide all necessary feedback for the caller
-        
+
         Args:
             c (int): HTTP Code
             details (dict): Response payload
-        
+
         Returns:
             dict: Response payload
-            
+
         Raises:
             ErrAtlasBadRequest
             ErrAtlasUnauthorized
@@ -52,7 +54,7 @@ class Network:
             ErrAtlasMethodNotAllowed
             ErrAtlasConflict
             ErrAtlasServerErrors
-        
+
         """
         if c in [Settings.SUCCESS, Settings.CREATED, Settings.ACCEPTED]:
             return details
@@ -71,21 +73,21 @@ class Network:
         else:
             # Settings.SERVER_ERRORS
             raise ErrAtlasServerErrors(c, details)
-    
+
     def get(self, uri):
         """Get request
-        
+
         Args:
             uri (str): URI
-            
+
         Returns:
             Json: API response
-            
+
         Raises:
             Exception: Network issue
         """
         r = None
-        
+
         try:
             r = requests.get(uri,
                              allow_redirects=True,
@@ -98,28 +100,28 @@ class Network:
         finally:
             if r:
                 r.connection.close()
-    
+
     def post(self, uri, payload):
         """Post request
-        
+
         Args:
             uri (str): URI
             payload (dict): Content to post 
-            
+
         Returns:
             Json: API response
-            
+
         Raises:
             Exception: Network issue
         """
         r = None
-        
+
         try:
             r = requests.post(uri,
                               json=payload,
                               allow_redirects=True,
                               timeout=Settings.requests_timeout,
-                              headers={"Content-Type" : "application/json"},
+                              headers={"Content-Type": "application/json"},
                               auth=HTTPDigestAuth(self.user, self.password))
             return self.answer(r.status_code, r.json())
         except:
@@ -127,28 +129,28 @@ class Network:
         finally:
             if r:
                 r.connection.close()
-    
+
     def patch(self, uri, payload):
         """Patch request
-        
+
         Args:
             uri (str): URI
             payload (dict): Content to patch
-            
+
         Returns:
             Json: API response
-            
+
         Raises:
             Exception: Network issue
         """
         r = None
-        
+
         try:
             r = requests.patch(uri,
                                json=payload,
                                allow_redirects=True,
                                timeout=Settings.requests_timeout,
-                               headers={"Content-Type" : "application/json"},
+                               headers={"Content-Type": "application/json"},
                                auth=HTTPDigestAuth(self.user, self.password))
             return self.answer(r.status_code, r.json())
         except:
@@ -156,21 +158,21 @@ class Network:
         finally:
             if r:
                 r.connection.close()
-    
+
     def delete(self, uri):
         """Delete request
-        
+
         Args:
             uri (str): URI
-            
+
         Returns:
             Json: API response
-            
+
         Raises:
             Exception: Network issue
         """
         r = None
-        
+
         try:
             r = requests.delete(uri,
                                 allow_redirects=True,

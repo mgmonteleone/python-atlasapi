@@ -25,6 +25,7 @@ from .errors import *
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 
+
 class Atlas:
     """Atlas constructor
     
@@ -33,18 +34,19 @@ class Atlas:
         password (str): Atlas password
         group (str): Atlas group
     """
+
     def __init__(self, user, password, group):
         self.group = group
-        
+
         # Network calls which will handld user/passord for auth
         self.network = Network(user, password)
-        
+
         # APIs
         self.Clusters = Atlas._Clusters(self)
         self.DatabaseUsers = Atlas._DatabaseUsers(self)
         self.Projects = Atlas._Projects(self)
         self.Alerts = Atlas._Alerts(self)
-        
+
     class _Clusters:
         """Clusters API
         
@@ -55,9 +57,10 @@ class Atlas:
         Args:
             atlas (Atlas): Atlas instance
         """
+
         def __init__(self, atlas):
             self.atlas = atlas
-            
+
         def is_existing_cluster(self, cluster):
             """Check if the cluster exists
             
@@ -69,13 +72,13 @@ class Atlas:
             Returns:
                 bool: The cluster exists or not
             """
-            
+
             try:
                 self.get_a_single_cluster(cluster)
                 return True
             except ErrAtlasNotFound:
                 return False
-            
+
         def get_all_clusters(self, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage, iterable=False):
             """Get All Clusters
             
@@ -92,16 +95,16 @@ class Atlas:
             Raises:
                 ErrPaginationLimits: Out of limits
             """
-            
+
             # Check limits and raise an Exception if needed
             ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
-            
+
             if iterable:
                 return ClustersGetAll(self.atlas, pageNum, itemsPerPage)
-            
+
             uri = Settings.api_resources["Clusters"]["Get All Clusters"] % (self.atlas.group, pageNum, itemsPerPage)
             return self.atlas.network.get(Settings.BASE_URL + uri)
-        
+
         def get_a_single_cluster(self, cluster):
             """Get a Single Cluster
             
@@ -115,8 +118,8 @@ class Atlas:
             """
             uri = Settings.api_resources["Clusters"]["Get a Single Cluster"] % (self.atlas.group, cluster)
             return self.atlas.network.get(Settings.BASE_URL + uri)
-            
-        def delete_a_cluster(self, cluster, areYouSure = False):
+
+        def delete_a_cluster(self, cluster, areYouSure=False):
             """Delete a Cluster
             
             url: https://docs.atlas.mongodb.com/reference/api/clusters-delete-one/
@@ -137,8 +140,9 @@ class Atlas:
                 uri = Settings.api_resources["Clusters"]["Delete a Cluster"] % (self.atlas.group, cluster)
                 return self.atlas.network.delete(Settings.BASE_URL + uri)
             else:
-                raise ErrConfirmationRequested("Please set areYouSure=True on delete_a_cluster call if you really want to delete [%s]" % cluster)
-            
+                raise ErrConfirmationRequested(
+                    "Please set areYouSure=True on delete_a_cluster call if you really want to delete [%s]" % cluster)
+
     class _DatabaseUsers:
         """Database Users API
         
@@ -149,10 +153,10 @@ class Atlas:
         Args:
             atlas (Atlas): Atlas instance
         """
-        
+
         def __init__(self, atlas):
             self.atlas = atlas
-            
+
         def get_all_database_users(self, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage, iterable=False):
             """Get All Database Users
             
@@ -169,16 +173,17 @@ class Atlas:
             Raises:
                 ErrPaginationLimits: Out of limits
             """
-            
+
             # Check limits and raise an Exception if needed
             ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
-            
+
             if iterable:
                 return DatabaseUsersGetAll(self.atlas, pageNum, itemsPerPage)
-            
-            uri = Settings.api_resources["Database Users"]["Get All Database Users"] % (self.atlas.group, pageNum, itemsPerPage)
+
+            uri = Settings.api_resources["Database Users"]["Get All Database Users"] % (
+            self.atlas.group, pageNum, itemsPerPage)
             return self.atlas.network.get(Settings.BASE_URL + uri)
-        
+
         def get_a_single_database_user(self, user):
             """Get a Database User
             
@@ -192,7 +197,7 @@ class Atlas:
             """
             uri = Settings.api_resources["Database Users"]["Get a Single Database User"] % (self.atlas.group, user)
             return self.atlas.network.get(Settings.BASE_URL + uri)
-        
+
         def create_a_database_user(self, permissions):
             """Create a Database User
             
@@ -206,7 +211,7 @@ class Atlas:
             """
             uri = Settings.api_resources["Database Users"]["Create a Database User"] % self.atlas.group
             return self.atlas.network.post(Settings.BASE_URL + uri, permissions.getSpecs())
-        
+
         def update_a_database_user(self, user, permissions):
             """Update a Database User
             
@@ -221,7 +226,7 @@ class Atlas:
             """
             uri = Settings.api_resources["Database Users"]["Update a Database User"] % (self.atlas.group, user)
             return self.atlas.network.patch(Settings.BASE_URL + uri, permissions.getSpecs())
-        
+
         def delete_a_database_user(self, user):
             """Delete a Database User
             
@@ -235,7 +240,7 @@ class Atlas:
             """
             uri = Settings.api_resources["Database Users"]["Delete a Database User"] % (self.atlas.group, user)
             return self.atlas.network.delete(Settings.BASE_URL + uri)
-    
+
     class _Projects:
         """Projects API
         
@@ -246,9 +251,10 @@ class Atlas:
         Args:
             atlas (Atlas): Atlas instance
         """
+
         def __init__(self, atlas):
             self.atlas = atlas
-            
+
         def get_all_projects(self, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage, iterable=False):
             """Get All Projects
             
@@ -265,16 +271,16 @@ class Atlas:
             Raises:
                 ErrPaginationLimits: Out of limits
             """
-            
+
             # Check limits and raise an Exception if needed
             ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
-            
+
             if iterable:
                 return ProjectsGetAll(self.atlas, pageNum, itemsPerPage)
-            
+
             uri = Settings.api_resources["Projects"]["Get All Projects"] % (pageNum, itemsPerPage)
             return self.atlas.network.get(Settings.BASE_URL + uri)
-        
+
         def get_one_project(self, groupid):
             """Get one Project
             
@@ -288,7 +294,7 @@ class Atlas:
             """
             uri = Settings.api_resources["Projects"]["Get One Project"] % (groupid)
             return self.atlas.network.get(Settings.BASE_URL + uri)
-        
+
         def create_a_project(self, name, orgId=None):
             """Create a Project
             
@@ -304,13 +310,13 @@ class Atlas:
                 dict: Response payload
             """
             uri = Settings.api_resources["Projects"]["Create a Project"]
-            
-            project = { "name" : name }
+
+            project = {"name": name}
             if orgId:
                 project["orgId"] = orgId
-            
+
             return self.atlas.network.post(Settings.BASE_URL + uri, project)
-        
+
     class _Alerts:
         """Alerts API
         
@@ -321,10 +327,12 @@ class Atlas:
         Args:
             atlas (Atlas): Atlas instance
         """
+
         def __init__(self, atlas):
             self.atlas = atlas
-        
-        def get_all_alerts(self, status=None, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage, iterable=False):
+
+        def get_all_alerts(self, status=None, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage,
+                           iterable=False):
             """Get All Alerts
             
             url: https://docs.atlas.mongodb.com/reference/api/alerts-get-all-alerts/
@@ -341,21 +349,21 @@ class Atlas:
             Raises:
                 ErrPaginationLimits: Out of limits
             """
-            
+
             # Check limits and raise an Exception if needed
             ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
-            
+
             if iterable:
                 return AlertsGetAll(self.atlas, status, pageNum, itemsPerPage)
-            
+
             if status:
-                uri = Settings.api_resources["Alerts"]["Get All Alerts with status"] % (self.atlas.group, status, pageNum, itemsPerPage)
+                uri = Settings.api_resources["Alerts"]["Get All Alerts with status"] % (
+                self.atlas.group, status, pageNum, itemsPerPage)
             else:
                 uri = Settings.api_resources["Alerts"]["Get All Alerts"] % (self.atlas.group, pageNum, itemsPerPage)
-            
+
             return self.atlas.network.get(Settings.BASE_URL + uri)
-            
-        
+
         def get_an_alert(self, alert):
             """Get an Alert 
             
@@ -369,7 +377,7 @@ class Atlas:
             """
             uri = Settings.api_resources["Alerts"]["Get an Alert"] % (self.atlas.group, alert)
             return self.atlas.network.get(Settings.BASE_URL + uri)
-        
+
         def acknowledge_an_alert(self, alert, until, comment=None):
             """Acknowledge an Alert
             
@@ -385,14 +393,14 @@ class Atlas:
             Returns:
                 dict: Response payload
             """
-            
-            data = { "acknowledgedUntil" : until.isoformat(timespec='seconds') }
+
+            data = {"acknowledgedUntil": until.isoformat(timespec='seconds')}
             if comment:
                 data["acknowledgementComment"] = comment
-            
+
             uri = Settings.api_resources["Alerts"]["Acknowledge an Alert"] % (self.atlas.group, alert)
             return self.atlas.network.patch(Settings.BASE_URL + uri, data)
-        
+
         def unacknowledge_an_alert(self, alert):
             """Acknowledge an Alert
             
@@ -404,13 +412,13 @@ class Atlas:
             Returns:
                 dict: Response payload
             """
-            
+
             # see https://docs.atlas.mongodb.com/reference/api/alerts-acknowledge-alert/#request-body-parameters
             # To unacknowledge a previously acknowledged alert, set the field value to the past.
             now = datetime.now(timezone.utc)
             until = now - relativedelta(days=1)
             return self.acknowledge_an_alert(alert, until)
-        
+
         def acknowledge_an_alert_forever(self, alert, comment=None):
             """Acknowledge an Alert forever
             
@@ -425,12 +433,58 @@ class Atlas:
             Returns:
                 dict: Response payload
             """
-            
+
             # see https://docs.atlas.mongodb.com/reference/api/alerts-acknowledge-alert/#request-body-parameters
             # To acknowledge an alert “forever”, set the field value to 100 years in the future.
             now = datetime.now(timezone.utc)
             until = now + relativedelta(years=100)
             return self.acknowledge_an_alert(alert, until, comment)
+
+    class _Hosts:
+        """Hosts API
+
+        see: https://docs.atlas.mongodb.com/reference/api/monitoring-and-logs/#monitoring-and-logs
+
+        Constructor
+
+        Args:
+            atlas (Atlas): Atlas instance
+        """
+
+        def __init__(self, atlas):
+            self.atlas = atlas
+
+        def get_all_processes(self, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage,
+                              iterable=False):
+            """Get All processes
+
+            url: https://docs.atlas.mongodb.com/reference/api/alerts-get-all-alerts/
+
+            Keyword Args:
+                pageNum (int): Page number
+                itemsPerPage (int): Number of Users per Page
+                iterable (bool): To return an iterable high level object instead of a low level API response
+
+            Returns:
+                AtlasPagination or dict: Iterable object representing this function OR Response payload
+
+            Raises:
+                ErrPaginationLimits: Out of limits
+            """
+
+            # Check limits and raise an Exception if needed
+            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+
+            if iterable:
+                return ProcessesGetAll(self.atlas, pageNum, itemsPerPage)
+
+            else:
+                uri = Settings.api_resources["Alerts"]["Get All Alerts"].format(group_id=self.atlas.group,
+                                                                                pageNum=pageNum,
+                                                                                items_per_page=itemsPerPage)
+
+            return self.atlas.network.get(Settings.BASE_URL + uri)
+
 
 class AtlasPagination:
     """Atlas Pagination Generic Implementation
@@ -443,34 +497,35 @@ class AtlasPagination:
         pageNum (int): Page number
         itemsPerPage (int): Number of Users per Page
     """
+
     def __init__(self, atlas, fetch, pageNum, itemsPerPage):
         self.atlas = atlas
         self.fetch = fetch
         self.pageNum = pageNum
         self.itemsPerPage = itemsPerPage
-    
+
     def __iter__(self):
         """Iterable
         
         Yields:
             str: One result
         """
-        
+
         # pageNum is set with the value requested (so not necessary 1)
         pageNum = self.pageNum
         # total: This is a fake value to enter into the while. It will be updated with a real value later
         total = pageNum * self.itemsPerPage
-        
+
         while (pageNum * self.itemsPerPage - total < self.itemsPerPage):
             # fetch the API
             try:
                 details = self.fetch(pageNum, self.itemsPerPage)
             except:
                 raise ErrPagination()
-            
+
             # set the real total
             total = details["totalCount"]
-            
+
             # while into the page results
             results = details["results"]
             results_count = len(results)
@@ -479,32 +534,40 @@ class AtlasPagination:
                 result = results[index]
                 index += 1
                 yield result
-            
+
             # next page
             pageNum += 1
-            
+
+
 class DatabaseUsersGetAll(AtlasPagination):
     """Pagination for Database User : Get All"""
+
     def __init__(self, atlas, pageNum, itemsPerPage):
         super().__init__(atlas, atlas.DatabaseUsers.get_all_database_users, pageNum, itemsPerPage)
-        
+
+
 class ProjectsGetAll(AtlasPagination):
     """Pagination for Projects : Get All"""
+
     def __init__(self, atlas, pageNum, itemsPerPage):
         super().__init__(atlas, atlas.Projects.get_all_projects, pageNum, itemsPerPage)
-        
+
+
 class ClustersGetAll(AtlasPagination):
     """Pagination for Clusters : Get All"""
+
     def __init__(self, atlas, pageNum, itemsPerPage):
         super().__init__(atlas, atlas.Clusters.get_all_clusters, pageNum, itemsPerPage)
-        
+
+
 class AlertsGetAll(AtlasPagination):
     """Pagination for Alerts : Get All"""
+
     def __init__(self, atlas, status, pageNum, itemsPerPage):
         super().__init__(atlas, self.fetch, pageNum, itemsPerPage)
         self.get_all_alerts = atlas.Alerts.get_all_alerts
         self.status = status
-        
+
     def fetch(self, pageNum, itemsPerPage):
         """Intermediate fetching
         
@@ -516,3 +579,10 @@ class AlertsGetAll(AtlasPagination):
             dict: Response payload
         """
         return self.get_all_alerts(self.status, pageNum, itemsPerPage)
+
+
+class ProcessesGetAll(AtlasPagination):
+    """Pagination for Processes : Get All"""
+
+    def __init__(self, atlas, pageNum, itemsPerPage):
+        super().__init__(atlas, atlas.Hosts.get_all_processes, pageNum, itemsPerPage)

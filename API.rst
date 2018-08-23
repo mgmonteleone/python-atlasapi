@@ -56,6 +56,37 @@ Status : [0%]
 Monitoring and Logs
 -------------------
 
+Processes
++++++++++
+
+- Get all processes for the specified group.
+- Get information for the specified process in the specified group.
+
+
+Hosts
++++++
+
+- Get measurements for the specified host.
+
+
+Databases
++++++++++
+
+- Get the list of databases for the specified host.
+- Get measurements of the specified database for the specified host.
+
+Disks
++++++
+
+- Get the list of disks or partitions for the specified host.
+- Get measurements of specified disk for the specified host.
+
+
+Logs
+++++
+
+- Get the log file for a host in the cluster.
+
 Status : [0%]
 
 IP Whitelist

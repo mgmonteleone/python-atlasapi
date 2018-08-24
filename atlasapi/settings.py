@@ -48,7 +48,7 @@ class Settings:
             "Acknowledge an Alert": "/api/atlas/v1.0/groups/%s/alerts/%s"
         },
         "Monitoring and Logs": {
-            "Get all processes for group.": "api/atlas/v1.0/groups/{group_id}/processes?pageNum={"
+            "Get all processes for group": "/api/atlas/v1.0/groups/{group_id}/processes?pageNum={"
                                             "page_num}&itemsPerPage={items_per_page}",
             "Get information for process in group.": "/api/atlas/v1.0/groups/%s/processes/%s:&s?pageNum=%d"
                                                      "&itemsPerPage=%d",

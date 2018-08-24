@@ -22,7 +22,7 @@ import requests
 from requests.auth import HTTPDigestAuth
 from .settings import Settings
 from .errors import *
-
+from pprint import pprint
 class Network:
     """Network constructor
     

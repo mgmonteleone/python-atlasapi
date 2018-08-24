@@ -24,7 +24,9 @@ from .errors import *
 
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
-
+from .specs import Host, ListOfHosts
+from typing import Union, Iterator
+from .types import OptionalStr, OptionalInt, OptionalBool, ListOfStr
 
 class Atlas:
     """Atlas constructor
@@ -46,6 +48,7 @@ class Atlas:
         self.DatabaseUsers = Atlas._DatabaseUsers(self)
         self.Projects = Atlas._Projects(self)
         self.Alerts = Atlas._Alerts(self)
+        self.Hosts = Atlas._Hosts(self)
 
     class _Clusters:
         """Clusters API
@@ -181,7 +184,7 @@ class Atlas:
                 return DatabaseUsersGetAll(self.atlas, pageNum, itemsPerPage)
 
             uri = Settings.api_resources["Database Users"]["Get All Database Users"] % (
-            self.atlas.group, pageNum, itemsPerPage)
+                self.atlas.group, pageNum, itemsPerPage)
             return self.atlas.network.get(Settings.BASE_URL + uri)
 
         def get_a_single_database_user(self, user):
@@ -358,7 +361,7 @@ class Atlas:
 
             if status:
                 uri = Settings.api_resources["Alerts"]["Get All Alerts with status"] % (
-                self.atlas.group, status, pageNum, itemsPerPage)
+                    self.atlas.group, status, pageNum, itemsPerPage)
             else:
                 uri = Settings.api_resources["Alerts"]["Get All Alerts"] % (self.atlas.group, pageNum, itemsPerPage)
 
@@ -454,10 +457,11 @@ class Atlas:
         def __init__(self, atlas):
             self.atlas = atlas
 
-        def get_all_processes(self, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage,
-                              iterable=False):
-            """Get All processes
+        def _get_all_hosts(self, pageNum: OptionalInt = Settings.pageNum, itemsPerPage: OptionalInt = Settings.itemsPerPage,
+                          iterable: OptionalBool = False) -> Union[ListOfHosts, dict]:
+            """Get All Hosts (actually processes)
 
+            Internal use only, actual data retrieval comes from properties host_list and host_names
             url: https://docs.atlas.mongodb.com/reference/api/alerts-get-all-alerts/
 
             Keyword Args:
@@ -466,7 +470,7 @@ class Atlas:
                 iterable (bool): To return an iterable high level object instead of a low level API response
 
             Returns:
-                AtlasPagination or dict: Iterable object representing this function OR Response payload
+                ListOfHosts or dict: Iterable object representing this function OR Response payload
 
             Raises:
                 ErrPaginationLimits: Out of limits
@@ -476,14 +480,33 @@ class Atlas:
             ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
 
             if iterable:
-                return ProcessesGetAll(self.atlas, pageNum, itemsPerPage)
-
+                itemlist = list(HostsGetAll(self.atlas, pageNum, itemsPerPage))
+                obj_list = list()
+                for item in itemlist:
+                    obj_list.append(Host(item))
+                return_val = obj_list
             else:
-                uri = Settings.api_resources["Alerts"]["Get All Alerts"].format(group_id=self.atlas.group,
-                                                                                pageNum=pageNum,
-                                                                                items_per_page=itemsPerPage)
+                uri = Settings.api_resources["Monitoring and Logs"]["Get all processes for group"].format(
+                    group_id=self.atlas.group,
+                    page_num=pageNum,
+                    items_per_page=itemsPerPage)
 
-            return self.atlas.network.get(Settings.BASE_URL + uri)
+                return_val = self.atlas.network.get(Settings.BASE_URL + uri)
+
+            return return_val
+
+        @property
+        def host_list(self) -> ListOfHosts:
+            """Returns a list of Host Objects"""
+
+            return self._get_all_hosts(iterable=True)
+
+        @property
+        def host_names(self) -> Iterator[str]:
+            """Returns a simple list of hostnames without port"""
+
+            for host in self.host_list:
+                yield host.hostname
 
 
 class AtlasPagination:
@@ -581,8 +604,8 @@ class AlertsGetAll(AtlasPagination):
         return self.get_all_alerts(self.status, pageNum, itemsPerPage)
 
 
-class ProcessesGetAll(AtlasPagination):
+class HostsGetAll(AtlasPagination):
     """Pagination for Processes : Get All"""
 
     def __init__(self, atlas, pageNum, itemsPerPage):
-        super().__init__(atlas, atlas.Hosts.get_all_processes, pageNum, itemsPerPage)
+        super().__init__(atlas, atlas.Hosts._get_all_hosts, pageNum, itemsPerPage)

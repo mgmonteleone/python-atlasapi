@@ -29,3 +29,8 @@ print('-----------------Now as iterable ------------------')
 # Iterable
 for a_host in a.Hosts.host_names:
     print(a_host)
+
+pprint('----------MeasureMents')
+output = a.Hosts.get_measurements_for_host(a.Hosts.host_list[0])
+
+pprint(output)

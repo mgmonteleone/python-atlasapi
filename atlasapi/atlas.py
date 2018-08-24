@@ -26,7 +26,7 @@ from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 from .specs import Host, ListOfHosts
 from typing import Union, Iterator
-from .types import OptionalStr, OptionalInt, OptionalBool, ListOfStr
+from .types import OptionalStr, OptionalInt, OptionalBool, ListOfStr, ListofDict
 
 class Atlas:
     """Atlas constructor
@@ -508,7 +508,48 @@ class Atlas:
             for host in self.host_list:
                 yield host.hostname
 
+        def get_measurements_for_host(self, host_obj: Host, pageNum: OptionalInt = Settings.pageNum, itemsPerPage: OptionalInt = Settings.itemsPerPage,
+                          iterable: OptionalBool = False) -> ListofDict:
+            """Get All measurements for a host
 
+            Internal use only, actual data retrieval comes from properties host_list and host_names
+            url: https://docs.atlas.mongodb.com/reference/api/process-measurements/
+
+            /api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/measurements
+
+            Keyword Args:
+                pageNum (int): Page number
+                itemsPerPage (int): Number of Users per Page
+                iterable (bool): To return an iterable high level object instead of a low level API response
+
+            Returns:
+                ListOfHosts or dict: Iterable object representing this function OR Response payload
+
+            Raises:
+                ErrPaginationLimits: Out of limits
+            """
+
+            # Check limits and raise an Exception if needed
+            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+
+            # if iterable:
+            #    itemlist = list(HostsGetAll(self.atlas, pageNum, itemsPerPage))
+            #    obj_list = list()
+            #    for item in itemlist:
+            #        obj_list.append(Host(item))
+            #    return_val = obj_list
+            # else:
+            uri = Settings.api_resources["Monitoring and Logs"]["Get measurements for host"].format(
+                group_id=self.atlas.group,
+                host=host_obj.hostname,
+                port=host_obj.port
+                #page_num=pageNum,
+                #items_per_page=itemsPerPage
+                 )
+
+            return_val = self.atlas.network.get(Settings.BASE_URL + uri)
+
+            return return_val
 class AtlasPagination:
     """Atlas Pagination Generic Implementation
     

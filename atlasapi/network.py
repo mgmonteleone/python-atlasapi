@@ -23,6 +23,12 @@ from requests.auth import HTTPDigestAuth
 from .settings import Settings
 from .errors import *
 from pprint import pprint
+import logging
+
+logger = logging.getLogger('network')
+
+logger.setLevel(logging.WARNING)
+
 class Network:
     """Network constructor
     
@@ -94,6 +100,8 @@ class Network:
                              auth=HTTPDigestAuth(self.user, self.password))
             return self.answer(r.status_code, r.json())
         except:
+            logger.warning('Request: {}'.format(r.request.__dict__))
+            logger.warning('Response: {}'.format(r.__dict__))
             raise
         finally:
             if r:

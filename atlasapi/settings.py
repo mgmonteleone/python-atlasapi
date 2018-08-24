@@ -50,10 +50,10 @@ class Settings:
         "Monitoring and Logs": {
             "Get all processes for group": "/api/atlas/v1.0/groups/{group_id}/processes?pageNum={"
                                             "page_num}&itemsPerPage={items_per_page}",
-            "Get information for process in group.": "/api/atlas/v1.0/groups/%s/processes/%s:&s?pageNum=%d"
+            "Get information for process in group": "/api/atlas/v1.0/groups/%s/processes/%s:&s?pageNum=%d"
                                                      "&itemsPerPage=%d",
-            "Get measurements for host.": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/measurements",
-            "Get list of databases for host.": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/databases",
+            "Get measurements for host": "/api/atlas/v1.0/groups/{group_id}/processes/{host}:{port}/measurements",
+            "Get list of databases for host": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/databases",
             "Get measurements of database for host.": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{"
                                                       "PORT}/databases/{DATABASE-NAME}/measurements",
             "Get list of disks or partitions for host.": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{"

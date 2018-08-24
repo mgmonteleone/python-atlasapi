@@ -59,7 +59,7 @@ Monitoring and Logs
 Processes
 +++++++++
 
-- Get all processes for the specified group.
+- Get all processes for the specified group. [Completed]
 - Get information for the specified process in the specified group.
 
 
@@ -87,7 +87,7 @@ Logs
 
 - Get the log file for a host in the cluster.
 
-Status : [0%]
+Status : [12.5%]
 
 IP Whitelist
 ------------

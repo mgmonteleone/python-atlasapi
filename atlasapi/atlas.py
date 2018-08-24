@@ -27,6 +27,8 @@ from dateutil.relativedelta import relativedelta
 from .specs import Host, ListOfHosts
 from typing import Union, Iterator
 from .types import OptionalStr, OptionalInt, OptionalBool, ListOfStr, ListofDict
+from .lib import AtlasPeriods, AtlasGranularities
+
 
 class Atlas:
     """Atlas constructor
@@ -457,8 +459,9 @@ class Atlas:
         def __init__(self, atlas):
             self.atlas = atlas
 
-        def _get_all_hosts(self, pageNum: OptionalInt = Settings.pageNum, itemsPerPage: OptionalInt = Settings.itemsPerPage,
-                          iterable: OptionalBool = False) -> Union[ListOfHosts, dict]:
+        def _get_all_hosts(self, pageNum: OptionalInt = Settings.pageNum,
+                           itemsPerPage: OptionalInt = Settings.itemsPerPage,
+                           iterable: OptionalBool = False) -> Union[ListOfHosts, dict]:
             """Get All Hosts (actually processes)
 
             Internal use only, actual data retrieval comes from properties host_list and host_names
@@ -508,8 +511,14 @@ class Atlas:
             for host in self.host_list:
                 yield host.hostname
 
-        def get_measurements_for_host(self, host_obj: Host, pageNum: OptionalInt = Settings.pageNum, itemsPerPage: OptionalInt = Settings.itemsPerPage,
-                          iterable: OptionalBool = False) -> ListofDict:
+        def get_measurement_for_host(self
+                                      , host_obj: Host
+                                      , granularity: AtlasGranularities
+                                      , period: AtlasPeriods
+                                      , measurement
+                                      , pageNum: OptionalInt = Settings.pageNum
+                                      , itemsPerPage: OptionalInt = Settings.itemsPerPage
+                                      , iterable: OptionalBool = False) -> ListofDict:
             """Get All measurements for a host
 
             Internal use only, actual data retrieval comes from properties host_list and host_names
@@ -539,17 +548,21 @@ class Atlas:
             #        obj_list.append(Host(item))
             #    return_val = obj_list
             # else:
-            uri = Settings.api_resources["Monitoring and Logs"]["Get measurements for host"].format(
+            uri = Settings.api_resources["Monitoring and Logs"]["Get measurement for host"].format(
                 group_id=self.atlas.group,
                 host=host_obj.hostname,
-                port=host_obj.port
-                #page_num=pageNum,
-                #items_per_page=itemsPerPage
-                 )
+                port=host_obj.port,
+                granularity=granularity,
+                period=period
+                # page_num=pageNum,
+                # items_per_page=itemsPerPage
+            )
 
             return_val = self.atlas.network.get(Settings.BASE_URL + uri)
 
             return return_val
+
+
 class AtlasPagination:
     """Atlas Pagination Generic Implementation
     

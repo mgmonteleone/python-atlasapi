@@ -49,10 +49,11 @@ class Settings:
         },
         "Monitoring and Logs": {
             "Get all processes for group": "/api/atlas/v1.0/groups/{group_id}/processes?pageNum={"
-                                            "page_num}&itemsPerPage={items_per_page}",
+                                           "page_num}&itemsPerPage={items_per_page}",
             "Get information for process in group": "/api/atlas/v1.0/groups/%s/processes/%s:&s?pageNum=%d"
-                                                     "&itemsPerPage=%d",
-            "Get measurements for host": "/api/atlas/v1.0/groups/{group_id}/processes/{host}:{port}/measurements",
+                                                    "&itemsPerPage=%d",
+            "Get measurement for host": "/api/atlas/v1.0/groups/{group_id}/processes/{host}:{"
+                                        "port}/measurements?granularity={granularity&period={period}&m={measurment}",
             "Get list of databases for host": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/databases",
             "Get measurements of database for host.": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{"
                                                       "PORT}/databases/{DATABASE-NAME}/measurements",

@@ -99,7 +99,8 @@ class Network:
                              headers={},
                              auth=HTTPDigestAuth(self.user, self.password))
             return self.answer(r.status_code, r.json())
-        except:
+
+        except Exception:
             logger.warning('Request: {}'.format(r.request.__dict__))
             logger.warning('Response: {}'.format(r.__dict__))
             raise

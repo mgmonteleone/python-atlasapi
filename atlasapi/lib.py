@@ -1,5 +1,25 @@
 from isodate import Duration, duration_isoformat
-from typing import Generator, Iterator
+from typing import Iterator, Tuple, NewType, List, Optional
+from dateutil.parser import parse
+import logging
+from datetime import datetime
+from enum import Enum
+from .atlas_types import OptionalFloat
+
+logger = logging.getLogger('atlasapi.lib')
+
+
+class AtlasUnits(Enum):
+    SCALAR_PER_SECOND = 'SCALAR_PER_SECOND'
+    SCALAR = 'SCALAR'
+    PERCENT = 'PERCENT'
+    MILLISECONDS = 'MILLISECONDS'
+    BYTES = 'BYTES'
+    GIGABYTES = 'GIGABYTES'
+    BYTES_PER_SECOND = 'BYTES_PER_SECOND'
+    MEGABYTES_PER_SECOND = 'MEGABYTES_PER_SECOND'
+    GIGABYTES_PER_HOUR = 'GIGABYTES_PER_HOUR'
+
 
 class AtlasGranularities(object):
     """Helper class to create ISO 8601 durations to pass to the API
@@ -49,7 +69,7 @@ class _GetAll(object):
                                 yield sub_sub_out.get(sub_sub_item)
 
 
-class AtlasMeasurements(_GetAll):
+class AtlasMeasurementTypes(_GetAll):
     """
     Helper class for all available atlas measurements.
 
@@ -68,8 +88,8 @@ class AtlasMeasurements(_GetAll):
     class Cache(_GetAll):
         bytes_read = 'CACHE_BYTES_READ_INTO'
         bytes_written = 'CACHE_BYTES_WRITTEN_FROM'
-        dirty = 'CACHE_USAGE_DIRTY'
-        used = 'CACHE_USAGE_USED'
+        dirty = 'CACHE_DIRTY_BYTES'
+        used = 'CACHE_USED_BYTES'
 
     class Cursors(_GetAll):
         open = 'CURSORS_TOTAL_OPEN'
@@ -120,7 +140,7 @@ class AtlasMeasurements(_GetAll):
     class Operations(_GetAll):
         scan_and_order = 'OPERATIONS_SCAN_AND_ORDER'
 
-        class ExcecutionTime(_GetAll):
+        class ExecutionTime(_GetAll):
             reads = 'OP_EXECUTION_TIME_READS'
             writes = 'OP_EXECUTION_TIME_WRITES'
             commands = 'OP_EXECUTION_TIME_COMMANDS'
@@ -129,7 +149,7 @@ class AtlasMeasurements(_GetAll):
         master_time = 'OPLOG_MASTER_TIME'
         rate = 'OPLOG_RATE_GB_PER_HOUR'
 
-    class QueryExceutor(_GetAll):
+    class QueryExecutor(_GetAll):
         scanned = 'QUERY_EXECUTOR_SCANNED'
         scanned_objects = 'QUERY_EXECUTOR_SCANNED_OBJECTS'
 
@@ -175,3 +195,133 @@ class AtlasMeasurements(_GetAll):
             steal = 'SYSTEM_NORMALIZED_CPU_STEAL'
 
 
+# noinspection PyBroadException
+class AtlasMeasurementValue(object):
+    def __init__(self, value_dict):
+        """
+        Class for holding a measurement value
+        :type value_dict: dict
+        :param value_dict: An Atlas standard Measurement value dictionary.
+        """
+        timestamp = value_dict.get('timestamp', None)
+        value = value_dict.get('value', None)
+        try:
+            self.timestamp = parse(timestamp)
+        except (ValueError, TypeError):
+            logger.warning('Could not parse "{}" as a datetime.')
+            self.timestamp = None
+        try:
+            if value is None:
+                self.value = None
+            self.value = float(value)
+        except ValueError as e:
+            self.value = None
+            logger.warning('Could not parse the metric value "{}". Error was {}'.format(value, e))
+        except TypeError:
+            logger.info('Value is none.')
+            self.value = None
+
+    @property
+    def value_int(self):
+        try:
+            return int(self.value)
+        except Exception:
+            return None
+
+    @property
+    def value_float(self):
+        try:
+            return float(self.value)
+        except Exception:
+            return None
+
+    def as_dict(self):
+        return dict(timestamp=self.timestamp.__str__(), value=self.value, value_int=self.value_int,
+                    value_float=self.value_float)
+
+    @property
+    def as_tuple(self) -> Tuple[datetime, OptionalFloat]:
+        """
+        Returns a MeasurementValue as a tuple, timestamp first.
+        :rtype: Tuple[datetime,OptionalFloat]
+        :return: A tuple with a datetime and a float
+        """
+        return self.timestamp, self.value
+
+
+ListOfAtlasMeasurementValues = NewType('ListOfAtlasMeasurementValues', List[Optional[AtlasMeasurementValue]])
+
+
+class AtlasMeasurement(object):
+    def __init__(self, name, period, granularity, measurements=list()):
+        """
+
+        :type measurements: ListOfAtlasMeasurementValues
+        :type granularity: AtlasGranularities
+
+        :type period: AtlasPeriods
+        :type name: AtlasMeasurementTypes
+        """
+        self.name = name
+        self.period = period
+        self.granularity = granularity
+        self._measurements = measurements
+
+    @property
+    def measurements(self):
+        for item in self._measurements:
+            yield item
+
+    @measurements.setter
+    def measurements(self, value):
+        if type(value) == list:
+            self._measurements.extend(value)
+        else:
+            self._measurements.append(value)
+
+    @measurements.deleter
+    def measurements(self):
+        self._measurements = []
+
+    def measurements_as_tuples(self):
+        if isinstance(self._measurements[0], AtlasMeasurementValue):
+            for item in self._measurements:
+                yield item.as_tuple
+
+    @property
+    def date_start(self):
+        """
+        :rtype: datetime
+        """
+        seq = [x.timestamp for x in self._measurements]
+        return min(seq)
+
+    @property
+    def date_end(self):
+        """
+
+        :rtype: datetime
+        """
+        seq = [x.timestamp for x in self._measurements]
+        return max(seq)
+
+    @property
+    def measurements_count(self):
+        """
+
+        :rtype: int
+        """
+        return len(self._measurements)
+
+    @property
+    def as_dict(self):
+        """
+        Returns the measurement as a dict, including the computed properties.
+        :rtype: dict
+        """
+        return dict(measurements=self._measurements, date_start=self.date_start, date_end=self.date_end, name=self.name,
+                    period=self.period, granularity=self.granularity, measurements_count=self.measurements_count
+                    )
+
+
+OptionalAtlasMeasurement = NewType('OptionalAtlasMeasurement', Optional[AtlasMeasurement])

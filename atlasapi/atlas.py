@@ -541,10 +541,15 @@ class Atlas:
         def _get_measurement_for_host(self, host_obj, granularity=AtlasGranularities.HOUR, period=AtlasPeriods.WEEKS_1,
                                       measurement=AtlasMeasurementTypes.Cache.dirty, pageNum=Settings.pageNum,
                                       itemsPerPage=Settings.itemsPerPage, iterable=False) -> OptionalAtlasMeasurement:
-            """Get All measurements for a host
+            """Get  measurement(s_ for a host
 
             Internal use only, actual data retrieval comes from properties host_list and host_names
             url: https://docs.atlas.mongodb.com/reference/api/process-measurements/
+
+            Accepts either a single measurement, but will retrieve more than one measurement
+            if the measurement (using the AtlasMeasurementTypes class)
+
+
 
             /api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/measurements
 
@@ -571,6 +576,21 @@ class Atlas:
 
             # Check limits and raise an Exception if needed
             ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+
+            # Check to see if we received a leaf or branch of the measurements
+            try:
+                parent = super(measurement)
+                self.logger.warning('We received a branch.')
+                leaves = measurement.get_all()
+                measurement_list = list(leaves)
+                measurement = '&m='.join(measurement_list)
+                got_leaf = False
+            except TypeError as e:
+                got_leaf = True
+                self.logger.warning('We received a leaf')
+
+
+            # Build the URL
             uri = Settings.api_resources["Monitoring and Logs"]["Get measurement for host"].format(
                 group_id=self.atlas.group,
                 host=host_obj.hostname,
@@ -582,6 +602,7 @@ class Atlas:
                 # page_num=pageNum,
                 # items_per_page=itemsPerPage
             )
+            # Build the request
             return_val = self.atlas.network.get(Settings.BASE_URL + uri)
 
             if iterable:
@@ -595,7 +616,20 @@ class Atlas:
                                                        , granularity=granularity)
                     for each in measurements[0].get('dataPoints'):
                         measurement_obj.measurements = AtlasMeasurementValue(each)
-                return measurement_obj
+                    return measurement_obj
+
+                else:
+                    self.logger.warning('Yipeee, we got {} measurements,'
+                                        ' now we gotta process them'.format(measurements_count))
+                    measurements_list = list()
+                    for each in measurements:
+                        measurement_obj = AtlasMeasurement(name=each.get('name')
+                                                       , period=period
+                                                       , granularity=granularity)
+                        for each_and_every in each.get('dataPoints'):
+                            measurement_obj.measurements = AtlasMeasurementValue(each_and_every)
+                        measurements_list.append(measurement_obj)
+                return measurements_list
 
             else:
                 return return_val

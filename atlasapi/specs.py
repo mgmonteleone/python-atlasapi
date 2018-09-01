@@ -252,6 +252,6 @@ class Host(object):
             self.port = data.get("port", None)
             self.replica_set_name = data.get("replicaSetName", None)
             self.type = ReplicaSetTypes[data.get("typeName", "NO_DATA")]
-
+            self.measurements = None
 
 ListOfHosts = NewType('ListOfHosts', List[Optional[Host]])

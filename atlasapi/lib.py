@@ -51,6 +51,7 @@ class AtlasPeriods(object):
 
 # noinspection PyCallByClass
 class _GetAll(object):
+    is_leaf = False
     @classmethod
     def get_all(cls) -> Iterator[str]:
         out = cls.__dict__
@@ -67,6 +68,13 @@ class _GetAll(object):
                         for sub_sub_item in sub_sub_out:
                             if '_' not in sub_sub_item and not sub_sub_item[0].isupper():
                                 yield sub_sub_out.get(sub_sub_item)
+
+
+class _GetAllLeaf(_GetAll):
+    is_leaf = True
+
+
+
 
 
 class AtlasMeasurementTypes(_GetAll):

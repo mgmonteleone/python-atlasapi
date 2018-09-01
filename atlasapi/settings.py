@@ -71,9 +71,9 @@ class Settings:
 
     # Atlas default pagination
     pageNum = 1
-    itemsPerPage = 100
+    itemsPerPage = 1000
     itemsPerPageMin = 1
-    itemsPerPageMax = 100
+    itemsPerPageMax = 2000
 
     # Requests
     requests_timeout = 10

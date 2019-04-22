@@ -29,6 +29,7 @@ logger = logging.getLogger('network')
 
 logger.setLevel(logging.WARNING)
 
+
 class Network:
     """Network constructor
     

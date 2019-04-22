@@ -38,6 +38,7 @@ class AtlasPeriods(object):
 
     To add more periods, add them here.
     """
+    MINUTES_15 = duration_isoformat(Duration(minutes=15))
     HOURS_1 = duration_isoformat(Duration(hours=1))
     HOURS_8 = duration_isoformat(Duration(hours=8))
     HOURS_24 = duration_isoformat(Duration(hours=24))

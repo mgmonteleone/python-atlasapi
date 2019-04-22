@@ -33,6 +33,10 @@ a = Atlas(USER,API_KEY,GROUP_ID)
 #    print(a_host)
 
 pprint('----------MeasureMents')
-output = a.Hosts._get_measurement_for_host(a.Hosts.host_list[0],measurement=AtlasMeasurementTypes.CPU.SystemNormalized,iterable=True,period=AtlasPeriods.HOURS_1,granularity=AtlasGranularities.MINUTE)
+output = a.Hosts._get_measurement_for_host(a.Hosts.host_list[0]
+                                           ,measurement=AtlasMeasurementTypes.Memory.virtual,iterable=True
+                                           ,period=AtlasPeriods.HOURS_24,granularity=AtlasGranularities.MINUTE)
 
-pprint(output)
+
+for each in output[0].measurements:
+    pprint(each)

@@ -93,3 +93,14 @@ IP Whitelist
 ------------
 
 Status : [0%]
+
+
+Events
+++++++
+
+Status: [0%]
+
+- Get All Organization Events
+- Get One Organization Event
+- Get All Project Events
+- Ge One Project Event

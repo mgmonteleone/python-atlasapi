@@ -36,7 +36,7 @@ from .atlas_types import *
 from typing import Optional, NewType, List, Any
 from datetime import datetime
 import isodate
-from .lib import AtlasMeasurement
+from atlasapi.measurements import AtlasMeasurement
 
 # etc., as needed
 

@@ -37,7 +37,7 @@ pprint('----------MeasureMents')
 output = a.Hosts._get_measurement_for_host(a.Hosts.host_list[0]
                                            ,measurement=AtlasMeasurementTypes.Memory.virtual,iterable=True
                                            ,period=AtlasPeriods.HOURS_24,granularity=AtlasGranularities.MINUTE)
-pprint(a.Hosts.host_list)
+
 
 for each in output[0].measurements:
-    pprint(each.__dict__)
+    pprint(each)

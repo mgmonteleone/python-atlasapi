@@ -40,7 +40,12 @@ class Settings:
                                             "DISK-NAME}/measurements",
             "Get the log file for a host in the cluster.": "/api/atlas/v1.0/groups/{GROUP-ID}/clusters/{"
                                                            "HOSTNAME}/logs/mongodb.gz"
+        },
+        "Alerts": {
+            "Get All Project Events": "/api/atlas/v1.0/groups/{group_id}/events?pageNum={"
+                                      "page_num}&itemsPerPage={items_per_page}"
         }
+
     }
 
     # Atlas enforced

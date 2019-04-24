@@ -6,7 +6,7 @@ from datetime import datetime
 from enum import Enum
 from .atlas_types import OptionalFloat
 import ipaddress
-
+from copy import copy
 
 class AtlasEventTypes(Enum):
     PEER_CREATED = "Peer Created"
@@ -460,12 +460,25 @@ class _AtlasBaseEvent(object):
         except ValueError as e:
             logger.warning("Could not parse datetime value for created_date: {}".format(e))
             pass
-        self.event_type = AtlasEventTypes(value_dict.get('eventTypeName', 'UNKNOWN'))  # type: AtlasEventTypes
+        self.event_type = AtlasEventTypes[value_dict.get('eventTypeName', 'UNKNOWN')]  # type: AtlasEventTypes
         self.group_id = value_dict.get('groupId', None)  # type: str
         self.id = value_dict.get('id', None)  # type: str
         self.is_global_admin = value_dict.get('isGlobalAdmin', False)  # type: bool
         self.links = value_dict.get('links', None)  # type: list
         self.event_dict = value_dict  # type: dict
+
+    def as_dict(self):
+        original_dict = self.__dict__
+        return_dict = copy(original_dict)
+        del return_dict['event_dict']
+        return_dict['created_date'] = datetime.isoformat(self.created_date)
+        return_dict['event_type'] = self.event_type.name
+        return_dict['event_type_desc'] = self.event_type.value
+
+        if return_dict.get('remote_address'):
+            return_dict['remote_address'] = return_dict['remote_address'].__str__()
+        return return_dict
+
 
 
 class _AtlasUserBaseEvent(_AtlasBaseEvent):

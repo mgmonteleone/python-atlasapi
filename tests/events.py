@@ -11,13 +11,13 @@ TODO: Create real tests
 from atlasapi.atlas import Atlas
 from pprint import pprint
 from os import environ, getenv
+from atlasapi import events
+from atlasapi.lib import AtlasPeriods, AtlasUnits, AtlasGranularities
 
-from atlasapi.specs import ListOfHosts, Host
 USER = getenv('ATLAS_USER', None)
 API_KEY = getenv('ATLAS_KEY', None)
 GROUP_ID = getenv('ATLAS_GROUP', None)
-from atlasapi.lib import AtlasPeriods, AtlasUnits, AtlasGranularities
-from atlasapi.measurements import AtlasMeasurementTypes
+
 
 if not USER or not API_KEY or not GROUP_ID:
     raise EnvironmentError('In order to run this smoke test you need ATLAS_USER, AND ATLAS_KEY env variables'
@@ -33,11 +33,9 @@ a = Atlas(USER,API_KEY,GROUP_ID)
 #for a_host in a.Hosts.host_names:
 #    print(a_host)
 
-pprint('----------MeasureMents')
-output = a.Hosts._get_measurement_for_host(a.Hosts.host_list[0]
-                                           ,measurement=AtlasMeasurementTypes.Memory.virtual,iterable=True
-                                           ,period=AtlasPeriods.HOURS_24,granularity=AtlasGranularities.MINUTE)
+pprint('----------Events')
+output = a.Events._get_all_project_events(iterable=True)
 
 
-for each in output[0].measurements:
-    pprint(each)
+for each_event in output:
+    pprint(each_event.as_dict())

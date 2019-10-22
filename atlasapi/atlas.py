@@ -52,10 +52,106 @@ class Atlas:
         self.network = Network(user, password)
 
         # APIs
+        self.Clusters = Atlas._Clusters(self)
         self.Hosts = Atlas._Hosts(self)
         self.Events = Atlas._Events(self)
         self.logger = logging.getLogger(name='Atlas')
 
+    class _Clusters:
+        """Clusters API
+
+        see: https://docs.atlas.mongodb.com/reference/api/clusters/
+
+        Constructor
+
+        Args:
+            atlas (Atlas): Atlas instance
+        """
+
+        def __init__(self, atlas):
+            self.atlas = atlas
+
+        def is_existing_cluster(self, cluster):
+            """Check if the cluster exists
+
+            Not part of Atlas api but provided to simplify some code
+
+            Args:
+                cluster (str): The cluster name
+
+            Returns:
+                bool: The cluster exists or not
+            """
+
+            try:
+                self.get_a_single_cluster(cluster)
+                return True
+            except ErrAtlasNotFound:
+                return False
+
+        def get_all_clusters(self, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage, iterable=False):
+            """Get All Clusters
+
+            url: https://docs.atlas.mongodb.com/reference/api/clusters-get-all/
+
+            Keyword Args:
+                pageNum (int): Page number
+                itemsPerPage (int): Number of Users per Page
+                iterable (bool): To return an iterable high level object instead of a low level API response
+
+            Returns:
+                AtlasPagination or dict: Iterable object representing this function OR Response payload
+
+            Raises:
+                ErrPaginationLimits: Out of limits
+            """
+
+            # Check limits and raise an Exception if needed
+            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+
+            if iterable:
+                return ClustersGetAll(self.atlas, pageNum, itemsPerPage)
+
+            uri = Settings.api_resources["Clusters"]["Get All Clusters"] % (self.atlas.group, pageNum, itemsPerPage)
+            return self.atlas.network.get(Settings.BASE_URL + uri)
+
+        def get_a_single_cluster(self, cluster):
+            """Get a Single Cluster
+
+            url: https://docs.atlas.mongodb.com/reference/api/clusters-get-one/
+
+            Args:
+                cluster (str): The cluster name
+
+            Returns:
+                dict: Response payload
+            """
+            uri = Settings.api_resources["Clusters"]["Get a Single Cluster"] % (self.atlas.group, cluster)
+            return self.atlas.network.get(Settings.BASE_URL + uri)
+
+        def delete_a_cluster(self, cluster, areYouSure=False):
+            """Delete a Cluster
+
+            url: https://docs.atlas.mongodb.com/reference/api/clusters-delete-one/
+
+            Args:
+                cluster (str): Cluster name
+
+            Keyword Args:
+                areYouSure (bool): safe flag to don't delete a cluster by mistake
+
+            Returns:
+                dict: Response payload
+
+            Raises:
+                ErrConfirmationRequested: Need a confirmation to delete the cluster
+            """
+            if areYouSure:
+                uri = Settings.api_resources["Clusters"]["Delete a Cluster"] % (self.atlas.group, cluster)
+                return self.atlas.network.delete(Settings.BASE_URL + uri)
+            else:
+                raise ErrConfirmationRequested(
+                    "Please set areYouSure=True on delete_a_cluster call if you really want to delete [%s]" % cluster)
     class _Hosts:
         """Hosts API
 
@@ -328,6 +424,13 @@ class AtlasPagination:
             # next page
             pageNum += 1
 
+
+
+
+class ClustersGetAll(AtlasPagination):
+    """Pagination for Clusters : Get All"""
+    def __init__(self, atlas, pageNum, itemsPerPage):
+        super().__init__(atlas, atlas.Clusters.get_all_clusters, pageNum, itemsPerPage)
 
 # noinspection PyProtectedMember
 class HostsGetAll(AtlasPagination):

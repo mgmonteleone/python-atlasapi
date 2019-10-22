@@ -25,12 +25,12 @@ from .errors import *
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 from .specs import Host, ListOfHosts
-from typing import Union, Iterator
+from typing import Union, Iterator, List
 from .atlas_types import OptionalInt, OptionalBool, ListofDict
 from .lib import AtlasPeriods, AtlasGranularities, AtlasUnits
 from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement, \
     OptionalAtlasMeasurement
-from atlasapi.events import atlas_event_factory
+from atlasapi.events import atlas_event_factory, ListOfEvents
 import logging
 from pprint import pprint
 
@@ -202,7 +202,7 @@ class Atlas:
                 measurements = return_val.get('measurements')
                 measurements_count = len(measurements)
                 self.logger.warning('There are {} measurements.'.format(measurements_count))
-                measurements_list = list()
+                measurements_list: List[AtlasMeasurement] = list()
 
                 for each in measurements:
                     measurement_obj = AtlasMeasurement(name=each.get('name')
@@ -228,12 +228,12 @@ class Atlas:
         """
 
         def __init__(self, atlas):
-            self.atlas = atlas
-            self.logger = logging.getLogger('Atlas.Events')
+            self.atlas = atlas  # type: Atlas
+            self.logger = logging.getLogger('Atlas.Events')  # type: logging
 
-        def _get_all_project_events(self, pageNum=Settings.pageNum,
-                                    itemsPerPage=Settings.itemsPerPage,
-                                    iterable=False):
+        def _get_all_project_events(self, pageNum: int = Settings.pageNum,
+                                    itemsPerPage: int = Settings.itemsPerPage,
+                                    iterable: bool = False) -> ListOfEvents:
             """Get All Project Events
 
             Internal use only, actual data retrieval comes from properties events_list

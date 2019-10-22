@@ -38,4 +38,4 @@ output = a.Events._get_all_project_events(iterable=True)
 
 
 for each_event in output:
-    pprint(each_event.as_dict())
+    pprint(each_event)

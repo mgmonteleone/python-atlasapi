@@ -99,6 +99,8 @@ class Network:
                              timeout=Settings.requests_timeout,
                              headers={},
                              auth=HTTPDigestAuth(self.user, self.password))
+            print("Auth information = {} {}".format(self.user, self.password))
+
             return self.answer(r.status_code, r.json())
 
         except Exception:

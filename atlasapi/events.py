@@ -8,6 +8,7 @@ from .atlas_types import OptionalFloat
 import ipaddress
 from copy import copy
 
+logger = logging.getLogger(name='Atlas_events')
 class AtlasEventTypes(Enum):
     PEER_CREATED = "Peer Created"
     PEER_DELETED = "Peer Deleted"
@@ -449,6 +450,7 @@ class AtlasEventTypes(Enum):
     USER_RESTORED_AUDIT = "User Restored Audit"
     USER_NAME_OFAC_HIT = "User Name Ofac Hit"
     USER_UNEMBARGOED = "User Unembargoed"
+    GROUP_CHARTS_UPGRADED = 'Group Charts Upgraded'
     UNKNOWN = "Unknown or None"
 
 
@@ -480,14 +482,16 @@ class _AtlasBaseEvent(object):
         return return_dict
 
 
-
 class _AtlasUserBaseEvent(_AtlasBaseEvent):
     def __init__(self, value_dict: dict) -> None:
         super().__init__(value_dict)
         self.user_id = value_dict.get('userId', None)  # type: str
         self.username = value_dict.get('username')  # type: str
-        self.remote_address = ipaddress.ip_address(value_dict.get('remoteAddress', None))  # type: ipaddress
-
+        try:
+            self.remote_address = ipaddress.ip_address(value_dict.get('remoteAddress', None))  # type: ipaddress
+        except ValueError as e:
+            logger.info('No IP address found')
+            self.remote_address = None
 
 class AtlasEvent(_AtlasBaseEvent):
     def __init__(self, value_dict: dict) -> None:
@@ -539,3 +543,6 @@ def atlas_event_factory(value_dict: dict) -> Union[
         return AtlasDataExplorerEvent(value_dict=value_dict)
     else:
         return AtlasEvent(value_dict=value_dict)
+
+
+ListOfEvents = NewType('ListOfEvents', List[Union[dict,_AtlasBaseEvent]])

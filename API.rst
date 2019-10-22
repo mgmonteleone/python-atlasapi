@@ -28,11 +28,11 @@ Clusters
 
 Status : [60%]
 
-- Get All Clusters
-- Get a Single Cluster
+- Get All Clusters [100%]
+- Get a Single Cluster [90%]
 - Create a Cluster [0%]
 - Modify a Cluster [0%]
-- Delete a Cluster
+- Delete a Cluster [100%]
 
 Alerts
 ------

@@ -26,5 +26,17 @@ if not USER or not API_KEY or not GROUP_ID:
 a = Atlas(USER,API_KEY,GROUP_ID)
 
 # Get All Clusters
+pprint('===========Get All Clusters==========')
 for cluster in a.Clusters.get_all_clusters(iterable=True):
-    print(cluster["name"])
+   print(cluster['name'])
+
+# Get A cluster
+print('===========Get A Cluster==========')
+
+out = a.Clusters.get_a_single_cluster('Gs-repro')
+pprint(out)
+
+print('===========Delete A Cluster==========')
+
+if a.Clusters.is_existing_cluster('QuickTest'):
+    a.Clusters.delete_a_cluster('QuickTest',True)

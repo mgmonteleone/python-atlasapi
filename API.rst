@@ -98,7 +98,7 @@ Status : [0%]
 Events
 ++++++
 
-Status: [0%]
+Status: [50%]
 
 - Get All Organization Events
 - Get One Organization Event

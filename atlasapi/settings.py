@@ -24,29 +24,6 @@ class Settings:
     BASE_URL = 'https://cloud.mongodb.com'
 
     api_resources = {
-        "Database Users": {
-            "Get All Database Users": "/api/atlas/v1.0/groups/%s/databaseUsers?pageNum=%d&itemsPerPage=%d",
-            "Get a Single Database User": "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s",
-            "Create a Database User": "/api/atlas/v1.0/groups/%s/databaseUsers",
-            "Update a Database User": "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s",
-            "Delete a Database User": "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s"
-        },
-        "Projects": {
-            "Get All Projects": "/api/atlas/v1.0/groups?pageNum=%d&itemsPerPage=%d",
-            "Get One Project": "/api/atlas/v1.0/groups/%s",
-            "Create a Project": "/api/atlas/v1.0/groups"
-        },
-        "Clusters": {
-            "Get All Clusters": "/api/atlas/v1.0/groups/%s/clusters?pageNum=%d&itemsPerPage=%d",
-            "Get a Single Cluster": "/api/atlas/v1.0/groups/%s/clusters/%s",
-            "Delete a Cluster": "/api/atlas/v1.0/groups/%s/clusters/%s"
-        },
-        "Alerts": {
-            "Get All Alerts": "/api/atlas/v1.0/groups/%s/alerts?pageNum=%d&itemsPerPage=%d",
-            "Get All Alerts with status": "/api/atlas/v1.0/groups/%s/alerts?status=%s&pageNum=%d&itemsPerPage=%d",
-            "Get an Alert": "/api/atlas/v1.0/groups/%s/alerts/%s",
-            "Acknowledge an Alert": "/api/atlas/v1.0/groups/%s/alerts/%s"
-        },
         "Monitoring and Logs": {
             "Get all processes for group": "/api/atlas/v1.0/groups/{group_id}/processes?pageNum={"
                                            "page_num}&itemsPerPage={items_per_page}",
@@ -63,7 +40,12 @@ class Settings:
                                             "DISK-NAME}/measurements",
             "Get the log file for a host in the cluster.": "/api/atlas/v1.0/groups/{GROUP-ID}/clusters/{"
                                                            "HOSTNAME}/logs/mongodb.gz"
+        },
+        "Events": {
+            "Get All Project Events": "/api/atlas/v1.0/groups/{group_id}/events?pageNum={"
+                                      "page_num}&itemsPerPage={items_per_page}"
         }
+
     }
 
     # Atlas enforced

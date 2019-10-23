@@ -33,11 +33,11 @@ for cluster in a.Clusters.get_all_clusters(iterable=True):
 # Get A cluster
 print('===========Get A Cluster==========')
 
-out = a.Clusters.get_a_single_cluster('QuickTest')
+out = a.Clusters.get_a_single_cluster('Gs-repro')
 pprint(out)
 
 print('===========Delete A Cluster==========')
 
-pprint(a.Clusters.is_existing_cluster('QuickTest'))
+#pprint(a.Clusters.is_existing_cluster('QuickTest'))
 
     # a.Clusters.delete_a_cluster('QuickTest',True)

@@ -27,12 +27,14 @@ from dateutil.relativedelta import relativedelta
 from .specs import Host, ListOfHosts
 from typing import Union, Iterator, List
 from .atlas_types import OptionalInt, OptionalBool, ListofDict
+from .clusters import ClusterConfig
 from .lib import AtlasPeriods, AtlasGranularities, AtlasUnits
 from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement, \
     OptionalAtlasMeasurement
 from atlasapi.events import atlas_event_factory, ListOfEvents
 import logging
 from pprint import pprint
+from typing import Union
 
 
 # noinspection PyProtectedMember
@@ -127,7 +129,23 @@ class Atlas:
                 dict: Response payload
             """
             uri = Settings.api_resources["Clusters"]["Get a Single Cluster"] % (self.atlas.group, cluster)
-            return self.atlas.network.get(Settings.BASE_URL + uri)
+            cluster_data = self.atlas.network.get(Settings.BASE_URL + uri)
+            return cluster_data
+
+        def get_a_single_cluster_as_obj(self, cluster) -> ClusterConfig:
+            """Get a Single Cluster as data
+
+            url: https://docs.atlas.mongodb.com/reference/api/clusters-get-one/
+
+            Args:
+                cluster (str): The cluster name
+
+            Returns:
+                ClusterConfig: Response payload
+            """
+            cluster_data = self.get_a_single_cluster(cluster=cluster)
+            return ClusterConfig.fill_from_dict(data_dict=cluster_data)
+
 
         def delete_a_cluster(self, cluster, areYouSure=False):
             """Delete a Cluster

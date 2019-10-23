@@ -31,10 +31,16 @@ for cluster in a.Clusters.get_all_clusters(iterable=True):
    print(cluster['name'])
 
 # Get A cluster
-print('===========Get A Cluster==========')
+#print('===========Get A Cluster==========')
+#
+#out = a.Clusters.get_a_single_cluster('replicaSet')
+#pprint(out)
 
-out = a.Clusters.get_a_single_cluster('Gs-repro')
-pprint(out)
+print('===========Get A Cluster as data==========')
+
+out = a.Clusters.get_a_single_cluster_as_obj(cluster='replicaSet')
+pprint(out.as_dict())
+
 
 print('===========Delete A Cluster==========')
 

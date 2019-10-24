@@ -19,16 +19,20 @@ Provides all specific Exceptions
 """
 
 from .settings import Settings
+from pprint import pprint
 
 class ErrRole(Exception):
     """A role is not compatible with Atlas"""
     pass
 
+
 class ErrPagination(Exception):
     """An issue occurs during a "Get All" function"""
+
     def __init__(self):
         super().__init__("Issue occurs during the pagination.")
-        
+
+
 class ErrPaginationLimits(Exception):
     """Out of limit on 'pageNum' or 'itemsPerPage' parameters
     
@@ -39,15 +43,16 @@ class ErrPaginationLimits(Exception):
     """
     ERR_PAGE_NUM = 0
     ERR_ITEMS_PER_PAGE = 1
-    
+
     def __init__(self, error_code):
         if error_code == ErrPaginationLimits.ERR_PAGE_NUM:
             super().__init__("pageNum can't be smaller than 1")
         elif error_code == ErrPaginationLimits.ERR_ITEMS_PER_PAGE:
-            super().__init__("itemsPerPage can't be smaller than %d and greater than %d" % (Settings.itemsPerPageMin, Settings.itemsPerPageMax))
+            super().__init__("itemsPerPage can't be smaller than %d and greater than %d" % (
+            Settings.itemsPerPageMin, Settings.itemsPerPageMax))
         else:
             super().__init__(str(error_code))
-        
+
     def checkAndRaise(pageNum, itemsPerPage):
         """Check and Raise an Exception if needed
         
@@ -61,9 +66,10 @@ class ErrPaginationLimits(Exception):
         """
         if pageNum < 1:
             raise ErrPaginationLimits(ErrPaginationLimits.ERR_PAGE_NUM)
-        
+
         if itemsPerPage < Settings.itemsPerPageMin or itemsPerPage > Settings.itemsPerPageMax:
             raise ErrPaginationLimits(ErrPaginationLimits.ERR_ITEMS_PER_PAGE)
+
 
 class ErrAtlasGeneric(Exception):
     """Atlas Generic Exception
@@ -75,11 +81,12 @@ class ErrAtlasGeneric(Exception):
         c (int): HTTP code
         details (dict): Response payload
     """
+
     def __init__(self, msg, c, details):
         super().__init__(msg)
         self.code = c
         self.details = details
-        
+
     def getAtlasResponse(self):
         """Get details about the Atlas response
             
@@ -88,7 +95,8 @@ class ErrAtlasGeneric(Exception):
         
         """
         return self.code, self.details
-    
+
+
 class ErrAtlasBadRequest(ErrAtlasGeneric):
     """Atlas : Bad Request
     
@@ -98,8 +106,10 @@ class ErrAtlasBadRequest(ErrAtlasGeneric):
         c (int): HTTP code
         details (dict): Response payload
     """
+
     def __init__(self, c, details):
         super().__init__("Something was wrong with the client request.", c, details)
+
 
 class ErrAtlasUnauthorized(ErrAtlasGeneric):
     """Atlas : Unauthorized
@@ -110,8 +120,11 @@ class ErrAtlasUnauthorized(ErrAtlasGeneric):
         c (int): HTTP code
         details (dict): Response payload
     """
+
     def __init__(self, c, details):
+
         super().__init__("Authentication is required", c, details)
+
 
 class ErrAtlasForbidden(ErrAtlasGeneric):
     """Atlas : Forbidden
@@ -122,8 +135,27 @@ class ErrAtlasForbidden(ErrAtlasGeneric):
         c (int): HTTP code
         details (dict): Response payload
     """
+
     def __init__(self, c, details):
-        super().__init__("Access to the specified resource is not permitted.", c, details)
+        if details['errorCode'] == 'ORG_REQUIRES_WHITELIST':
+            raise ErrAtlasForbiddenWL(c,details)
+        else:
+            super().__init__("Access to the specified resource is not permitted.", c, details)
+
+
+class ErrAtlasForbiddenWL(ErrAtlasGeneric):
+    """Atlas : Forbidden by WhiteList
+
+    Constructor
+
+    Args:
+        c (int): HTTP code
+        details (dict): Response payload
+    """
+
+    def __init__(self, c, details):
+        super().__init__("This organization requires access through a whitelist of ip ranges.", c, details)
+
 
 class ErrAtlasNotFound(ErrAtlasGeneric):
     """Atlas : Not Found
@@ -134,8 +166,10 @@ class ErrAtlasNotFound(ErrAtlasGeneric):
         c (int): HTTP code
         details (dict): Response payload
     """
+
     def __init__(self, c, details):
         super().__init__("The requested resource does not exist.", c, details)
+
 
 class ErrAtlasMethodNotAllowed(ErrAtlasGeneric):
     """Atlas : Method Not Allowed
@@ -146,8 +180,10 @@ class ErrAtlasMethodNotAllowed(ErrAtlasGeneric):
         c (int): HTTP code
         details (dict): Response payload
     """
+
     def __init__(self, c, details):
         super().__init__("The HTTP method is not supported for the specified resource.", c, details)
+
 
 class ErrAtlasConflict(ErrAtlasGeneric):
     """Atlas : Conflict
@@ -158,8 +194,12 @@ class ErrAtlasConflict(ErrAtlasGeneric):
         c (int): HTTP code
         details (dict): Response payload
     """
+
     def __init__(self, c, details):
-        super().__init__("This is typically the response to a request to create or modify a property of an entity that is unique when an existing entity already exists with the same value for that property.", c, details)
+        super().__init__(
+            "This is typically the response to a request to create or modify a property of an entity that is unique when an existing entity already exists with the same value for that property.",
+            c, details)
+
 
 class ErrAtlasServerErrors(ErrAtlasGeneric):
     """Atlas : Server Errors
@@ -170,8 +210,10 @@ class ErrAtlasServerErrors(ErrAtlasGeneric):
         c (int): HTTP code
         details (dict): Response payload
     """
+
     def __init__(self, c, details):
         super().__init__("Something unexpected went wrong.", c, details)
+
 
 class ErrConfirmationRequested(Exception):
     """No Confirmation provided
@@ -181,5 +223,6 @@ class ErrConfirmationRequested(Exception):
     Args:
         msg (str): Short description of the error
     """
+
     def __init__(self, msg):
         super().__init__(msg)

@@ -35,6 +35,7 @@ from atlasapi.events import atlas_event_factory, ListOfEvents
 import logging
 from pprint import pprint
 from typing import Union
+from atlasapi.errors import ErrAtlasUnauthorized
 
 
 # noinspection PyProtectedMember
@@ -424,7 +425,7 @@ class AtlasPagination:
             # fetch the API
             try:
                 details = self.fetch(pageNum, self.itemsPerPage)
-            except Exception:
+            except Exception as e:
                 raise ErrPagination()
 
             # set the real total

@@ -14,17 +14,16 @@ A Python package for MongoDB Atlas Cloud provider.
 Installation
 ------------
 
-This package is available for Python 3.5+.
+This package is available for Python 3.6+.
+
+
+Install the development version from github:
 
 .. code:: bash
 
-    pip3 install atlasapi
+    pip3 install git+https://github.com/mgmonteleone/python-atlasapi.git
 
-Or install the development version from github:
-
-.. code:: bash
-
-    pip3 install git+https://github.com/mickybart/python-atlasapi.git
+Repo coming soon. . .
 
 Usage
 -----

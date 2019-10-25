@@ -50,6 +50,13 @@ class Settings:
             "Get a Single Cluster": "/api/atlas/v1.0/groups/%s/clusters/%s",
             "Delete a Cluster": "/api/atlas/v1.0/groups/%s/clusters/%s",
             "Create a Cluster": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/",
+        },
+        "Database Users": {
+            "Get All Database Users": "/api/atlas/v1.0/groups/%s/databaseUsers?pageNum=%d&itemsPerPage=%d",
+            "Get a Single Database User": "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s",
+            "Create a Database User": "/api/atlas/v1.0/groups/%s/databaseUsers",
+            "Update a Database User": "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s",
+            "Delete a Database User": "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s"
         }
 
     }
@@ -70,6 +77,7 @@ class Settings:
     SUCCESS = 200
     CREATED = 201
     ACCEPTED = 202
+    NO_CONTENT = 204
     BAD_REQUEST = 400
     UNAUTHORIZED = 401
     FORBIDDEN = 403

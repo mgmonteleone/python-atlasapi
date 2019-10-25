@@ -145,6 +145,23 @@ Clusters
     # Delete a Cluster (approved)
     details = a.Clusters.delete_a_cluster("cluster-dev", areYouSure=True)
 
+    # Create a Simple Replica Set Cluster
+
+    details = a.Clusters.create_basic_rs(name="cluster-dev")
+
+    # Create a cluster
+
+    provider_settings: ProviderSettings = ProviderSettings()
+    regions_config = RegionConfig()
+    replication_specs = ReplicationSpecs(regions_config={provider_settings.region_name: regions_config.__dict__})
+
+    cluster_config = ClusterConfig(name='test2',
+                               providerSettings=provider_settings,
+                               replication_specs=replication_specs)
+
+    output = a.Clusters.create_a_cluster(cluster_config)
+
+
 Alerts
 ^^^^^^
 

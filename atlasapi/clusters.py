@@ -135,7 +135,7 @@ class ProviderSettings(object):
     def __init__(self,
                  size: InstanceSizeName = InstanceSizeName.M10,
                  provider: ProviderName = ProviderName.AWS,
-                 region: str = None,
+                 region: str = 'US_WEST_1',
                  autoScaling: Optional[dict] = None,
                  diskIOPS: int = None,
                  encryptEBSVolume: bool = True,

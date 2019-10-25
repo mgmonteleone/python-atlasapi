@@ -14,7 +14,9 @@ from os import environ, getenv
 from atlasapi.atlas import Atlas
 from atlasapi.lib import AtlasPeriods, AtlasUnits, AtlasGranularities
 from json import dumps
-from atlasapi.clusters import AtlasBasicReplicaSet, MongoDBMajorVersion as mdb_version
+from atlasapi.clusters import AtlasBasicReplicaSet, MongoDBMajorVersion as mdb_version, ClusterConfig
+from atlasapi.clusters import ClusterConfig, ProviderSettings, ReplicationSpecs
+from atlasapi.clusters import RegionConfig
 
 USER = getenv('ATLAS_USER', None)
 API_KEY = getenv('ATLAS_KEY', None)
@@ -58,6 +60,21 @@ print('===========Delete A Cluster==========')
 
 print('=========Create A Basic Cluster=====================')
 
-#myoutput = a.Clusters.create_basic_rs(name="test221121", disk_size=11,version=mdb_version.v4_2)
+# myoutput = a.Clusters.create_basic_rs(name="test221121", disk_size=11,version=mdb_version.v4_2)
 
-#pprint(myoutput.__dict__)
+# pprint(myoutput.__dict__)
+
+
+print('=========Create A Cluster=====================')
+
+provider_settings: ProviderSettings = ProviderSettings()
+regions_config = RegionConfig()
+replication_specs = ReplicationSpecs(regions_config={provider_settings.region_name: regions_config.__dict__})
+
+cluster_config = ClusterConfig(name='test2',
+                               providerSettings=provider_settings,
+                               replication_specs=replication_specs)
+
+output = a.Clusters.create_a_cluster(cluster_config)
+
+pprint(output)

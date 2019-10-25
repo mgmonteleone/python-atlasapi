@@ -162,7 +162,7 @@ class Atlas:
                 raise e
             return out_obj
 
-        def create_a_cluster(self, cluster: ClusterConfig):
+        def create_a_cluster(self, cluster: ClusterConfig) -> dict:
             """Create a cluster
 
             url: POST /api/atlas/v1.0/groups/{GROUP-ID}/clusters
@@ -187,7 +187,8 @@ class Atlas:
                             region: str = 'US_WEST_2',
                             version: MongoDBMajorVersion = MongoDBMajorVersion.v4_0) -> AtlasBasicReplicaSet:
             """
-            Simplified method for creating a basic replica set with basic options
+            Simplified method for creating a basic replica set with basic options.
+
             :param name: The name for the cluster
             :param size: The Atlas Instance size, found in The InstanceSizeName enum
             :param disk_size: The size in GB for disk

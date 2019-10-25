@@ -24,7 +24,7 @@ from .errors import *
 
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
-from .specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs
+from .specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, DatabaseUsersPermissionsSpecs
 from typing import Union, Iterator, List
 from .atlas_types import OptionalInt, OptionalBool, ListofDict
 from .clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
@@ -461,10 +461,11 @@ class Atlas:
             atlas (Atlas): Atlas instance
         """
 
-        def __init__(self, atlas):
+        def __init__(self, atlas) -> None:
             self.atlas = atlas
 
-        def get_all_database_users(self, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage, iterable=False):
+        def get_all_database_users(self, pageNum: int = Settings.pageNum, itemsPerPage: int = Settings.itemsPerPage,
+                                   iterable: bool = False):
             """Get All Database Users
 
             url: https://docs.atlas.mongodb.com/reference/api/database-users-get-all-users/
@@ -488,10 +489,10 @@ class Atlas:
                 return DatabaseUsersGetAll(self.atlas, pageNum, itemsPerPage)
 
             uri = Settings.api_resources["Database Users"]["Get All Database Users"] % (
-            self.atlas.group, pageNum, itemsPerPage)
+                self.atlas.group, pageNum, itemsPerPage)
             return self.atlas.network.get(Settings.BASE_URL + uri)
 
-        def get_a_single_database_user(self, user):
+        def get_a_single_database_user(self, user: str) -> dict:
             """Get a Database User
 
             url: https://docs.atlas.mongodb.com/reference/api/database-users-get-single-user/
@@ -505,7 +506,7 @@ class Atlas:
             uri = Settings.api_resources["Database Users"]["Get a Single Database User"] % (self.atlas.group, user)
             return self.atlas.network.get(Settings.BASE_URL + uri)
 
-        def create_a_database_user(self, permissions):
+        def create_a_database_user(self, permissions) -> dict:
             """Create a Database User
 
             url: https://docs.atlas.mongodb.com/reference/api/database-users-create-a-user/
@@ -519,7 +520,7 @@ class Atlas:
             uri = Settings.api_resources["Database Users"]["Create a Database User"] % self.atlas.group
             return self.atlas.network.post(Settings.BASE_URL + uri, permissions.getSpecs())
 
-        def update_a_database_user(self, user:str, permissions: DatabaseUsersUpdatePermissionsSpecs) -> dict:
+        def update_a_database_user(self, user: str, permissions: DatabaseUsersUpdatePermissionsSpecs) -> dict:
             """Update a Database User
 
             url: https://docs.atlas.mongodb.com/reference/api/database-users-update-a-user/
@@ -562,7 +563,7 @@ class AtlasPagination:
         itemsPerPage (int): Number of Users per Page
     """
 
-    def __init__(self, atlas, fetch, pageNum, itemsPerPage):
+    def __init__(self, atlas, fetch, pageNum: int, itemsPerPage:int):
         self.atlas = atlas
         self.fetch = fetch
         self.pageNum = pageNum
@@ -604,6 +605,7 @@ class AtlasPagination:
 
                 def __init__(self, atlas, pageNum, itemsPerPage):
                     super().__init__(atlas, atlas.DatabaseUsers.get_all_database_users, pageNum, itemsPerPage)
+
             # next page
             pageNum += 1
 
@@ -632,5 +634,6 @@ class EventsGetForProject(AtlasPagination):
 
 class DatabaseUsersGetAll(AtlasPagination):
     """Pagination for Database User : Get All"""
+
     def __init__(self, atlas, pageNum, itemsPerPage):
         super().__init__(atlas, atlas.DatabaseUsers.get_all_database_users, pageNum, itemsPerPage)

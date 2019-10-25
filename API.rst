@@ -26,11 +26,11 @@ Status : [100%]
 Clusters
 --------
 
-Status : [60%]
+Status : [80%]
 
 - Get All Clusters [100%]
 - Get a Single Cluster [90%]
-- Create a Cluster [0%]
+- Create a Cluster [100%]
 - Modify a Cluster [0%]
 - Delete a Cluster [100%]
 

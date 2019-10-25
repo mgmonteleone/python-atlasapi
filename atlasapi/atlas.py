@@ -27,12 +27,18 @@ from dateutil.relativedelta import relativedelta
 from .specs import Host, ListOfHosts
 from typing import Union, Iterator, List
 from .atlas_types import OptionalInt, OptionalBool, ListofDict
+from .clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
+    MongoDBMajorVersion, InstanceSizeName, ProviderName
 from .lib import AtlasPeriods, AtlasGranularities, AtlasUnits
 from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement, \
     OptionalAtlasMeasurement
 from atlasapi.events import atlas_event_factory, ListOfEvents
 import logging
 from pprint import pprint
+from typing import Union
+from atlasapi.errors import ErrAtlasUnauthorized
+from time import time
+logger = logging.getLogger('Atlas')
 
 
 # noinspection PyProtectedMember
@@ -127,7 +133,77 @@ class Atlas:
                 dict: Response payload
             """
             uri = Settings.api_resources["Clusters"]["Get a Single Cluster"] % (self.atlas.group, cluster)
-            return self.atlas.network.get(Settings.BASE_URL + uri)
+            cluster_data = self.atlas.network.get(Settings.BASE_URL + uri)
+            return cluster_data
+
+        def get_a_single_cluster_as_obj(self, cluster) -> Union[ClusterConfig, ShardedClusterConfig]:
+            """Get a Single Cluster as data
+
+            url: https://docs.atlas.mongodb.com/reference/api/clusters-get-one/
+
+            Args:
+                cluster (str): The cluster name
+
+            Returns:
+                ClusterConfig: Response payload
+            """
+            cluster_data = self.get_a_single_cluster(cluster=cluster)
+            try:
+                if cluster_data.get('clusterType', None) == 'SHARDED':
+                    logger.warning("Cluster Type is SHARDED, Returning a ShardedClusterConfig")
+                    out_obj = ShardedClusterConfig.fill_from_dict(data_dict=cluster_data)
+                elif cluster_data.get('clusterType', None) == 'REPLICASET':
+                    logger.warning("Cluster Type is REPLICASET, Returning a ClusterConfig")
+                    out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
+                else:
+                    logger.warning("Cluster Type is not recognized, Returning a REPLICASET")
+                    out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
+            except Exception as e:
+                raise e
+            return out_obj
+
+        def create_a_cluster(self, cluster: ClusterConfig) -> dict:
+            """Create a cluster
+
+            url: POST /api/atlas/v1.0/groups/{GROUP-ID}/clusters
+
+            Args:
+                cluster (ClusterConfig): A Cluster Config Object
+
+            Returns:
+                dict: Response payload
+            """
+            uri = Settings.api_resources["Clusters"]["Create a Cluster"].format(GROUP_ID=self.atlas.group)
+            logger.info("Initiating Call to Atlas API at {}".format(Settings.BASE_URL + uri))
+            logger.info("Cluster Config = {}".format(cluster))
+
+            cluster_data = self.atlas.network.post(Settings.BASE_URL + uri, payload=cluster.as_create_dict())
+            return cluster_data
+
+        def create_basic_rs(self, name: str,
+                            size: InstanceSizeName = InstanceSizeName.M10,
+                            disk_size: int = 10,
+                            provider: ProviderName = ProviderName.AWS,
+                            region: str = 'US_WEST_2',
+                            version: MongoDBMajorVersion = MongoDBMajorVersion.v4_0) -> AtlasBasicReplicaSet:
+            """
+            Simplified method for creating a basic replica set with basic options.
+
+            :param name: The name for the cluster
+            :param size: The Atlas Instance size, found in The InstanceSizeName enum
+            :param disk_size: The size in GB for disk
+            :param provider: The cloud provider, found in ProviderName enum
+            :param region: The provider region to place the cluster.
+            :param version: The mongodb major version (enum)
+            :return: AtlasBasicReplicaSet
+            """
+            cluster: AtlasBasicReplicaSet = AtlasBasicReplicaSet(name=name, size=size, disk_size=disk_size,
+                                                                 provider=provider, region=region,
+                                                                 version=version)
+            result = self.create_a_cluster(cluster=cluster.config)
+
+            cluster.config_running = result
+            return cluster
 
         def delete_a_cluster(self, cluster, areYouSure=False):
             """Delete a Cluster
@@ -152,6 +228,7 @@ class Atlas:
             else:
                 raise ErrConfirmationRequested(
                     "Please set areYouSure=True on delete_a_cluster call if you really want to delete [%s]" % cluster)
+
     class _Hosts:
         """Hosts API
 
@@ -406,7 +483,7 @@ class AtlasPagination:
             # fetch the API
             try:
                 details = self.fetch(pageNum, self.itemsPerPage)
-            except Exception:
+            except Exception as e:
                 raise ErrPagination()
 
             # set the real total
@@ -425,12 +502,12 @@ class AtlasPagination:
             pageNum += 1
 
 
-
-
 class ClustersGetAll(AtlasPagination):
     """Pagination for Clusters : Get All"""
+
     def __init__(self, atlas, pageNum, itemsPerPage):
         super().__init__(atlas, atlas.Clusters.get_all_clusters, pageNum, itemsPerPage)
+
 
 # noinspection PyProtectedMember
 class HostsGetAll(AtlasPagination):

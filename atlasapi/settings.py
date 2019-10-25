@@ -57,6 +57,12 @@ class Settings:
             "Create a Database User": "/api/atlas/v1.0/groups/%s/databaseUsers",
             "Update a Database User": "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s",
             "Delete a Database User": "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s"
+        },
+        "Alerts": {
+            "Get All Alerts": "/api/atlas/v1.0/groups/%s/alerts?pageNum=%d&itemsPerPage=%d",
+            "Get All Alerts with status": "/api/atlas/v1.0/groups/%s/alerts?status=%s&pageNum=%d&itemsPerPage=%d",
+            "Get an Alert": "/api/atlas/v1.0/groups/%s/alerts/%s",
+            "Acknowledge an Alert": "/api/atlas/v1.0/groups/%s/alerts/%s"
         }
 
     }

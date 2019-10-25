@@ -49,7 +49,7 @@ class Settings:
             "Get All Clusters": "/api/atlas/v1.0/groups/%s/clusters?pageNum=%d&itemsPerPage=%d",
             "Get a Single Cluster": "/api/atlas/v1.0/groups/%s/clusters/%s",
             "Delete a Cluster": "/api/atlas/v1.0/groups/%s/clusters/%s",
-            "Create a Cluster": "/api/atlas/v1.0/groups/{GROUP-ID}/clusters/"
+            "Create a Cluster": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/",
         }
 
     }

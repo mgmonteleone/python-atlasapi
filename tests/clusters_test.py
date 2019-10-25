@@ -13,37 +13,51 @@ from pprint import pprint
 from os import environ, getenv
 from atlasapi.atlas import Atlas
 from atlasapi.lib import AtlasPeriods, AtlasUnits, AtlasGranularities
+from json import dumps
+from atlasapi.clusters import AtlasBasicReplicaSet, MongoDBMajorVersion as mdb_version
 
 USER = getenv('ATLAS_USER', None)
 API_KEY = getenv('ATLAS_KEY', None)
 GROUP_ID = getenv('ATLAS_GROUP', None)
 
-
 if not USER or not API_KEY or not GROUP_ID:
     raise EnvironmentError('In order to run this smoke test you need ATLAS_USER, AND ATLAS_KEY env variables'
                            'your env variables are {}'.format(environ.__str__()))
 
-a = Atlas(USER,API_KEY,GROUP_ID)
+a = Atlas(USER, API_KEY, GROUP_ID)
 
-# Get All Clusters
-pprint('===========Get All Clusters==========')
-for cluster in a.Clusters.get_all_clusters(iterable=True):
-   print(cluster['name'])
-
-# Get A cluster
-#print('===========Get A Cluster==========')
+## Get All Clusters
+# pprint('===========Get All Clusters==========')
+# for cluster in a.Clusters.get_all_clusters(iterable=True):
+#   print(cluster['name'])
 #
-#out = a.Clusters.get_a_single_cluster('replicaSet')
-#pprint(out)
-
+## Get A cluster
+# print('===========Get A Cluster==========')
+#
+# out = a.Clusters.get_a_single_cluster('rsTest33')
+# pprint(out)
+#
 print('===========Get A Cluster as data==========')
 
-out = a.Clusters.get_a_single_cluster_as_obj(cluster='replicaSet')
-pprint(out.as_dict())
+# out = a.Clusters.get_a_single_cluster_as_obj(cluster='rsTest33')
+# pprint(out.as_dict())
+# pprint('-------------')
+# print(dumps(out.as_create_dict()))
 
 
 print('===========Delete A Cluster==========')
 
-#pprint(a.Clusters.is_existing_cluster('QuickTest'))
+# pprint(a.Clusters.is_existing_cluster('QuickTest'))
 
-    # a.Clusters.delete_a_cluster('QuickTest',True)
+# a.Clusters.delete_a_cluster('QuickTest',True)
+
+# out = create_basic_rs("test20")
+
+# print(dumps(out.as_create_dict()))
+
+
+print('=========Create A Basic Cluster=====================')
+
+#myoutput = a.Clusters.create_basic_rs(name="test221121", disk_size=11,version=mdb_version.v4_2)
+
+#pprint(myoutput.__dict__)

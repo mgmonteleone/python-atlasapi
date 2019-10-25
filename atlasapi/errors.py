@@ -108,8 +108,23 @@ class ErrAtlasBadRequest(ErrAtlasGeneric):
     """
 
     def __init__(self, c, details):
+        if details['errorCode'] == 'DUPLICATE_CLUSTER_NAME':
+            raise(ErrAtlasDuplicateClusterName(c,details))
         super().__init__("Something was wrong with the client request.", c, details)
 
+
+class ErrAtlasDuplicateClusterName(ErrAtlasGeneric):
+    """Atlas : Duplicate Clustername
+
+    Constructor
+
+    Args:
+        c (int): HTTP code
+        details (dict): Response payload
+    """
+
+    def __init__(self, c, details):
+        super().__init__(details.get('detail','Duplicate Error'), c, details)
 
 class ErrAtlasUnauthorized(ErrAtlasGeneric):
     """Atlas : Unauthorized

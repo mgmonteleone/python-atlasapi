@@ -7,9 +7,8 @@ A Python package for MongoDB Atlas Cloud provider.
 
 `Configure Atlas API Access <https://docs.atlas.mongodb.com/configure-api-access/>`__
 
-`Current state of the python-atlasapi support <https://github.com/mickybart/python-atlasapi/blob/master/API.rst>`__
+`Current state of the python-atlasapi support <https://github.com/mgmonteleone/python-atlasapi/blob/master/API.rst>`__
 
-`Code documentation (sphinx) <https://mickybart.github.io/python-atlasapi/>`__
 
 Installation
 ------------
@@ -237,13 +236,10 @@ Exceptions
 - ErrConfirmationRequested
     Confirmation requested to execute the call.
 
-Internal Notes
---------------
 
-`Code documentation (sphinx) <https://mickybart.github.io/python-atlasapi/>`__
 
 Bugs or Issues
 --------------
 
 Please report bugs, issues or feature requests to `Github
-Issues <https://github.com/mickybart/python-atlasapi/issues>`__
+Issues <https://github.com/mgmonteleone/python-atlasapi/issues>`__

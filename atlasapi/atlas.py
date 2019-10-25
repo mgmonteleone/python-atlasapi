@@ -24,7 +24,7 @@ from .errors import *
 
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
-from .specs import Host, ListOfHosts
+from .specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs
 from typing import Union, Iterator, List
 from .atlas_types import OptionalInt, OptionalBool, ListofDict
 from .clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
@@ -38,6 +38,7 @@ from pprint import pprint
 from typing import Union
 from atlasapi.errors import ErrAtlasUnauthorized
 from time import time
+
 logger = logging.getLogger('Atlas')
 
 
@@ -58,6 +59,7 @@ class Atlas:
         self.network = Network(user, password)
 
         # APIs
+        self.DatabaseUsers = Atlas._DatabaseUsers(self)
         self.Clusters = Atlas._Clusters(self)
         self.Hosts = Atlas._Hosts(self)
         self.Events = Atlas._Events(self)
@@ -448,6 +450,105 @@ class Atlas:
 
             return return_val
 
+    class _DatabaseUsers:
+        """Database Users API
+
+        see: https://docs.atlas.mongodb.com/reference/api/database-users/
+
+        Constructor
+
+        Args:
+            atlas (Atlas): Atlas instance
+        """
+
+        def __init__(self, atlas):
+            self.atlas = atlas
+
+        def get_all_database_users(self, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage, iterable=False):
+            """Get All Database Users
+
+            url: https://docs.atlas.mongodb.com/reference/api/database-users-get-all-users/
+
+            Keyword Args:
+                pageNum (int): Page number
+                itemsPerPage (int): Number of Users per Page
+                iterable (bool): To return an iterable high level object instead of a low level API response
+
+            Returns:
+                AtlasPagination or dict: Iterable object representing this function OR Response payload
+
+            Raises:
+                ErrPaginationLimits: Out of limits
+            """
+
+            # Check limits and raise an Exception if needed
+            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+
+            if iterable:
+                return DatabaseUsersGetAll(self.atlas, pageNum, itemsPerPage)
+
+            uri = Settings.api_resources["Database Users"]["Get All Database Users"] % (
+            self.atlas.group, pageNum, itemsPerPage)
+            return self.atlas.network.get(Settings.BASE_URL + uri)
+
+        def get_a_single_database_user(self, user):
+            """Get a Database User
+
+            url: https://docs.atlas.mongodb.com/reference/api/database-users-get-single-user/
+
+            Args:
+                user (str): User
+
+            Returns:
+                dict: Response payload
+            """
+            uri = Settings.api_resources["Database Users"]["Get a Single Database User"] % (self.atlas.group, user)
+            return self.atlas.network.get(Settings.BASE_URL + uri)
+
+        def create_a_database_user(self, permissions):
+            """Create a Database User
+
+            url: https://docs.atlas.mongodb.com/reference/api/database-users-create-a-user/
+
+            Args:
+                permissions (DatabaseUsersPermissionsSpec): Permissions to apply
+
+            Returns:
+                dict: Response payload
+            """
+            uri = Settings.api_resources["Database Users"]["Create a Database User"] % self.atlas.group
+            return self.atlas.network.post(Settings.BASE_URL + uri, permissions.getSpecs())
+
+        def update_a_database_user(self, user:str, permissions: DatabaseUsersUpdatePermissionsSpecs) -> dict:
+            """Update a Database User
+
+            url: https://docs.atlas.mongodb.com/reference/api/database-users-update-a-user/
+
+            Args:
+                user (str): User
+                permissions (DatabaseUsersUpdatePermissionsSpecs): Permissions to apply
+
+            Returns:
+                dict: Response payload
+            """
+            uri = Settings.api_resources["Database Users"]["Update a Database User"] % (self.atlas.group, user)
+            logger.warning(Settings.BASE_URL + uri, permissions.getSpecs())
+            return self.atlas.network.patch(Settings.BASE_URL + uri, permissions.getSpecs())
+
+        def delete_a_database_user(self, user: str) -> dict:
+            """Delete a Database User
+
+            url: https://docs.atlas.mongodb.com/reference/api/database-users-delete-a-user/
+
+            Args:
+                user (str): User to delete
+
+            Returns:
+                dict: Response payload
+            """
+            uri = Settings.api_resources["Database Users"]["Delete a Database User"] % (self.atlas.group, user)
+            return self.atlas.network.delete(Settings.BASE_URL + uri)
+
 
 class AtlasPagination:
     """Atlas Pagination Generic Implementation
@@ -498,6 +599,11 @@ class AtlasPagination:
                 index += 1
                 yield result
 
+            class DatabaseUsersGetAll(AtlasPagination):
+                """Pagination for Database User : Get All"""
+
+                def __init__(self, atlas, pageNum, itemsPerPage):
+                    super().__init__(atlas, atlas.DatabaseUsers.get_all_database_users, pageNum, itemsPerPage)
             # next page
             pageNum += 1
 
@@ -522,3 +628,9 @@ class EventsGetForProject(AtlasPagination):
 
     def __init__(self, atlas: Atlas, pageNum: int, itemsPerPage: int):
         super().__init__(atlas, atlas.Events._get_all_project_events, pageNum, itemsPerPage)
+
+
+class DatabaseUsersGetAll(AtlasPagination):
+    """Pagination for Database User : Get All"""
+    def __init__(self, atlas, pageNum, itemsPerPage):
+        super().__init__(atlas, atlas.DatabaseUsers.get_all_database_users, pageNum, itemsPerPage)

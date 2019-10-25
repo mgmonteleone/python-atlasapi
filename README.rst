@@ -7,24 +7,22 @@ A Python package for MongoDB Atlas Cloud provider.
 
 `Configure Atlas API Access <https://docs.atlas.mongodb.com/configure-api-access/>`__
 
-`Current state of the python-atlasapi support <https://github.com/mickybart/python-atlasapi/blob/master/API.rst>`__
+`Current state of the python-atlasapi support <https://github.com/mgmonteleone/python-atlasapi/blob/master/API.rst>`__
 
-`Code documentation (sphinx) <https://mickybart.github.io/python-atlasapi/>`__
 
 Installation
 ------------
 
-This package is available for Python 3.5+.
+This package is available for Python 3.6+.
+
+
+Install the development version from github:
 
 .. code:: bash
 
-    pip3 install atlasapi
+    pip3 install git+https://github.com/mgmonteleone/python-atlasapi.git
 
-Or install the development version from github:
-
-.. code:: bash
-
-    pip3 install git+https://github.com/mickybart/python-atlasapi.git
+Repo coming soon. . .
 
 Usage
 -----
@@ -238,13 +236,10 @@ Exceptions
 - ErrConfirmationRequested
     Confirmation requested to execute the call.
 
-Internal Notes
---------------
 
-`Code documentation (sphinx) <https://mickybart.github.io/python-atlasapi/>`__
 
 Bugs or Issues
 --------------
 
 Please report bugs, issues or feature requests to `Github
-Issues <https://github.com/mickybart/python-atlasapi/issues>`__
+Issues <https://github.com/mgmonteleone/python-atlasapi/issues>`__

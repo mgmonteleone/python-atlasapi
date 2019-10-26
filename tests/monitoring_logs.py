@@ -37,7 +37,20 @@ pprint('----------MeasureMents')
 output = a.Hosts._get_measurement_for_host(a.Hosts.host_list[0]
                                            ,measurement=AtlasMeasurementTypes.Memory.virtual,iterable=True
                                            ,period=AtlasPeriods.HOURS_24,granularity=AtlasGranularities.MINUTE)
-pprint(a.Hosts.host_list)
 
 for each in output[0].measurements:
     pprint(each.__dict__)
+pprint('------------Test list of clusters-----------------')
+
+cluster_list = a.Hosts.cluster_list
+
+for cluster in cluster_list:
+    print('Cluster name {}'.format(cluster))
+
+
+pprint('------------Test get hosts by cluster-----------------')
+
+hosts = a.Hosts.host_list_by_cluster('monitoringtest')
+
+for hosts in hosts:
+    pprint(hosts.__dict__)

@@ -35,7 +35,7 @@ from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, 
 from atlasapi.events import atlas_event_factory, ListOfEvents
 import logging
 from pprint import pprint
-from typing import Union, Iterable
+from typing import Union, Iterable, Set
 from atlasapi.errors import ErrAtlasUnauthorized
 from atlasapi.alerts import Alert
 from time import time
@@ -310,6 +310,31 @@ class Atlas:
 
             for host in self.host_list:
                 yield host.hostname
+
+        @property
+        def cluster_list(self) -> Set[str]:
+            """
+            Returns a list of clusters found in the hosts for this group.
+
+
+            This is done by parsing the hostnames of the hosts, so any changes to that logic will break this.
+            """
+            cluster_list = set()
+            for host in self.host_list:
+                cluster_list.add(host.cluster_name)
+            return cluster_list
+
+        def host_list_by_cluster(self, cluster_name: str):
+            """
+            Returns hosts belonging to the named cluster.
+            :param cluster_name:
+            """
+            for host in self.host_list:
+                if host.cluster_name == cluster_name:
+                    yield host
+
+
+
 
         def _get_measurement_for_host(self, host_obj, granularity=AtlasGranularities.HOUR, period=AtlasPeriods.WEEKS_1,
                                       measurement=AtlasMeasurementTypes.Cache.dirty, pageNum=Settings.pageNum,

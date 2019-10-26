@@ -35,7 +35,7 @@ from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, 
 from atlasapi.events import atlas_event_factory, ListOfEvents
 import logging
 from pprint import pprint
-from typing import Union
+from typing import Union, Iterable
 from atlasapi.errors import ErrAtlasUnauthorized
 from atlasapi.alerts import Alert
 from time import time

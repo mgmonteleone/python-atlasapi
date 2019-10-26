@@ -64,7 +64,13 @@ class Settings:
             "Get an Alert": "/api/atlas/v1.0/groups/%s/alerts/%s",
             "Acknowledge an Alert": "/api/atlas/v1.0/groups/%s/alerts/%s"
         }
-
+        ,
+        "Whitelist": {
+            "Get All Whitelist Entries": "/api/atlas/v1.0/groups/%s/whitelist?pageNum=%d&itemsPerPage=%d",
+            "Get Whitelist Entry": "/api/atlas/v1.0/groups/%s/whitelist/%s",
+            "Create Whitelist Entry": "/api/atlas/v1.0/groups/%s/whitelist",
+            "Delete Whitelist Entry": "/api/atlas/v1.0/groups/%s/whitelist/%s"
+        }
     }
 
     # Atlas enforced

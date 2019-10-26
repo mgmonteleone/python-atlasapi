@@ -27,9 +27,9 @@ from pprint import pprint
 from os import environ, getenv
 
 from atlasapi.specs import ListOfHosts, Host
-USER = getenv('ATLAS_USER', None)
-API_KEY = getenv('ATLAS_KEY', None)
-GROUP_ID = getenv('ATLAS_GROUP', None)
+USER = getenv('ATLAS_USER', 'JKKIDWUA')
+API_KEY = getenv('ATLAS_KEY', '4e09ab9f-bf2c-41da-90bf-7d7974c330d2')
+GROUP_ID = getenv('ATLAS_GROUP', '5b1e92c13b34b93b0230e6e1')
 from atlasapi.lib import AtlasPeriods, AtlasUnits, AtlasGranularities
 from atlasapi.measurements import AtlasMeasurementTypes
 
@@ -45,5 +45,5 @@ output = a.Hosts._get_measurement_for_host(a.Hosts.host_list[0]
                                            ,measurement=AtlasMeasurementTypes.Memory.resident,iterable=True
                                            ,period=AtlasPeriods.WEEKS_4,granularity=AtlasGranularities.MINUTE)
 
-for each in output[0].measurements:
+for each in a.Hosts.host_list:
     pprint(each.__dict__)

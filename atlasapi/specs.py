@@ -87,6 +87,7 @@ class Host(object):
             self.replica_set_name = data.get("replicaSetName", None)
             self.type = ReplicaSetTypes[data.get("typeName", "NO_DATA")]
             self.measurements = None
+            self.cluster_name = self.hostname.split('-')[0]
 
 
 ListOfHosts = NewType('ListOfHosts', List[Optional[Host]])

@@ -92,8 +92,12 @@ Status : [12.5%]
 IP Whitelist
 ------------
 
-Status : [0%]
+Status : [80%]
 
+- Get All Entries
+- Add a single entry
+- Delete a entry
+- update a entry(missing)
 
 Events
 ++++++

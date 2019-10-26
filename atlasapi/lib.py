@@ -41,6 +41,7 @@ class AtlasPeriods(object):
     HOURS_24 = duration_isoformat(Duration(hours=24))
     HOURS_48 = duration_isoformat(Duration(hours=48))
     WEEKS_1 = duration_isoformat(Duration(weeks=1))
+    WEEKS_4 = duration_isoformat(Duration(weeks=4))
     MONTHS_1 = duration_isoformat(Duration(months=1))
     MONTHS_2 = duration_isoformat(Duration(months=2))
     YEARS_1 = duration_isoformat(Duration(years=1))

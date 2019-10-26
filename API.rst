@@ -37,11 +37,11 @@ Status : [80%]
 Alerts
 ------
 
-Status : [100%]
+Status : [50%]
 
 - Get All Alerts
 - Get an Alert
-- Acknowledge an Alert (include Unacknowledge)
+- Acknowledge an Alert (include Unacknowledge) (BROKEN)
 
 Alert Configurations
 --------------------

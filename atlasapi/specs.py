@@ -55,6 +55,8 @@ class ReplicaSetTypes(Enum):
     SHARD_PRIMARY = 'Shard primary'
     SHARD_SECONDARY = 'Shard secondary'
     NO_DATA = 'No data available'
+    SHARD_CONFIG_PRIMARY = 'Config server'
+    SHARD_CONFIG_SECONDARY = 'Config server'
 
 
 class Host(object):

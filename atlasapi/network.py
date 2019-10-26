@@ -24,7 +24,7 @@ from .settings import Settings
 from .errors import *
 from pprint import pprint
 import logging
-
+from json import dumps
 logger = logging.getLogger('network')
 
 logger.setLevel(logging.WARNING)
@@ -162,9 +162,12 @@ class Network:
                                timeout=Settings.requests_timeout,
                                headers={"Content-Type" : "application/json"},
                                auth=HTTPDigestAuth(self.user, self.password))
+            pprint(r.request.__dict__)
+            pprint(r.__dict__)
             return self.answer(r.status_code, r.json())
-        except:
-            raise
+        except Exception as e:
+
+            raise e
         finally:
             if r:
                 r.connection.close()

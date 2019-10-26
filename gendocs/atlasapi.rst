@@ -9,6 +9,48 @@ atlasapi\.atlas module
     :undoc-members:
     :show-inheritance:
 
+
+atlasapi\.alerts module
+----------------------
+
+.. automodule:: atlasapi.alerts
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+atlasapi\.clusters module
+----------------------
+
+.. automodule:: atlasapi.clusters
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+atlasapi\.events module
+----------------------
+
+.. automodule:: atlasapi.events
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+atlasapi\.measurements module
+----------------------
+
+.. automodule:: atlasapi.measurements
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+atlasapi\.whitelist module
+----------------------
+
+.. automodule:: atlasapi.whitelist
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 atlasapi\.errors module
 -----------------------
 

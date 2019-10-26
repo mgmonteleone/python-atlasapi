@@ -190,6 +190,17 @@ Alerts
     # Unacknowledge an Alert (BROKEN
     details = a.Alerts.unacknowledge_an_alert("597f221fdf9db113ce1755cd")
 
+Metrics
+^^^^^^^
+Examples coming soon.
+
+Whitelists
+^^^^^^^^^^
+Examples coming soon.
+
+
+
+
 Error Types
 -----------
 

@@ -595,13 +595,13 @@ class Atlas:
 
             if status:
                 uri = Settings.api_resources["Alerts"]["Get All Alerts with status"] % (
-                self.atlas.group, status, pageNum, itemsPerPage)
+                    self.atlas.group, status, pageNum, itemsPerPage)
             else:
                 uri = Settings.api_resources["Alerts"]["Get All Alerts"] % (self.atlas.group, pageNum, itemsPerPage)
 
             return self.atlas.network.get(Settings.BASE_URL + uri)
 
-        def get_an_alert(self, alert:str) -> Alert:
+        def get_an_alert(self, alert: str) -> Alert:
             """Get an Alert
 
             url: https://docs.atlas.mongodb.com/reference/api/alerts-get-alert/
@@ -633,7 +633,7 @@ class Atlas:
                 dict: Response payload
             """
 
-            #data = {"acknowledgedUntil": until.isoformat(timespec='seconds')}
+            # data = {"acknowledgedUntil": until.isoformat(timespec='seconds')}
             data = {"acknowledgedUntil": "2017-10-23T08:28:35Z"}
             if comment:
                 data["acknowledgementComment"] = comment
@@ -660,7 +660,7 @@ class Atlas:
             until = now - relativedelta(days=1)
             return self.acknowledge_an_alert(alert, until)
 
-        #TODO: FIX THIS
+        # TODO: FIX THIS
         def acknowledge_an_alert_forever(self, alert, comment=None):
             """Acknowledge an Alert forever
 
@@ -696,8 +696,8 @@ class Atlas:
         def __init__(self, atlas):
             self.atlas = atlas
 
-        def get_all_whitelist_entries(self, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage,
-                                      iterable=False) -> Iterable[WhitelistEntry]:
+        def get_all_whitelist_entries(self, pageNum: int = Settings.pageNum, itemsPerPage: int = Settings.itemsPerPage,
+                                      iterable: bool = False) -> Iterable[WhitelistEntry]:
             """Get All whitelist entries
 
             url: https://docs.atlas.mongodb.com/reference/api/whitelist-get-all/
@@ -725,10 +725,10 @@ class Atlas:
 
             response = self.atlas.network.get(Settings.BASE_URL + uri)
 
-            for entry in response.get('results',[]):
+            for entry in response.get('results', []):
                 yield WhitelistEntry.fill_from_dict(entry)
 
-        def get_whitelist_entry(self, ip_address):
+        def get_whitelist_entry(self, ip_address: str) -> WhitelistEntry:
             """Get a whitelist entry
 
             url: https://docs.atlas.mongodb.com/reference/api/whitelist-get-one-entry/
@@ -737,13 +737,14 @@ class Atlas:
                 ip_address (str): ip address to fetch from whitelist
 
             Returns:
-                dict: Response payload
+                WhitelistEntry: Response payload
             """
             uri = Settings.api_resources["Whitelist"]["Get Whitelist Entry"] % (
                 self.atlas.group, ip_address)
-            return self.atlas.network.get(Settings.BASE_URL + uri)
+            response: dict = self.atlas.network.get(Settings.BASE_URL + uri)
+            return WhitelistEntry.fill_from_dict(response)
 
-        def create_whitelist_entry(self, ip_address, comment):
+        def create_whitelist_entry(self, ip_address: str, comment: str) -> List[WhitelistEntry]:
             """Create a whitelist entry
 
             url: https://docs.atlas.mongodb.com/reference/api/whitelist-add-one/
@@ -753,14 +754,16 @@ class Atlas:
                 comment (str): comment describing the whitelist entry
 
             Returns:
-                dict: Response payload
+                List[WhitelistEntry]: Response payload
             """
             uri = Settings.api_resources["Whitelist"]["Create Whitelist Entry"] % self.atlas.group
 
-            whitelist_entry = [{'ipAddress': ip_address, 'comment': comment}]
-            return self.atlas.network.post(Settings.BASE_URL + uri, whitelist_entry)
+            whitelist_entry = {'ipAddress': ip_address, 'comment': comment}
+            response = self.atlas.network.post(Settings.BASE_URL + uri, [whitelist_entry])
+            for entry in response.get('results', []):
+                yield WhitelistEntry.fill_from_dict(entry)
 
-        def delete_a_whitelist_entry(self, ip_address):
+        def delete_a_whitelist_entry(self, ip_address: str) -> dict:
             """Delete a whitelist entry
 
             url: https://docs.atlas.mongodb.com/reference/api/whitelist-delete-one/
@@ -788,7 +791,7 @@ class AtlasPagination:
         itemsPerPage (int): Number of Users per Page
     """
 
-    def __init__(self, atlas, fetch, pageNum: int, itemsPerPage:int):
+    def __init__(self, atlas, fetch, pageNum: int, itemsPerPage: int):
         self.atlas = atlas
         self.fetch = fetch
         self.pageNum = pageNum
@@ -890,4 +893,3 @@ class WhitelistGetAll(AtlasPagination):
 
     def __init__(self, atlas, pageNum, itemsPerPage):
         super().__init__(atlas, atlas.Whitelist.get_all_whitelist_entries, pageNum, itemsPerPage)
-

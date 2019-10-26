@@ -42,10 +42,20 @@ if not USER or not API_KEY or not GROUP_ID:
 a = Atlas(USER, API_KEY, GROUP_ID)
 
 
-print('----------Test Get all closed alerts ------------------')
+#print('----------Test Get whitelist entries------------------')
+#
+#
+#out = a.Whitelist.get_all_whitelist_entries()
+#
+#for each in out:
+#    pprint(each.__dict__)
+#
+
+print('----------Create a whitelist entry then get it.------------------')
 
 
-out = a.Whitelist.get_all_whitelist_entries()
+#returnit = a.Whitelist.create_whitelist_entry('67.180.12.52', 'Test 12')
 
-for each in out:
-    pprint(each.__dict__)
+out = a.Whitelist.get_whitelist_entry('67.180.12.52')
+
+pprint(out.__dict__)

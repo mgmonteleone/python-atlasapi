@@ -39,6 +39,7 @@ from typing import Union
 from atlasapi.errors import ErrAtlasUnauthorized
 from atlasapi.alerts import Alert
 from time import time
+from atlasapi.whitelist import WhitelistEntry
 
 logger = logging.getLogger('Atlas')
 
@@ -66,7 +67,7 @@ class Atlas:
         self.Events = Atlas._Events(self)
         self.logger = logging.getLogger(name='Atlas')
         self.Alerts = Atlas._Alerts(self)
-
+        self.Whitelist = Atlas._Whitelist(self)
 
     class _Clusters:
         """Clusters API
@@ -681,6 +682,98 @@ class Atlas:
             until = now + relativedelta(years=100)
             return self.acknowledge_an_alert(alert, until, comment)
 
+    class _Whitelist:
+        """Whitelist API
+
+        see: https://docs.atlas.mongodb.com/reference/api/whitelist/
+
+        Constructor
+
+        Args:
+            atlas (Atlas): Atlas instance
+        """
+
+        def __init__(self, atlas):
+            self.atlas = atlas
+
+        def get_all_whitelist_entries(self, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage,
+                                      iterable=False) -> Iterable[WhitelistEntry]:
+            """Get All whitelist entries
+
+            url: https://docs.atlas.mongodb.com/reference/api/whitelist-get-all/
+
+            Keyword Args:
+                pageNum (int): Page number
+                itemsPerPage (int): Number of Users per Page
+                iterable (bool): To return an iterable high level object instead of a low level API response
+
+            Returns:
+                AtlasPagination or dict: Iterable object representing this function OR Response payload
+
+            Raises:
+                ErrPaginationLimits: Out of limits
+            """
+
+            # Check limits and raise an Exception if needed
+            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+
+            if iterable:
+                return WhitelistGetAll(self.atlas, pageNum, itemsPerPage)
+
+            uri = Settings.api_resources["Whitelist"]["Get All Whitelist Entries"] % (
+                self.atlas.group, pageNum, itemsPerPage)
+
+            response = self.atlas.network.get(Settings.BASE_URL + uri)
+
+            for entry in response.get('results',[]):
+                yield WhitelistEntry.fill_from_dict(entry)
+
+        def get_whitelist_entry(self, ip_address):
+            """Get a whitelist entry
+
+            url: https://docs.atlas.mongodb.com/reference/api/whitelist-get-one-entry/
+
+            Args:
+                ip_address (str): ip address to fetch from whitelist
+
+            Returns:
+                dict: Response payload
+            """
+            uri = Settings.api_resources["Whitelist"]["Get Whitelist Entry"] % (
+                self.atlas.group, ip_address)
+            return self.atlas.network.get(Settings.BASE_URL + uri)
+
+        def create_whitelist_entry(self, ip_address, comment):
+            """Create a whitelist entry
+
+            url: https://docs.atlas.mongodb.com/reference/api/whitelist-add-one/
+
+            Args:
+                ip_address (str): ip address to add to whitelist
+                comment (str): comment describing the whitelist entry
+
+            Returns:
+                dict: Response payload
+            """
+            uri = Settings.api_resources["Whitelist"]["Create Whitelist Entry"] % self.atlas.group
+
+            whitelist_entry = [{'ipAddress': ip_address, 'comment': comment}]
+            return self.atlas.network.post(Settings.BASE_URL + uri, whitelist_entry)
+
+        def delete_a_whitelist_entry(self, ip_address):
+            """Delete a whitelist entry
+
+            url: https://docs.atlas.mongodb.com/reference/api/whitelist-delete-one/
+
+            Args:
+                ip_address (str): ip address to delete from whitelist
+
+            Returns:
+                dict: Response payload
+            """
+            uri = Settings.api_resources["Whitelist"]["Delete Whitelist Entry"] % (
+                self.atlas.group, ip_address)
+            return self.atlas.network.delete(Settings.BASE_URL + uri)
 
 
 class AtlasPagination:
@@ -790,3 +883,11 @@ class AlertsGetAll(AtlasPagination):
             dict: Response payload
         """
         return self.get_all_alerts(self.status, pageNum, itemsPerPage)
+
+
+class WhitelistGetAll(AtlasPagination):
+    """Pagination for Database User : Get All"""
+
+    def __init__(self, atlas, pageNum, itemsPerPage):
+        super().__init__(atlas, atlas.Whitelist.get_all_whitelist_entries, pageNum, itemsPerPage)
+

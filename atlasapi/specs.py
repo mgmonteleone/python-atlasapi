@@ -37,10 +37,11 @@ from typing import Optional, NewType, List, Any
 from datetime import datetime
 import isodate
 from atlasapi.measurements import AtlasMeasurement
-
+import logging
 from future import standard_library
 
 standard_library.install_aliases()
+logger = logging.getLogger('Atlas.specs')
 
 
 # etc., as needed
@@ -86,8 +87,19 @@ class Host(object):
             self.port = data.get("port", None)
             self.replica_set_name = data.get("replicaSetName", None)
             self.type = ReplicaSetTypes[data.get("typeName", "NO_DATA")]
-            self.measurements = None
+            self.measurements = []
             self.cluster_name = self.hostname.split('-')[0]
+
+    def add_measurements(self, measurement):
+        # TODO: Make measurements unique, use a set instead, but then how do we concat 2?
+        self.measurements = self.measurements + measurement
+
+    def __hash__(self):
+        return hash(self.hostname)
+
+    def __eq__(self, other):
+        if isinstance(other, Host):
+            return self.hostname == other.hostname
 
 
 ListOfHosts = NewType('ListOfHosts', List[Optional[Host]])
@@ -141,7 +153,7 @@ class DatabaseUsersPermissionsSpecs:
 
         return content
 
-    def add_roles(self, databaseName: str, roleNames: List[RoleSpecs], collectionName: str =None):
+    def add_roles(self, databaseName: str, roleNames: List[RoleSpecs], collectionName: str = None):
         """Add multiple roles
 
         Args:

@@ -25,7 +25,7 @@ from .errors import *
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 from .specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, DatabaseUsersPermissionsSpecs
-from typing import Union, Iterator, List
+from typing import Union, Iterator, List, Optional
 from .atlas_types import OptionalInt, OptionalBool, ListofDict
 from .clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
     MongoDBMajorVersion, InstanceSizeName, ProviderName
@@ -156,13 +156,13 @@ class Atlas:
             cluster_data = self.get_a_single_cluster(cluster=cluster)
             try:
                 if cluster_data.get('clusterType', None) == 'SHARDED':
-                    logger.warning("Cluster Type is SHARDED, Returning a ShardedClusterConfig")
+                    logger.info("Cluster Type is SHARDED, Returning a ShardedClusterConfig")
                     out_obj = ShardedClusterConfig.fill_from_dict(data_dict=cluster_data)
                 elif cluster_data.get('clusterType', None) == 'REPLICASET':
-                    logger.warning("Cluster Type is REPLICASET, Returning a ClusterConfig")
+                    logger.info("Cluster Type is REPLICASET, Returning a ClusterConfig")
                     out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
                 else:
-                    logger.warning("Cluster Type is not recognized, Returning a REPLICASET")
+                    logger.info("Cluster Type is not recognized, Returning a REPLICASET")
                     out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
             except Exception as e:
                 raise e
@@ -249,6 +249,8 @@ class Atlas:
         def __init__(self, atlas):
             self.atlas = atlas
             self.logger = logging.getLogger('Atlas.Hosts')
+            self.host_list_with_measurements: Optional[List[Host]] = list()
+            self.host_list: Optional[List[Host]] = list()
 
         def _get_all_hosts(self, pageNum=Settings.pageNum,
                            itemsPerPage=Settings.itemsPerPage,
@@ -294,17 +296,31 @@ class Atlas:
 
             return return_val
 
-        @property
-        def host_list(self):
-            """Returns a list of Host Objects
-            :rtype: ListOfHosts
+        def fill_host_list(self, for_cluster: Optional[str] = None) -> ListOfHosts:
             """
+            Fills the `self.hostname` property with the current hosts for the project/group.
 
-            return self._get_all_hosts(iterable=True)
+            Optionally, one can specify the `for_cluster` parameter to fill the host list with
+            hosts only from the specified cluster.
+
+            :param for_cluster: str: The name of the cluster for filter the host list.
+            """
+            host_list = self._get_all_hosts(iterable=True)
+            if for_cluster:
+                out_list = list()
+                for host in host_list:
+                    if host.cluster_name == for_cluster:
+                        out_list.append(host)
+                self.host_list = out_list
+            else:
+                self.host_list = self._get_all_hosts(iterable=True)
+
+            return self.host_list
 
         @property
-        def host_names(self):
+        def host_names(self) -> Iterable[str]:
             """Returns a simple list of host names without port
+
             :rtype: Iterator[str]
             """
 
@@ -324,7 +340,7 @@ class Atlas:
                 cluster_list.add(host.cluster_name)
             return cluster_list
 
-        def host_list_by_cluster(self, cluster_name: str):
+        def host_list_by_cluster(self, cluster_name: str) -> Iterable[Host]:
             """
             Returns hosts belonging to the named cluster.
             :param cluster_name:
@@ -333,21 +349,85 @@ class Atlas:
                 if host.cluster_name == cluster_name:
                     yield host
 
+        def update_host_list(self, host_obj: Host) -> None:
+            """
+            Replaces a host into the host_list property.
+
+            Returns boolean indicating if the object was replaced.
+            :rtype: bool
+            :param host_obj: Host: A host object ith measurements.
+            """
+            for n, i in enumerate(self.host_list):
+                if i == host_obj:
+                    self.host_list[n] = host_obj
+            self.logger.info("Added new host item")
+
+        def get_measurement_for_hosts(self, granularity: AtlasGranularities = AtlasGranularities.HOUR,
+                                      period: AtlasPeriods = AtlasPeriods.WEEKS_1,
+                                      measurement=AtlasMeasurementTypes.Cache.dirty, return_data: bool = False):
+            """Get  measurement(s) for all hosts in the host_list
+
+
+                        Populates all hosts in the host_list with the requested metric.
+
+                        Multiple calls will append additional metrics to the same host object.
+
+                        Please note that using the `return_data`  param will also return the updated
+                        host objects, which may unnecessarily consume memory.
+
+                        Keyword Args:
+                            granularity (AtlasGranuarities): the desired granularity
+                            period (AtlasPeriods): The desired period
+                            measurement (AtlasMeasurementTypes) : The desired measurement or Measurement class
 
 
 
-        def _get_measurement_for_host(self, host_obj, granularity=AtlasGranularities.HOUR, period=AtlasPeriods.WEEKS_1,
-                                      measurement=AtlasMeasurementTypes.Cache.dirty, pageNum=Settings.pageNum,
-                                      itemsPerPage=Settings.itemsPerPage, iterable=False):
-            """Get  measurement(s_ for a host
+                            :param return_data:
+                            :rtype: List[AtlasMeasurement]
+                            :type period: AtlasPeriods
+                            :type granularity: AtlasGranularities
+                            :type measurement: AtlasMeasurementTypes
+                        """
+
+            if not self.host_list:
+                raise (ValueError('Before retrieving measurements for hosts, you must retrieve the host list'
+                                  ' by using one of the `fill_host_list`.'))
+
+            for each_host in self.host_list:
+                logger.info('Pulling measurements for {} hosts'.format(len(self.host_list)))
+                logger.info('Measurement: {}'.format(measurement.__str__()))
+                logger.info('Metric: {}'.format(granularity.__str__()))
+                logger.info('For Period: {}'.format(period.__str__()))
+                return_list = list()
+                try:
+                    returned_data = self._get_measurement_for_host(each_host, granularity=granularity,
+                                                                 period=period,
+                                                                 measurement=measurement, fill_list=True)
+                    if return_data is True:
+                        return_list.append(return_data)
+                except Exception as e:
+                    logger.error('An error occurred while retrieving metrics for host: {}.'
+                                 'The error was {}'.format(each_host.hostname, e))
+                    logger.warning('Will continue with next host. . . ')
+
+        def _get_measurement_for_host(self, host_obj: Host, granularity: AtlasGranularities = AtlasGranularities.HOUR,
+                                      period: AtlasPeriods = AtlasPeriods.WEEKS_1,
+                                      measurement: AtlasMeasurementTypes = AtlasMeasurementTypes.Cache.dirty,
+                                      pageNum: int = Settings.pageNum,
+                                      itemsPerPage: int = Settings.itemsPerPage,
+                                      iterable: bool = True, fill_list: bool = True):
+            """Get  measurement(s) for a host
 
             Internal use only, should come from the host obj itself.
+
+            When invoked repopulates a host from the host_list with a filled measurements, this behaviour
+            can be overiddedn with the `fill_list` param.
+
             url: https://docs.atlas.mongodb.com/reference/api/process-measurements/
+
 
             Accepts either a single measurement, but will retrieve more than one measurement
             if the measurement (using the AtlasMeasurementTypes class)
-
-
 
             /api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/measurements
 
@@ -405,7 +485,7 @@ class Atlas:
             if iterable:
                 measurements = return_val.get('measurements')
                 measurements_count = len(measurements)
-                self.logger.warning('There are {} measurements.'.format(measurements_count))
+                self.logger.info('There are {} measurements.'.format(measurements_count))
                 measurements_list: List[AtlasMeasurement] = list()
 
                 for each in measurements:
@@ -415,7 +495,10 @@ class Atlas:
                     for each_and_every in each.get('dataPoints'):
                         measurement_obj.measurements = AtlasMeasurementValue(each_and_every)
                     measurements_list.append(measurement_obj)
-                return measurements_list
+                host_obj.add_measurements(measurements_list)
+                if fill_list is True:
+                    self.update_host_list(host_obj)
+                return host_obj
 
             else:
                 return return_val
@@ -562,7 +645,7 @@ class Atlas:
                 dict: Response payload
             """
             uri = Settings.api_resources["Database Users"]["Update a Database User"] % (self.atlas.group, user)
-            logger.warning(Settings.BASE_URL + uri, permissions.getSpecs())
+            logger.info(Settings.BASE_URL + uri, permissions.getSpecs())
             return self.atlas.network.patch(Settings.BASE_URL + uri, permissions.getSpecs())
 
         def delete_a_database_user(self, user: str) -> dict:

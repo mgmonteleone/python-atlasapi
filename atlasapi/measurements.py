@@ -260,5 +260,15 @@ class AtlasMeasurement(object):
                     period=self.period, granularity=self.granularity, measurements_count=self.measurements_count
                     )
 
+    def __hash__(self):
+        return hash(self.name+'-'+self.period)
 
+    def __eq__(self, other):
+        """
+        Measurements are considered duplicate of name and period are the same
+        :param other:
+        :return:
+        """
+        if isinstance(other, AtlasMeasurement):
+            return  ((self.name == other.name) and (self.period == other.period))
 OptionalAtlasMeasurement = NewType('OptionalAtlasMeasurement', Optional[AtlasMeasurement])

@@ -162,12 +162,10 @@ class Network:
                                timeout=Settings.requests_timeout,
                                headers={"Content-Type" : "application/json"},
                                auth=HTTPDigestAuth(self.user, self.password))
-            pprint(r.request.__dict__)
-            pprint(r.__dict__)
             return self.answer(r.status_code, r.json())
         except Exception as e:
 
-            raise e
+            raise ValueError(r.status_code,r.content)
         finally:
             if r:
                 r.connection.close()

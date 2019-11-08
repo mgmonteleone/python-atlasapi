@@ -160,6 +160,19 @@ Clusters
     output = a.Clusters.create_a_cluster(cluster_config)
 
 
+    # Modify a cluster
+     existing_config = a.Clusters.get_a_single_cluster_as_obj(cluster=TEST_CLUSTER_NAME)
+     out.providerSettings.instance_size_name = InstanceSizeName.M10
+     out.disk_size_gb = 13
+     new_config = a.Clusters.modify_a_cluster('pyAtlasAPIClustersTest', out)
+     pprint(new_config)
+
+    # Modify cluster instance size
+
+    a.Clusters.modify_cluster_instanct_size(cluster='pyAtlasAPIClustersTest',new_cluster_size=InstanceSizeName.M20)
+
+
+
 Alerts
 ^^^^^^
 

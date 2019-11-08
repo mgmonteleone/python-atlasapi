@@ -4,6 +4,7 @@ from pprint import pprint
 from datetime import datetime
 import pytz
 import uuid
+import copy
 
 FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
@@ -308,12 +309,14 @@ class ClusterConfig(object):
         try:
             return_dict['clusterType'] = self.cluster_type.name
             return_dict.__delitem__('cluster_type')
+            return_dict['mongoDBMajorVersion'] = self.mongodb_major_version.value
+            return_dict.__delitem__('mongodb_major_version')
+            return_dict['replicationSpecs'] = [self.replication_specs[0].as_dict()]
+            return_dict.__delitem__('replication_specs')
+
         except (KeyError, AttributeError):
             pass
-        return_dict['mongoDBMajorVersion'] = self.mongodb_major_version.value
-        return_dict.__delitem__('mongodb_major_version')
-        return_dict['replicationSpecs'] = [self.replication_specs[0].as_dict()]
-        return_dict.__delitem__('replication_specs')
+
         try:
             return_dict['stateName'] = self.state_name.name
         except AttributeError:
@@ -322,26 +325,32 @@ class ClusterConfig(object):
             return_dict.__delitem__('state_name')
         except KeyError:
             pass
-        return_dict['providerSettings'] = self.providerSettings.as_dict()
-        return_dict.__delitem__('replication_factor')  # THis has been deprecated, so removing from dict output
-        return_dict['mongoDBVersion'] = self.mongodb_version
-        return_dict.__delitem__('mongodb_version')
-        return_dict['srvAddress'] = self.srv_address
-        return_dict.__delitem__('srv_address')
-        return_dict['mongoURI'] = self.mongo_uri
-        return_dict.__delitem__('mongo_uri')
-        return_dict['mongoURIWithOptions'] = self.mongod_uri_with_options
-        return_dict.__delitem__('mongod_uri_with_options')
-        return_dict['diskSizeGB'] = self.disk_size_gb
-        return_dict.__delitem__('disk_size_gb')
-        return_dict['pitEnabled'] = self.pit_enabled
-        return_dict.__delitem__('pit_enabled')
-        return_dict['numShards'] = self.num_shards
-        return_dict.__delitem__('num_shards')
-        return_dict['mongoURIUpdated'] = self.mongo_uri_updated
-        return_dict.__delitem__('mongo_uri_updated')
-        return_dict['backupEnabled'] = self.backup_enabled
-        return_dict.__delitem__('backup_enabled')
+        try:
+            return_dict['providerSettings'] = self.providerSettings.as_dict()
+        except AttributeError:
+            return_dict['providerSettings'] = self.providerSettings
+        try:
+            return_dict.__delitem__('replication_factor')  # THis has been deprecated, so removing from dict output
+            return_dict['mongoDBVersion'] = self.mongodb_version
+            return_dict.__delitem__('mongodb_version')
+            return_dict['srvAddress'] = self.srv_address
+            return_dict.__delitem__('srv_address')
+            return_dict['mongoURI'] = self.mongo_uri
+            return_dict.__delitem__('mongo_uri')
+            return_dict['mongoURIWithOptions'] = self.mongod_uri_with_options
+            return_dict.__delitem__('mongod_uri_with_options')
+            return_dict['diskSizeGB'] = self.disk_size_gb
+            return_dict.__delitem__('disk_size_gb')
+            return_dict['pitEnabled'] = self.pit_enabled
+            return_dict.__delitem__('pit_enabled')
+            return_dict['numShards'] = self.num_shards
+            return_dict.__delitem__('num_shards')
+            return_dict['mongoURIUpdated'] = self.mongo_uri_updated
+            return_dict.__delitem__('mongo_uri_updated')
+            return_dict['backupEnabled'] = self.backup_enabled
+            return_dict.__delitem__('backup_enabled')
+        except KeyError:
+            pass
 
         return return_dict
 
@@ -357,18 +366,44 @@ class ClusterConfig(object):
         """
         out_dict = self.as_dict()
         try:
-            out_dict.__delitem__('numShards')
-            out_dict.__delitem__('mongoURI')
-            out_dict.__delitem__('mongoDBVersion')
-            out_dict.__delitem__('mongoURIUpdated')
-            out_dict.__delitem__('mongoURIWithOptions')
-            out_dict.__delitem__('paused')
-            out_dict.__delitem__('srvAddress')
-            out_dict.__delitem__('links')
-            out_dict.__delitem__('state_name')
+            out_dict.pop('numShards', None)
+            out_dict.pop('mongoURI', None)
+            out_dict.pop('mongoDBVersion', None)
+            out_dict.pop('mongoURIUpdated', None)
+            out_dict.pop('mongoURIWithOptions', None)
+            out_dict.pop('paused', None)
+            out_dict.pop('srvAddress', None)
+            out_dict.pop('links', None)
+            out_dict.pop('state_name', None)
         except KeyError:
             pass
-        out_dict['replicationSpecs'][0].__delitem__('id')
+        try:
+            out_dict['replicationSpecs'][0].__delitem__('id')
+        except KeyError:
+            pass
+        return out_dict
+
+    def as_modify_dict(self) -> dict:
+        """
+        Returns the config object in a format acceptable for the PATCH (modify) endpoint.
+
+        Removes properties which are read-only.
+
+        TODO: Refactor to identify which properties are RO in the spec, and automatically loop through and remove.
+
+        :return: dict: A dict containing a valid create object for the POST endpoint.
+        """
+        out_dict = self.as_dict()
+        out_dict.pop('stateName', None)
+        out_dict.pop('numShards', None)
+        out_dict.pop('mongoURI', None)
+        out_dict.pop('mongoDBVersion', None)
+        out_dict.pop('mongoURIUpdated', None)
+        out_dict.pop('mongoURIWithOptions', None)
+        out_dict.pop('paused', None)
+        out_dict.pop('srvAddress', None)
+        out_dict.pop('links', None)
+        out_dict.pop('state_name', None)
 
         return out_dict
 

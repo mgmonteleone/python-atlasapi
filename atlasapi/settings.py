@@ -50,7 +50,7 @@ class Settings:
             "Get a Single Cluster": "/api/atlas/v1.0/groups/%s/clusters/%s",
             "Delete a Cluster": "/api/atlas/v1.0/groups/%s/clusters/%s",
             "Create a Cluster": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/",
-            "Modify a Cluster": "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}"
+            "Modify a Cluster": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}"
         },
         "Database Users": {
             "Get All Database Users": "/api/atlas/v1.0/groups/%s/databaseUsers?pageNum=%d&itemsPerPage=%d",

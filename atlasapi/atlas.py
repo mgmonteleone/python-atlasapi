@@ -96,7 +96,7 @@ class Atlas:
             """
 
             try:
-                self.get_a_single_cluster(cluster)
+                self.get_single_cluster(cluster)
                 return True
             except ErrAtlasNotFound:
                 return False
@@ -127,7 +127,7 @@ class Atlas:
             uri = Settings.api_resources["Clusters"]["Get All Clusters"] % (self.atlas.group, pageNum, itemsPerPage)
             return self.atlas.network.get(Settings.BASE_URL + uri)
 
-        def get_a_single_cluster(self, cluster: str) -> dict:
+        def get_single_cluster(self, cluster: str) -> dict:
             """Get a Single Cluster
 
             url: https://docs.atlas.mongodb.com/reference/api/clusters-get-one/
@@ -142,7 +142,7 @@ class Atlas:
             cluster_data = self.atlas.network.get(Settings.BASE_URL + uri)
             return cluster_data
 
-        def get_a_single_cluster_as_obj(self, cluster) -> Union[ClusterConfig, ShardedClusterConfig]:
+        def get_single_cluster_as_obj(self, cluster) -> Union[ClusterConfig, ShardedClusterConfig]:
             """Get a Single Cluster as data
 
             url: https://docs.atlas.mongodb.com/reference/api/clusters-get-one/
@@ -153,7 +153,7 @@ class Atlas:
             Returns:
                 ClusterConfig: Response payload
             """
-            cluster_data = self.get_a_single_cluster(cluster=cluster)
+            cluster_data = self.get_single_cluster(cluster=cluster)
             try:
                 if cluster_data.get('clusterType', None) == 'SHARDED':
                     logger.info("Cluster Type is SHARDED, Returning a ShardedClusterConfig")
@@ -168,7 +168,7 @@ class Atlas:
                 raise e
             return out_obj
 
-        def create_a_cluster(self, cluster: ClusterConfig) -> dict:
+        def create_cluster(self, cluster: ClusterConfig) -> dict:
             """Create a cluster
 
             url: POST /api/atlas/v1.0/groups/{GROUP-ID}/clusters
@@ -206,12 +206,12 @@ class Atlas:
             cluster: AtlasBasicReplicaSet = AtlasBasicReplicaSet(name=name, size=size, disk_size=disk_size,
                                                                  provider=provider, region=region,
                                                                  version=version)
-            result = self.create_a_cluster(cluster=cluster.config)
+            result = self.create_cluster(cluster=cluster.config)
 
             cluster.config_running = result
             return cluster
 
-        def delete_a_cluster(self, cluster, areYouSure=False):
+        def delete_cluster(self, cluster, areYouSure=False):
             """Delete a Cluster
 
             url: https://docs.atlas.mongodb.com/reference/api/clusters-delete-one/
@@ -234,6 +234,58 @@ class Atlas:
             else:
                 raise ErrConfirmationRequested(
                     "Please set areYouSure=True on delete_a_cluster call if you really want to delete [%s]" % cluster)
+
+        def modify_cluster(self, cluster: str, cluster_config: ClusterConfig) -> dict:
+            """Modify a Cluster
+
+            Modifies an existing cluster in the project.
+
+
+            url: https://docs.atlas.mongodb.com/reference/api/clusters-modify-one/
+
+
+            :param cluster: The name of the cluster to modify
+            :param cluster_config: A ClusterConfig object containing the new configuration
+            :return: dict:  A dictionary of the new cluster config
+            TODO: Option to return a cluster config object
+            """
+            uri = Settings.api_resources["Clusters"]["Modify a Cluster"].format(GROUP_ID=self.atlas.group,
+                                                                                CLUSTER_NAME=cluster)
+            try:
+                self.get_single_cluster_as_obj(cluster=cluster)
+            except ErrAtlasNotFound as e:
+                logger.error('Could not find existing cluster {}'.format(cluster))
+                raise ValueError('Could not find existing cluster {}'.format(cluster))
+
+            try:
+                new_config = cluster_config.as_modify_dict()
+            except Exception as e:
+                logger.error('Error while trying to parse the new configuration')
+                raise ValueError('Error while trying to parse the new configuration')
+            return self.atlas.network.patch(uri=Settings.BASE_URL + uri, payload=new_config)
+
+        def modify_cluster_instance_size(self, cluster: str, new_cluster_size: InstanceSizeName) -> dict:
+            """
+            Modifies existing cluster by changing only the instance size.
+
+            Helper function using modify_cluster
+            :param cluster: The cluster name
+            :param new_cluster_size: InstanceSizeName: The new size to use.
+            :return: dict: the new cluster configuration dict
+
+            """
+            # First check to see if this is a new size, and if the cluster exists
+            try:
+                existing_config = self.get_single_cluster_as_obj(cluster=cluster)
+                if existing_config.providerSettings.instance_size_name == new_cluster_size:
+                    logger.error("New size is the same as old size.")
+                    raise ValueError("New size is the same as old size.")
+            except ErrAtlasNotFound as e:
+                logger.error('Could not find existing cluster {}'.format(cluster))
+                raise ValueError('Could not find existing cluster {}'.format(cluster))
+
+            existing_config.providerSettings.instance_size_name = new_cluster_size
+            return self.modify_cluster(cluster=cluster, cluster_config=existing_config)
 
     class _Hosts:
         """Hosts API

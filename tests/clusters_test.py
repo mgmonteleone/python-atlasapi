@@ -15,7 +15,7 @@ from atlasapi.atlas import Atlas
 from atlasapi.lib import AtlasPeriods, AtlasUnits, AtlasGranularities
 from json import dumps
 from atlasapi.clusters import AtlasBasicReplicaSet, MongoDBMajorVersion as mdb_version, ClusterConfig
-from atlasapi.clusters import ClusterConfig, ProviderSettings, ReplicationSpecs
+from atlasapi.clusters import ClusterConfig, ProviderSettings, ReplicationSpecs, InstanceSizeName
 from atlasapi.clusters import RegionConfig
 
 USER = getenv('ATLAS_USER', None)
@@ -77,14 +77,19 @@ a = Atlas(USER, API_KEY, GROUP_ID)
 #pprint(out.as_dict())
 
 
-print('==========Modify a Cluster=================')
-
-out = a.Clusters.get_a_single_cluster_as_obj(cluster=TEST_CLUSTER_NAME)
-print('Retrieved information regarding cluster {}'.format(TEST_CLUSTER_NAME))
-pprint('output is of type: {}'.format(type(out)))
-
-print('===========Delete A Cluster==========')
-
+#print('==========Modify a Cluster=================')
+#
+#out = a.Clusters.get_a_single_cluster_as_obj(cluster=TEST_CLUSTER_NAME)
+#out.providerSettings.instance_size_name = InstanceSizeName.M10
+#print('Retrieved information regarding cluster {}'.format(TEST_CLUSTER_NAME))
+#
+#out.disk_size_gb = 13
+#new_config = a.Clusters.modify_a_cluster('pyAtlasAPIClustersTest', out)
+#
+#pprint(new_config)
+#
+#print('===========Delete A Cluster==========')
+#
 # pprint(a.Clusters.is_existing_cluster(TEST_CLUSTER_NAME))
 
 # a.Clusters.delete_a_cluster('QuickTest',True)
@@ -92,3 +97,9 @@ print('===========Delete A Cluster==========')
 # out = create_basic_rs("test20")
 
 # print(dumps(out.as_create_dict()))
+
+print('===========Resize A Cluster==========')
+
+out = a.Clusters.modify_cluster_instanct_size(cluster='pyAtlasAPIClustersTest',new_cluster_size=InstanceSizeName.M20)
+
+pprint(out)

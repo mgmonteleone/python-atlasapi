@@ -33,10 +33,11 @@ from datetime import datetime
 from enum import Enum
 from dateutil import parser
 from .atlas_types import *
-from typing import Optional, NewType, List, Any
+from typing import Optional, NewType, List, Any, Union, Iterable
 from datetime import datetime
 import isodate
-from atlasapi.measurements import AtlasMeasurement
+from .measurements import AtlasMeasurement, AtlasMeasurementTypes
+from .lib import AtlasGranularities, AtlasPeriods
 import logging
 from future import standard_library
 
@@ -89,6 +90,92 @@ class Host(object):
             self.type = ReplicaSetTypes[data.get("typeName", "NO_DATA")]
             self.measurements = []
             self.cluster_name = self.hostname.split('-')[0]
+
+    def get_measurement_for_host(self, granularity: AtlasGranularities = AtlasGranularities.HOUR,
+                                 period: AtlasPeriods = AtlasPeriods.WEEKS_1,
+                                 measurement: AtlasMeasurementTypes = AtlasMeasurementTypes.Cache.dirty,
+                                 pageNum: int = Settings.pageNum,
+                                 itemsPerPage: int = Settings.itemsPerPage,
+                                 iterable: bool = True) -> Union[dict, Iterable[AtlasMeasurement]]:
+        """Get  measurement(s) for a host
+
+        Returns measurements for the Host object.
+
+        url: https://docs.atlas.mongodb.com/reference/api/process-measurements/
+
+
+        Accepts either a single measurement, but will retrieve more than one measurement
+        if the measurement (using the AtlasMeasurementTypes class)
+
+        /api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/measurements
+
+        Keyword Args:
+            host_obj (Host): the host
+            granularity (AtlasGranuarities): the desired granularity
+            period (AtlasPeriods): The desired period
+            measurement (AtlasMeasurementTypes) : The desired measurement or Measurement class
+            pageNum (int): Page number
+            itemsPerPage (int): Number of Users per Page
+            iterable (bool): To return an iterable high level object instead of a low level API response
+
+        Returns:
+             Iterable[AtlasMeasurement] or dict: Iterable object representing this function OR Response payload
+
+        Raises:
+            ErrPaginationLimits: Out of limits
+
+            :rtype: List[AtlasMeasurement]
+            :type iterable: OptionalBool
+            :type itemsPerPage: OptionalInt
+            :type pageNum: OptionalInt
+            :type period: AtlasPeriods
+            :type granularity: AtlasGranularities
+            :type host_obj: Host
+            :type measurement: AtlasMeasurementTypes
+
+        """
+
+        # Check limits and raise an Exception if needed
+        ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+
+        # Check to see if we received a leaf or branch of the measurements
+        try:
+            parent = super(measurement)
+            self.logger.info('We received a branch, whos parent is {}'.format(parent.__str__()))
+            leaves = measurement.get_all()
+            measurement_list = list(leaves)
+            measurement = '&m='.join(measurement_list)
+        except TypeError as e:
+            self.logger.info('We received a leaf')
+
+        # Build the URL
+        uri = Settings.api_resources["Monitoring and Logs"]["Get measurement for host"].format(
+            group_id=self.atlas.group,
+            host=host_obj.hostname,
+            port=host_obj.port,
+            granularity=granularity,
+            period=period,
+            measurement=measurement
+        )
+        # Build the request
+        return_val = self.atlas.network.get(Settings.BASE_URL + uri)
+
+        if iterable:
+            measurements = return_val.get('measurements')
+            measurements_count = len(measurements)
+            self.logger.info('There are {} measurements.'.format(measurements_count))
+
+            for each in measurements:
+                measurement_obj = AtlasMeasurement(name=each.get('name')
+                                                   , period=period
+                                                   , granularity=granularity)
+                for each_and_every in each.get('dataPoints'):
+                    measurement_obj.measurements = AtlasMeasurementValue(each_and_every)
+
+            yield measurement_obj
+
+        else:
+            return return_val
 
     def add_measurements(self, measurement):
         # TODO: Make measurements unique, use a set instead, but then how do we concat 2?

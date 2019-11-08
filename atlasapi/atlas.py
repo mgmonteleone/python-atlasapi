@@ -127,7 +127,7 @@ class Atlas:
             uri = Settings.api_resources["Clusters"]["Get All Clusters"] % (self.atlas.group, pageNum, itemsPerPage)
             return self.atlas.network.get(Settings.BASE_URL + uri)
 
-        def get_a_single_cluster(self, cluster):
+        def get_a_single_cluster(self, cluster: str) -> dict:
             """Get a Single Cluster
 
             url: https://docs.atlas.mongodb.com/reference/api/clusters-get-one/
@@ -401,10 +401,9 @@ class Atlas:
                 return_list = list()
                 try:
                     returned_data = self._get_measurement_for_host(each_host, granularity=granularity,
-                                                                 period=period,
-                                                                 measurement=measurement, fill_list=True)
-                    if return_data is True:
-                        return_list.append(return_data)
+                                                                   period=period,
+                                                                   measurement=measurement)
+                    return_list.append(return_data)
                 except Exception as e:
                     logger.error('An error occurred while retrieving metrics for host: {}.'
                                  'The error was {}'.format(each_host.hostname, e))
@@ -415,13 +414,12 @@ class Atlas:
                                       measurement: AtlasMeasurementTypes = AtlasMeasurementTypes.Cache.dirty,
                                       pageNum: int = Settings.pageNum,
                                       itemsPerPage: int = Settings.itemsPerPage,
-                                      iterable: bool = True, fill_list: bool = True):
+                                      iterable: bool = True) -> Union[dict, Iterable[AtlasMeasurement]]:
             """Get  measurement(s) for a host
 
             Internal use only, should come from the host obj itself.
 
-            When invoked repopulates a host from the host_list with a filled measurements, this behaviour
-            can be overiddedn with the `fill_list` param.
+            Returns measurements for the passed Host object.
 
             url: https://docs.atlas.mongodb.com/reference/api/process-measurements/
 
@@ -441,7 +439,7 @@ class Atlas:
                 iterable (bool): To return an iterable high level object instead of a low level API response
 
             Returns:
-                 List[AtlasMeasurement] or dict: Iterable object representing this function OR Response payload
+                 Iterable[AtlasMeasurement] or dict: Iterable object representing this function OR Response payload
 
             Raises:
                 ErrPaginationLimits: Out of limits
@@ -486,7 +484,6 @@ class Atlas:
                 measurements = return_val.get('measurements')
                 measurements_count = len(measurements)
                 self.logger.info('There are {} measurements.'.format(measurements_count))
-                measurements_list: List[AtlasMeasurement] = list()
 
                 for each in measurements:
                     measurement_obj = AtlasMeasurement(name=each.get('name')
@@ -494,11 +491,8 @@ class Atlas:
                                                        , granularity=granularity)
                     for each_and_every in each.get('dataPoints'):
                         measurement_obj.measurements = AtlasMeasurementValue(each_and_every)
-                    measurements_list.append(measurement_obj)
-                host_obj.add_measurements(measurements_list)
-                if fill_list is True:
-                    self.update_host_list(host_obj)
-                return host_obj
+
+                yield measurement_obj
 
             else:
                 return return_val

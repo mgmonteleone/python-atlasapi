@@ -19,7 +19,7 @@ API_KEY = getenv('ATLAS_KEY', None)
 GROUP_ID = getenv('ATLAS_GROUP', None)
 from atlasapi.lib import AtlasPeriods, AtlasUnits, AtlasGranularities
 from atlasapi.measurements import AtlasMeasurementTypes
-
+import csv
 if not USER or not API_KEY or not GROUP_ID:
     raise EnvironmentError('In order to run this smoke test you need ATLAS_USER, AND ATLAS_KEY env variables'
                            'your env variables are {}'.format(environ.__str__()))
@@ -72,12 +72,30 @@ pprint('------------Test get hosts by cluster-----------------')
 print('-----------Test get metrics for a clusters hosts---------------')
 a.Hosts.fill_host_list(for_cluster='monitoringtest')
 
-a.Hosts.get_measurement_for_hosts(measurement=AtlasMeasurementTypes.Memory.virtual
-                                  , period=AtlasPeriods.HOURS_24, granularity=AtlasGranularities.MINUTE)
-a.Hosts.get_measurement_for_hosts(measurement=AtlasMeasurementTypes.Memory.resident
-                                   , period=AtlasPeriods.HOURS_24, granularity=AtlasGranularities.MINUTE)
+#a.Hosts.get_measurement_for_hosts(measurement=AtlasMeasurementTypes.Network.bytes_out
+#                                  , period=AtlasPeriods.HOURS_1, granularity=AtlasGranularities.FIVE_MINUTE)
 
-for host in a.Hosts.host_list:
-    pprint(host.cluster_name)
-    for each_measurement in host.measurements:
-        pprint(each_measurement)
+for hostObj in a.Hosts.host_list:
+    hostObj.get_measurement_for_host(measurement=AtlasMeasurementTypes.Network.bytes_out,
+                                  period=AtlasPeriods.HOURS_1, granularity=AtlasGranularities.FIVE_MINUTE)
+
+
+
+the = list()
+
+#for host in a.Hosts.host_list:
+#    hostname = host.hostname
+#    for each_measurement in host.measurements:
+#        name = each_measurement.name
+#        for each_point in each_measurement._measurements:
+#            timestamp = each_point.timestamp
+#            value = each_point.value
+#            the.append(dict(hostname=hostname,metric=name,value=value,timestamp=timestamp))
+#            pprint(dict(hostname=hostname,metric=name,value=value,timestamp=timestamp))
+#
+#with open('names.csv', 'w', newline='') as csvfile:
+#    fieldnames = ['hostname', 'metric', 'value', 'timestamp']
+#    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+#    writer.writeheader()
+#    for item in the:
+#        writer.writerow(item)

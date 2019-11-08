@@ -144,6 +144,7 @@ class ProviderSettings(object):
         """
         Configuration for the provisioned servers on which MongoDB runs.
 
+
         :param size: Name of the cluster tier used for the Atlas cluster.
         :param provider: Cloud service provider on which the servers are provisioned.
         :param region: Physical location of your MongoDB cluster. The region you choose can affect network latency for
@@ -184,7 +185,7 @@ class ProviderSettings(object):
         out_dict = self.__dict__
         out_dict['instanceSizeName'] = self.instance_size_name.name
         out_dict['providerName'] = self.provider_name.name
-        out_dict['volumeType'] = self.volumeType.name
+        out_dict['volumeType'] = self.volumeType
         out_dict['regionName'] = self.region_name
         del out_dict['provider_name']
         del out_dict['instance_size_name']
@@ -344,7 +345,16 @@ class ClusterConfig(object):
 
         return return_dict
 
-    def as_create_dict(self):
+    def as_create_dict(self) -> dict:
+        """
+        Returns the config object in a format acceptable for the POST (create) endpoint.
+
+        Removes properties which are read-only.
+
+        TODO: Refactor to identify which properties are RO in the spec, and automatically loop through and remove.
+
+        :return: dict: A dict containing a valid create object for the POST endpoint.
+        """
         out_dict = self.as_dict()
         try:
             out_dict.__delitem__('numShards')

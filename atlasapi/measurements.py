@@ -271,4 +271,5 @@ class AtlasMeasurement(object):
         """
         if isinstance(other, AtlasMeasurement):
             return  ((self.name == other.name) and (self.period == other.period))
+
 OptionalAtlasMeasurement = NewType('OptionalAtlasMeasurement', Optional[AtlasMeasurement])

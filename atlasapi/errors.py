@@ -21,6 +21,7 @@ Provides all specific Exceptions
 from .settings import Settings
 from pprint import pprint
 
+
 class ErrRole(Exception):
     """A role is not compatible with Atlas"""
     pass
@@ -49,7 +50,7 @@ class ErrPaginationLimits(Exception):
             super().__init__("pageNum can't be smaller than 1")
         elif error_code == ErrPaginationLimits.ERR_ITEMS_PER_PAGE:
             super().__init__("itemsPerPage can't be smaller than %d and greater than %d" % (
-            Settings.itemsPerPageMin, Settings.itemsPerPageMax))
+                Settings.itemsPerPageMin, Settings.itemsPerPageMax))
         else:
             super().__init__(str(error_code))
 
@@ -109,7 +110,7 @@ class ErrAtlasBadRequest(ErrAtlasGeneric):
 
     def __init__(self, c, details):
         if details['errorCode'] == 'DUPLICATE_CLUSTER_NAME':
-            raise(ErrAtlasDuplicateClusterName(c,details))
+            raise (ErrAtlasDuplicateClusterName(c, details))
         super().__init__("Something was wrong with the client request.", c, details)
 
 
@@ -124,7 +125,8 @@ class ErrAtlasDuplicateClusterName(ErrAtlasGeneric):
     """
 
     def __init__(self, c, details):
-        super().__init__(details.get('detail','Duplicate Error'), c, details)
+        super().__init__(details.get('detail', 'Duplicate Error'), c, details)
+
 
 class ErrAtlasUnauthorized(ErrAtlasGeneric):
     """Atlas : Unauthorized
@@ -137,7 +139,6 @@ class ErrAtlasUnauthorized(ErrAtlasGeneric):
     """
 
     def __init__(self, c, details):
-
         super().__init__("Authentication is required", c, details)
 
 
@@ -153,7 +154,7 @@ class ErrAtlasForbidden(ErrAtlasGeneric):
 
     def __init__(self, c, details):
         if details['errorCode'] == 'ORG_REQUIRES_WHITELIST':
-            raise ErrAtlasForbiddenWL(c,details)
+            raise ErrAtlasForbiddenWL(c, details)
         else:
             super().__init__("Access to the specified resource is not permitted.", c, details)
 
@@ -212,7 +213,8 @@ class ErrAtlasConflict(ErrAtlasGeneric):
 
     def __init__(self, c, details):
         super().__init__(
-            "This is typically the response to a request to create or modify a property of an entity that is unique when an existing entity already exists with the same value for that property.",
+            "This is typically the response to a request to create or modify a property of an entity that is unique "
+            "when an existing entity already exists with the same value for that property.",
             c, details)
 
 

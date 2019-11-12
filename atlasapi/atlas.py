@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# Modifications copyright (C) 2019 Matthew Monteleone
 
 """
 Atlas module
@@ -211,7 +212,7 @@ class Atlas:
             cluster.config_running = result
             return cluster
 
-        def delete_cluster(self, cluster, areYouSure=False):
+        def delete_cluster(self, cluster: str, areYouSure: bool = False):
             """Delete a Cluster
 
             url: https://docs.atlas.mongodb.com/reference/api/clusters-delete-one/
@@ -227,6 +228,9 @@ class Atlas:
 
             Raises:
                 ErrConfirmationRequested: Need a confirmation to delete the cluster
+                :type areYouSure: bool
+                :param cluster: Cluster name
+                :param areYouSure: safe flag to don't delete a cluster by mistake
             """
             if areYouSure:
                 uri = Settings.api_resources["Clusters"]["Delete a Cluster"] % (self.atlas.group, cluster)
@@ -281,7 +285,7 @@ class Atlas:
                 if existing_config.providerSettings.instance_size_name == new_cluster_size:
                     logger.error("New size is the same as old size.")
                     raise ValueError("New size is the same as old size.")
-            except ErrAtlasNotFound as e:
+            except ErrAtlasNotFound:
                 logger.error('Could not find existing cluster {}'.format(cluster))
                 raise ValueError('Could not find existing cluster {}'.format(cluster))
 
@@ -456,7 +460,7 @@ class Atlas:
                     returned_data = self._get_measurement_for_host(each_host, granularity=granularity,
                                                                    period=period,
                                                                    measurement=measurement)
-                    return_list.append(return_data)
+                    return_list.append(returned_data)
                 except Exception as e:
                     logger.error('An error occurred while retrieving metrics for host: {}.'
                                  'The error was {}'.format(each_host.hostname, e))
@@ -518,7 +522,7 @@ class Atlas:
                 leaves = measurement.get_all()
                 measurement_list = list(leaves)
                 measurement = '&m='.join(measurement_list)
-            except TypeError as e:
+            except TypeError:
                 self.logger.info('We received a leaf')
 
             # Build the URL
@@ -786,6 +790,7 @@ class Atlas:
 
             Returns:
                 dict: Response payload
+                :param comment:
             """
 
             # data = {"acknowledgedUntil": until.isoformat(timespec='seconds')}
@@ -968,7 +973,7 @@ class AtlasPagination:
             # fetch the API
             try:
                 details = self.fetch(pageNum, self.itemsPerPage)
-            except Exception as e:
+            except Exception:
                 raise ErrPagination()
 
             # set the real total

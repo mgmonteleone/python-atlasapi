@@ -29,6 +29,10 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
+      env: # Or as an environment variable
+        ATLAS_USER: ${{ secrets.ATLAS_USER }}
+        ATLAS_KEY: ${{ secrets.ATLAS_KEY }}
+        ATLAS_GROUP: ${{ secrets.ATLAS_GROUP }}
       run: |
-        pip install pytest
-        pytest
+        pip install nose2
+        nose2

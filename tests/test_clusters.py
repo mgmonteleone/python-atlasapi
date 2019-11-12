@@ -91,5 +91,3 @@ class ClusterTests(BaseTests):
         print('Successfully Deleted resized cluster :{}, output was '.format(self.TEST_CLUSTER2_NAME_UNIQUE, output))
 
 
-if __name__ == "__main__":
-    unittest.main()

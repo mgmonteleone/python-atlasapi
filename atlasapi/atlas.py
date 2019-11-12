@@ -261,8 +261,9 @@ class Atlas:
                 new_config = cluster_config.as_modify_dict()
             except Exception as e:
                 logger.error('Error while trying to parse the new configuration')
-                raise ValueError('Error while trying to parse the new configuration')
-            return self.atlas.network.patch(uri=Settings.BASE_URL + uri, payload=new_config)
+                raise e
+            value_returned = self.atlas.network.patch(uri=Settings.BASE_URL + uri, payload=new_config)
+            return value_returned
 
         def modify_cluster_instance_size(self, cluster: str, new_cluster_size: InstanceSizeName) -> dict:
             """

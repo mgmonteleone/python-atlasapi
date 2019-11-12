@@ -32,6 +32,7 @@ class ClusterType(Enum):
 
 
 class InstanceSizeName(Enum):
+    M0 = 'M0'
     M2 = 'M2'
     M5 = 'M5'
     M10 = 'M10'
@@ -61,6 +62,7 @@ class ProviderName(Enum):
     AWS = 'Amazon Web Services'
     GCP = 'Google Cloud Platform'
     AZURE = 'Microsoft Azure'
+    TENANT = 'Shared Tier'
 
 
 class MongoDBMajorVersion(Enum):
@@ -186,7 +188,11 @@ class ProviderSettings(object):
         out_dict = self.__dict__
         out_dict['instanceSizeName'] = self.instance_size_name.name
         out_dict['providerName'] = self.provider_name.name
-        out_dict['volumeType'] = self.volumeType
+        try:
+            out_dict['volumeType'] = self.volumeType.name
+        except AttributeError:
+            out_dict['volumeType'] = self.volumeType
+
         out_dict['regionName'] = self.region_name
         del out_dict['provider_name']
         del out_dict['instance_size_name']
@@ -326,8 +332,11 @@ class ClusterConfig(object):
         except KeyError:
             pass
         try:
-            return_dict['providerSettings'] = self.providerSettings.as_dict()
-        except AttributeError:
+            if type(return_dict['providerSettings']) != dict:
+                return_dict['providerSettings'] = self.providerSettings.as_dict()
+            else:
+                return_dict['providerSettings'] = self.providerSettings
+        except AttributeError as e:
             return_dict['providerSettings'] = self.providerSettings
         try:
             return_dict.__delitem__('replication_factor')  # THis has been deprecated, so removing from dict output

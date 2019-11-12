@@ -154,7 +154,6 @@ class Network:
             Exception: Network issue
         """
         r = None
-        
         try:
             r = requests.patch(uri,
                                json=payload,
@@ -165,7 +164,7 @@ class Network:
             return self.answer(r.status_code, r.json())
         except Exception as e:
 
-            raise ValueError(r.status_code,r.content)
+            raise e
         finally:
             if r:
                 r.connection.close()

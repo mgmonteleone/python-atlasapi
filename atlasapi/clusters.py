@@ -93,7 +93,8 @@ class ReplicationSpecs(object):
                  zone_name: Optional[str] = None,
                  regions_config: Optional[dict] = None):
         """
-        Configuration of each region in the cluster. Each element in this document represents a region where Atlas deploys your cluster.
+        Configuration of each region in the cluster. Each element in this document represents a region where Atlas
+        deploys your cluster.
 
         NOTE: A ReplicationSpecs object is found in Atlas replicationSpecs
 
@@ -288,7 +289,7 @@ class ClusterConfig(object):
             mongo_uri_updated = None
         try:
             mongodb_major_version = MongoDBMajorVersion(data_dict.get('mongoDBMajorVersion'))
-        except ValueError as e:
+        except ValueError:
             mongodb_major_version = MongoDBMajorVersion.vX_x
         mongodb_version = data_dict.get('mongoDBVersion', None)
         paused = data_dict.get('paused', False)
@@ -336,7 +337,7 @@ class ClusterConfig(object):
                 return_dict['providerSettings'] = self.providerSettings.as_dict()
             else:
                 return_dict['providerSettings'] = self.providerSettings
-        except AttributeError as e:
+        except AttributeError:
             return_dict['providerSettings'] = self.providerSettings
         try:
             return_dict.__delitem__('replication_factor')  # THis has been deprecated, so removing from dict output

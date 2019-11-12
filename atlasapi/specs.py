@@ -130,7 +130,6 @@ class Host(object):
             :type pageNum: OptionalInt
             :type period: AtlasPeriods
             :type granularity: AtlasGranularities
-            :type host_obj: Host
             :type measurement: AtlasMeasurementTypes
 
         """
@@ -145,7 +144,7 @@ class Host(object):
             leaves = measurement.get_all()
             measurement_list = list(leaves)
             measurement = '&m='.join(measurement_list)
-        except TypeError as e:
+        except TypeError:
             self.logger.info('We received a leaf')
 
         # Build the URL
@@ -159,16 +158,16 @@ class Host(object):
         )
         # Build the request
         return_val = self.atlas.network.get(Settings.BASE_URL + uri)
-
+        measurement_obj = None
         if iterable:
             measurements = return_val.get('measurements')
             measurements_count = len(measurements)
             self.logger.info('There are {} measurements.'.format(measurements_count))
 
             for each in measurements:
-                measurement_obj = AtlasMeasurement(name=each.get('name')
-                                                   , period=period
-                                                   , granularity=granularity)
+                measurement_obj = AtlasMeasurement(name=each.get('name'),
+                                                   period=period,
+                                                   granularity=granularity)
                 for each_and_every in each.get('dataPoints'):
                     measurement_obj.measurements = AtlasMeasurementValue(each_and_every)
 
@@ -252,12 +251,15 @@ class DatabaseUsersPermissionsSpecs:
 
         Raises:
             ErrRoleException: role not compatible with the databaseName and/or collectionName
+            :param databaseName: Database Name
+            :param roleNames: roles
+            :param collectionName: Collection
 
         """
         for roleName in roleNames:
             self.add_role(databaseName, roleName, collectionName)
 
-    def add_role(self, databaseName, roleName, collectionName=None):
+    def add_role(self, databaseName: str, roleName: str, collectionName: OptionalStr = None):
         """Add one role
 
         Args:
@@ -269,6 +271,9 @@ class DatabaseUsersPermissionsSpecs:
 
         Raises:
             ErrRole: role not compatible with the databaseName and/or collectionName
+            :param roleName:
+            :param databaseName:
+            :type collectionName: str
         """
         role = {"databaseName": databaseName,
                 "roleName": roleName}

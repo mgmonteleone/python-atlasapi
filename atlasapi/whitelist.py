@@ -31,11 +31,11 @@ class WhitelistEntry(object):
         self.cidrBlock = cidrBlock
         try:
             self.cidrBlockObj: IPv4Network = IPv4Network(self.cidrBlock)
-        except Exception as e:
+        except Exception:
             self.cidrBlockObj = None
         try:
             self.ipAddressObj: IPv4Address = IPv4Address(self.ipAddress)
-        except Exception as e:
+        except Exception:
             self.ipAddressObj = None
 
     @classmethod

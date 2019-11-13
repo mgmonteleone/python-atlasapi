@@ -9,6 +9,8 @@ import ipaddress
 from copy import copy
 
 logger = logging.getLogger(name='Atlas_events')
+
+
 class AtlasEventTypes(Enum):
     PEER_CREATED = "Peer Created"
     PEER_DELETED = "Peer Deleted"
@@ -489,9 +491,10 @@ class _AtlasUserBaseEvent(_AtlasBaseEvent):
         self.username = value_dict.get('username')  # type: str
         try:
             self.remote_address = ipaddress.ip_address(value_dict.get('remoteAddress', None))  # type: ipaddress
-        except ValueError as e:
+        except ValueError:
             logger.info('No IP address found')
             self.remote_address = None
+
 
 class AtlasEvent(_AtlasBaseEvent):
     def __init__(self, value_dict: dict) -> None:
@@ -529,7 +532,7 @@ class AtlasFeatureEvent(_AtlasUserBaseEvent):
 
 
 def atlas_event_factory(value_dict: dict) -> Union[
-                              AtlasEvent, AtlasDataExplorerEvent, AtlasClusterEvent, AtlasHostEvent, AtlasFeatureEvent]:
+                            AtlasEvent, AtlasDataExplorerEvent, AtlasClusterEvent, AtlasHostEvent, AtlasFeatureEvent]:
     if value_dict.get("featureName", None):
         return AtlasFeatureEvent(value_dict=value_dict)
 
@@ -545,4 +548,4 @@ def atlas_event_factory(value_dict: dict) -> Union[
         return AtlasEvent(value_dict=value_dict)
 
 
-ListOfEvents = NewType('ListOfEvents', List[Union[dict,_AtlasBaseEvent]])
+ListOfEvents = NewType('ListOfEvents', List[Union[dict, _AtlasBaseEvent]])

@@ -3,10 +3,10 @@ from setuptools import setup, find_packages
 
 setup(
     name='atlasapi',
-    version='0.8.0',
+    version='0.9.0',
     python_requires='>=3.6',
     packages=find_packages(),
-    install_requires=['requests', 'python-dateutil', 'isodate', 'future', 'pytz'],
+    install_requires=['requests', 'python-dateutil', 'isodate', 'future', 'pytz','coolname'],
 
     # Metadata
     author="Matthew G. Monteleone",

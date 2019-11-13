@@ -14,7 +14,7 @@
 # Modifications copyright (C) 2019 Matthew Monteleone
 
 from enum import Enum
-from typing import List, NewType, Optional
+from typing import List, NewType, Optional, Union
 from pprint import pprint
 from datetime import datetime
 import pytz

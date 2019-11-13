@@ -35,7 +35,6 @@ from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, 
     OptionalAtlasMeasurement
 from atlasapi.events import atlas_event_factory, ListOfEvents
 import logging
-from pprint import pprint
 from typing import Union, Iterable, Set
 from atlasapi.errors import ErrAtlasUnauthorized
 from atlasapi.alerts import Alert
@@ -239,17 +238,18 @@ class Atlas:
                 raise ErrConfirmationRequested(
                     "Please set areYouSure=True on delete_a_cluster call if you really want to delete [%s]" % cluster)
 
-        def modify_cluster(self, cluster: str, cluster_config: ClusterConfig) -> dict:
+        def modify_cluster(self, cluster: str, cluster_config: Union[ClusterConfig, dict]) -> dict:
             """Modify a Cluster
 
-            Modifies an existing cluster in the project.
+            Modifies an existing cluster in the project. Either from a full ClusterConfig object, or from a simple
+            dict which contains the elements desired.
 
 
             url: https://docs.atlas.mongodb.com/reference/api/clusters-modify-one/
 
 
             :param cluster: The name of the cluster to modify
-            :param cluster_config: A ClusterConfig object containing the new configuration
+            :param cluster_config: A ClusterConfig object containing the new configuration, or a dict containing fragment.
             :return: dict:  A dictionary of the new cluster config
             TODO: Option to return a cluster config object
             """
@@ -261,11 +261,16 @@ class Atlas:
                 logger.error('Could not find existing cluster {}'.format(cluster))
                 raise ValueError('Could not find existing cluster {}'.format(cluster))
 
-            try:
-                new_config = cluster_config.as_modify_dict()
-            except Exception as e:
-                logger.error('Error while trying to parse the new configuration')
-                raise e
+            if type(cluster_config) == ClusterConfig:
+                logger.warning("We recevied a full cluster_config, converting to dict")
+                try:
+                    new_config = cluster_config.as_modify_dict()
+                except Exception as e:
+                    logger.error('Error while trying to parse the new configuration')
+                    raise e
+            else:
+                logger.warning("We received a simple dict for cluster config, sending without converting.")
+                new_config = cluster_config
             value_returned = self.atlas.network.patch(uri=Settings.BASE_URL + uri, payload=new_config)
             return value_returned
 
@@ -291,6 +296,28 @@ class Atlas:
 
             existing_config.providerSettings.instance_size_name = new_cluster_size
             return self.modify_cluster(cluster=cluster, cluster_config=existing_config)
+
+        def pause_cluster(self, cluster: str, toggle_if_paused: bool = False) -> dict:
+            """
+            Pauses/Unpauses a cluster.
+
+            If you wish to unpause, set the toggle_if_paused param to True.
+            :rtype: dict
+            :param cluster: The name of the cluster
+            :param toggle_if_paused: Set to true to unpause a paused clsuter.
+            :return: dict: The updated config
+            """
+            existing_config = self.get_single_cluster_as_obj(cluster=cluster)
+            logger.info('The cluster state is currently Paused= {}'.format(existing_config.paused))
+            if existing_config.paused is True and toggle_if_paused is False:
+                logger.error("The cluster is already paused. Use unpause instead.")
+                raise ErrAtlasBadRequest(400, { 'msg': 'The cluster is already paused. Use toggle_if_paused to unpause.'})
+            elif existing_config.paused is True and toggle_if_paused is True:
+                logger.warning('Cluster is paused, will toggle to unpaused, since toggle_if paused is true')
+                new_config = dict(paused=False)
+            else:
+                new_config = dict(paused=True)
+            return self.modify_cluster(cluster=cluster, cluster_config=new_config)
 
     class _Hosts:
         """Hosts API

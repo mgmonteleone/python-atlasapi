@@ -311,13 +311,30 @@ class Atlas:
             logger.info('The cluster state is currently Paused= {}'.format(existing_config.paused))
             if existing_config.paused is True and toggle_if_paused is False:
                 logger.error("The cluster is already paused. Use unpause instead.")
-                raise ErrAtlasBadRequest(400, { 'msg': 'The cluster is already paused. Use toggle_if_paused to unpause.'})
+                raise ErrAtlasBadRequest(400,
+                                         {'msg': 'The cluster is already paused. Use toggle_if_paused to unpause.'})
             elif existing_config.paused is True and toggle_if_paused is True:
                 logger.warning('Cluster is paused, will toggle to unpaused, since toggle_if paused is true')
                 new_config = dict(paused=False)
             else:
                 new_config = dict(paused=True)
             return self.modify_cluster(cluster=cluster, cluster_config=new_config)
+
+        def test_failover(self, cluster: str) -> Optional[dict]:
+            """
+            Triggers a primary failover for a cluster
+
+            Used for testing cluster resiliency.
+
+            :rtype: dict
+            :param cluster:
+            :return: And empty dict
+            """
+            uri = Settings.api_resources["Clusters"]["Test Failover"].format(GROUP_ID=self.atlas.group,
+                                                                             CLUSTER_NAME=cluster)
+
+            return self.atlas.network.post(uri=Settings.BASE_URL + uri, payload={})
+
 
     class _Hosts:
         """Hosts API

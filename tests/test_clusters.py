@@ -112,3 +112,7 @@ class ClusterTests(BaseTests):
 
     test_10_pause_cluster.advanced = True
 
+    def test_11_test_failover(self):
+        self.a.Clusters.test_failover(self.TEST_CLUSTER_NAME)
+
+    test_11_test_failover.basic = True

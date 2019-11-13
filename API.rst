@@ -35,7 +35,7 @@ Status : [80%]
 - Delete a Cluster [100%]
 - Get Advanced Configuration Options for One Cluster [0%]
 - Modify Advanced Configuration Options for One Cluster [0%]
-- Test Failover [0%]
+- Test Failover [100%]
 
 - (Helper) Modify cluster instance size
 - (Helper) Pause/Unpause Cluster

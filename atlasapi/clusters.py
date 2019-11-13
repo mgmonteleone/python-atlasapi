@@ -10,11 +10,18 @@ FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 # Enums
 class VolumeTypes(Enum):
+    """
+    The volume types available on atlas
+    """
     STANDARD = "Standard"
     PROVISIONED = 'Provisioned'
 
 
 class ClusterStates(Enum):
+    """
+    The states of Atlas clusters. RO attribute.
+
+    """
     IDLE = 'Idle'
     CREATING = 'Creating'
     UPDATING = 'Updating'
@@ -25,12 +32,25 @@ class ClusterStates(Enum):
 
 
 class ClusterType(Enum):
+    """
+    THe types of clusteres available in Atlas.
+
+    GEOSHARDED is a Global write cluster sharded by geo information.
+
+    """
     REPLICASET = 'Replica Set'
     SHARDED = 'Sharded Cluster'
     GEOSHARDED = 'Global Cluster'
 
 
 class InstanceSizeName(Enum):
+    """
+    The Atlas instance sizes, which are equivalent across all providers.
+
+    NVME suggixed types provide loval NVME disk.
+
+
+    """
     M0 = 'M0'
     M2 = 'M2'
     M5 = 'M5'

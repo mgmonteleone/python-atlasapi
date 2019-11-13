@@ -15,7 +15,7 @@
 """
 Settings module
 
-Provide few constants, APIs endpoint, ...
+Provides few constants, APIs endpoints.
 """
 
 

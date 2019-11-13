@@ -15,7 +15,7 @@
 """
 Network module
 
-Permit to communicate with external APIs
+Module which handles the basic network operations with the Atlas API>
 """
 
 import requests

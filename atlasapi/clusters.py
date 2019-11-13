@@ -1,3 +1,11 @@
+"""
+Classes related to Atlas clusters.
+
+Supports the creation and configuration of Atlas clusters of various types.
+
+Enums are used in order to minimize invalid configuration values.
+
+"""
 from enum import Enum
 from typing import List, NewType, Optional
 from datetime import datetime

@@ -26,10 +26,10 @@ Status : [100%]
 Clusters
 --------
 
-Status : [62%]
+Status : [80%]
 
 - Get All Clusters [100%]
-- Get a Single Cluster [90%]
+- Get a Single Cluster [100%]
 - Create a Cluster [100%]
 - Modify a Cluster [100%]
 - Delete a Cluster [100%]
@@ -38,6 +38,7 @@ Status : [62%]
 - Test Failover [0%]
 
 - (Helper) Modify cluster instance size
+- (Helper) Pause/Unpause Cluster
 
 Alerts
 ------

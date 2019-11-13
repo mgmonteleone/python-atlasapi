@@ -171,7 +171,9 @@ Clusters
 
     a.Clusters.modify_cluster_instanct_size(cluster='pyAtlasAPIClustersTest',new_cluster_size=InstanceSizeName.M20)
 
+    # Pause(unpause) a cluster
 
+    self.a.Clusters.pause_cluster(cluster='pyAtlasAPIClustersTest, toggle_if_paused=True)
 
 Alerts
 ^^^^^^

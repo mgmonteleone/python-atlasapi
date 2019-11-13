@@ -1,5 +1,5 @@
 atlasapi package
-================
+=================
 
 atlasapi\.atlas module
 ----------------------
@@ -10,8 +10,18 @@ atlasapi\.atlas module
     :show-inheritance:
 
 
+atlasapi\.atlas_types module
+-----------------------------
+
+.. automodule:: atlasapi.atlas_types
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+
 atlasapi\.alerts module
-----------------------
+------------------------
 
 .. automodule:: atlasapi.alerts
     :members:
@@ -19,7 +29,7 @@ atlasapi\.alerts module
     :show-inheritance:
 
 atlasapi\.clusters module
-----------------------
+-------------------------
 
 .. automodule:: atlasapi.clusters
     :members:
@@ -27,7 +37,7 @@ atlasapi\.clusters module
     :show-inheritance:
 
 atlasapi\.events module
-----------------------
+-----------------------
 
 .. automodule:: atlasapi.events
     :members:
@@ -35,7 +45,7 @@ atlasapi\.events module
     :show-inheritance:
 
 atlasapi\.measurements module
-----------------------
+------------------------------
 
 .. automodule:: atlasapi.measurements
     :members:
@@ -44,7 +54,7 @@ atlasapi\.measurements module
 
 
 atlasapi\.whitelist module
-----------------------
+---------------------------
 
 .. automodule:: atlasapi.whitelist
     :members:

@@ -29,7 +29,7 @@ from .specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, Datab
 from typing import Union, Iterator, List, Optional
 from .atlas_types import OptionalInt, OptionalBool, ListofDict
 from .clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
-    MongoDBMajorVersion, InstanceSizeName, ProviderName
+    MongoDBMajorVersion, InstanceSizeName, ProviderName, AdvancedOptions
 from .lib import AtlasPeriods, AtlasGranularities, AtlasUnits
 from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement, \
     OptionalAtlasMeasurement
@@ -141,6 +141,19 @@ class Atlas:
             uri = Settings.api_resources["Clusters"]["Get a Single Cluster"] % (self.atlas.group, cluster)
             cluster_data = self.atlas.network.get(Settings.BASE_URL + uri)
             return cluster_data
+
+        def get_single_cluster_advanced_options(self, cluster: str, as_obj: bool = True) -> Union[dict,
+                                                                                                     AdvancedOptions]:
+            uri = Settings.api_resources["Clusters"]["Advanced Configuration Options"].format(GROUP_ID=self.atlas.group,
+                                                                                              CLUSTER_NAME=cluster)
+            advanced_options = self.atlas.network.get(Settings.BASE_URL + uri)
+
+            if as_obj is True:
+                return_obj = AdvancedOptions.fill_from_dict(data_dict=advanced_options)
+            else:
+                return_obj = advanced_options
+
+            return return_obj
 
         def get_single_cluster_as_obj(self, cluster) -> Union[ClusterConfig, ShardedClusterConfig]:
             """Get a Single Cluster as data
@@ -334,7 +347,6 @@ class Atlas:
                                                                              CLUSTER_NAME=cluster)
 
             return self.atlas.network.post(uri=Settings.BASE_URL + uri, payload={})
-
 
     class _Hosts:
         """Hosts API

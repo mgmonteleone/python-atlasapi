@@ -51,7 +51,10 @@ class Settings:
             "Delete a Cluster": "/api/atlas/v1.0/groups/%s/clusters/%s",
             "Create a Cluster": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/",
             "Modify a Cluster": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}",
-            "Test Failover": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}/restartPrimaries"
+            "Test Failover": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}/restartPrimaries",
+            "Advanced Configuration Options": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/{"
+                                              "CLUSTER_NAME}/processArgs",
+
         },
         "Database Users": {
             "Get All Database Users": "/api/atlas/v1.0/groups/%s/databaseUsers?pageNum=%d&itemsPerPage=%d",

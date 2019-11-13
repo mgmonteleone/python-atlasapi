@@ -10,7 +10,7 @@ from atlasapi.lib import AtlasPeriods, AtlasUnits, AtlasGranularities
 from json import dumps
 from atlasapi.clusters import AtlasBasicReplicaSet, MongoDBMajorVersion as mdb_version, ClusterConfig
 from atlasapi.clusters import ClusterConfig, ProviderSettings, ReplicationSpecs, InstanceSizeName
-from atlasapi.clusters import RegionConfig
+from atlasapi.clusters import RegionConfig, AdvancedOptions
 from tests import BaseTests
 import logging
 from time import sleep
@@ -24,6 +24,7 @@ class ClusterTests(BaseTests):
         cluster_list = list(self.a.Clusters.get_all_clusters(iterable=True))
 
         self.assertTrue(type(cluster_list) is list)
+
     test_00_get_all_clusters.basic = True
 
     def test_01_get_all_clusters_type(self):
@@ -31,18 +32,21 @@ class ClusterTests(BaseTests):
         for each_cluster in cluster_list:
             logger.warning(each_cluster)
             self.assertTrue(type(each_cluster) is dict)
+
     test_01_get_all_clusters_type.basic = True
 
     def test_02_get_a_cluster_as_obj(self):
         cluster = self.a.Clusters.get_single_cluster_as_obj(self.TEST_CLUSTER_NAME)
         self.assertTrue(type(cluster) is ClusterConfig)
         self.assertEqual(cluster.name, self.TEST_CLUSTER_NAME)
+
     test_02_get_a_cluster_as_obj.basic = True
 
     def test_03_get_a_cluster(self):
         cluster = self.a.Clusters.get_single_cluster(self.TEST_CLUSTER_NAME)
         self.assertTrue(type(cluster) is dict)
         self.assertEqual(cluster['name'], self.TEST_CLUSTER_NAME)
+
     test_03_get_a_cluster.basic = True
 
     def test_04_create_basic_cluster(self):
@@ -67,7 +71,6 @@ class ClusterTests(BaseTests):
         print('-------------------Waiting a bit to allow the cluster to be modified......-------------')
         sleep(20)
         print('-----------------------------------Done Sleeping -------------------------------------')
-
 
     def test_06_delete_a_cluster(self):
         myoutput = self.a.Clusters.delete_cluster(cluster=self.TEST_CLUSTER2_NAME_UNIQUE, areYouSure=True)
@@ -116,3 +119,11 @@ class ClusterTests(BaseTests):
         self.a.Clusters.test_failover(self.TEST_CLUSTER_NAME)
 
     test_11_test_failover.basic = True
+
+    def test_12_get_advanced_options(self):
+        out_obj = self.a.Clusters.get_single_cluster_advanced_options(self.TEST_CLUSTER_NAME)
+        self.assertEqual(type(out_obj), AdvancedOptions, msg='Output should be and AdvancedOptions object')
+        out_dict = self.a.Clusters.get_single_cluster_advanced_options(self.TEST_CLUSTER_NAME, as_obj=False)
+        self.assertEqual(type(out_dict), dict, msg="output should be a dict")
+
+    test_12_get_advanced_options.basic = True

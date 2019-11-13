@@ -35,4 +35,4 @@ jobs:
         ATLAS_GROUP: ${{ secrets.ATLAS_GROUP }}
       run: |
         pip install nose2
-        nose2 -v -A basic tests/
+        nose2 -s tests/ --verbose --plugin nose2.plugins.attrib -A basic

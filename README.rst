@@ -9,6 +9,7 @@ A Python package for MongoDB Atlas Cloud provider.
 
 `Current state of the python-atlasapi support <https://github.com/mgmonteleone/python-atlasapi/blob/master/API.rst>`__
 
+Version 0.10.0 (Beta)
 
 Installation
 ------------
@@ -124,7 +125,8 @@ Clusters
 .. code:: python
 
     from atlasapi.atlas import Atlas
-    
+    from atlasapi.clusters import  AdvancedOptions
+
     a = Atlas("<user>","<password>","<groupid>")
     
     # Is existing cluster ?
@@ -173,7 +175,16 @@ Clusters
 
     # Pause(unpause) a cluster
 
-    self.a.Clusters.pause_cluster(cluster='pyAtlasAPIClustersTest, toggle_if_paused=True)
+    a.Clusters.pause_cluster(cluster='pyAtlasAPIClustersTest', toggle_if_paused=True)
+
+
+    # Get Advanced Options
+    a.Clusters.get_single_cluster_advanced_options(cluster='pyAtlasAPIClustersTest')
+
+    # Set Advanced Options
+    options = AdvancedOptions(failIndexKeyTooLong=True)
+    self.a.Clusters.modify_cluster_advanced_options(cluster='pyAtlasAPIClustersTest',
+                                                                    advanced_options=options)
 
 Alerts
 ^^^^^^

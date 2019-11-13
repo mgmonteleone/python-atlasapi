@@ -29,7 +29,7 @@ from .specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, Datab
 from typing import Union, Iterator, List, Optional
 from .atlas_types import OptionalInt, OptionalBool, ListofDict
 from .clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
-    MongoDBMajorVersion, InstanceSizeName, ProviderName
+    MongoDBMajorVersion, InstanceSizeName, ProviderName, AdvancedOptions
 from .lib import AtlasPeriods, AtlasGranularities, AtlasUnits
 from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement, \
     OptionalAtlasMeasurement
@@ -141,6 +141,28 @@ class Atlas:
             uri = Settings.api_resources["Clusters"]["Get a Single Cluster"] % (self.atlas.group, cluster)
             cluster_data = self.atlas.network.get(Settings.BASE_URL + uri)
             return cluster_data
+
+        def get_single_cluster_advanced_options(self, cluster: str, as_obj: bool = True) -> Union[dict,
+                                                                                                  AdvancedOptions]:
+            """
+            Retrieves advanced options from a cluster, either as a obj, or optionally as a dict.
+
+            GET /groups/{GROUP-ID}/clusters/{CLUSTER-NAME}/processArgs
+
+            :param cluster:
+            :param as_obj: True to return, AdvancedOptions, false for a dict
+            :return: AdvancedOptions object or dict
+            """
+            uri = Settings.api_resources["Clusters"]["Advanced Configuration Options"].format(GROUP_ID=self.atlas.group,
+                                                                                              CLUSTER_NAME=cluster)
+            advanced_options = self.atlas.network.get(Settings.BASE_URL + uri)
+
+            if as_obj is True:
+                return_obj = AdvancedOptions.fill_from_dict(data_dict=advanced_options)
+            else:
+                return_obj = advanced_options
+
+            return return_obj
 
         def get_single_cluster_as_obj(self, cluster) -> Union[ClusterConfig, ShardedClusterConfig]:
             """Get a Single Cluster as data
@@ -297,6 +319,31 @@ class Atlas:
             existing_config.providerSettings.instance_size_name = new_cluster_size
             return self.modify_cluster(cluster=cluster, cluster_config=existing_config)
 
+        def modify_cluster_advanced_options(self, cluster: str,
+                                            advanced_options: AdvancedOptions,
+                                            as_obj: bool = True) -> Union[AdvancedOptions, dict]:
+            """
+            Modifies cluster advanced options using a AdvancedOptions object.
+
+            PATCH /groups/{GROUP-ID}/clusters/{CLUSTER-NAME}/processArgs
+
+            :param cluster: The clutster name
+            :param advanced_options: An AdvancedOptions object with the options to be set.
+            :param as_obj: Return the new AdvancedOptions as an object.
+            :return:
+            """
+            uri = Settings.api_resources["Clusters"]["Advanced Configuration Options"].format(GROUP_ID=self.atlas.group,
+                                                                                              CLUSTER_NAME=cluster)
+
+            value_returned = self.atlas.network.patch(uri=Settings.BASE_URL + uri, payload=advanced_options.as_dict)
+
+            if as_obj is True:
+                return_obj = AdvancedOptions.fill_from_dict(data_dict=value_returned)
+            else:
+                return_obj = value_returned
+
+            return return_obj
+
         def pause_cluster(self, cluster: str, toggle_if_paused: bool = False) -> dict:
             """
             Pauses/Unpauses a cluster.
@@ -311,13 +358,29 @@ class Atlas:
             logger.info('The cluster state is currently Paused= {}'.format(existing_config.paused))
             if existing_config.paused is True and toggle_if_paused is False:
                 logger.error("The cluster is already paused. Use unpause instead.")
-                raise ErrAtlasBadRequest(400, { 'msg': 'The cluster is already paused. Use toggle_if_paused to unpause.'})
+                raise ErrAtlasBadRequest(400,
+                                         {'msg': 'The cluster is already paused. Use toggle_if_paused to unpause.'})
             elif existing_config.paused is True and toggle_if_paused is True:
                 logger.warning('Cluster is paused, will toggle to unpaused, since toggle_if paused is true')
                 new_config = dict(paused=False)
             else:
                 new_config = dict(paused=True)
             return self.modify_cluster(cluster=cluster, cluster_config=new_config)
+
+        def test_failover(self, cluster: str) -> Optional[dict]:
+            """
+            Triggers a primary failover for a cluster
+
+            Used for testing cluster resiliency.
+
+            :rtype: dict
+            :param cluster:
+            :return: And empty dict
+            """
+            uri = Settings.api_resources["Clusters"]["Test Failover"].format(GROUP_ID=self.atlas.group,
+                                                                             CLUSTER_NAME=cluster)
+
+            return self.atlas.network.post(uri=Settings.BASE_URL + uri, payload={})
 
     class _Hosts:
         """Hosts API
@@ -570,9 +633,9 @@ class Atlas:
                 self.logger.info('There are {} measurements.'.format(measurements_count))
 
                 for each in measurements:
-                    measurement_obj = AtlasMeasurement(name=each.get('name')
-                                                       , period=period
-                                                       , granularity=granularity)
+                    measurement_obj = AtlasMeasurement(name=each.get('name'),
+                                                       period=period,
+                                                       granularity=granularity)
                     for each_and_every in each.get('dataPoints'):
                         measurement_obj.measurements = AtlasMeasurementValue(each_and_every)
 

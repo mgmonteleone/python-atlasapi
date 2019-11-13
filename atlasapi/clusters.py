@@ -72,6 +72,13 @@ class MongoDBMajorVersion(Enum):
     vX_x = 'Unknown'
 
 
+class TLSProtocols(Enum):
+    TLS1_0 = 'TLS1_0'
+    TLS1_1 = 'TLS1_1'
+    TLS1_2 = 'TLS1_2'
+    TLS1_3 = 'TLS1_3'  # 4.0 And Above Only
+
+
 # Classes
 
 class RegionConfig(object):
@@ -501,3 +508,82 @@ class AtlasBasicReplicaSet(object):
                                                    replication_specs=replication_specs)
         self.config_running = None
         self.config_pending = None
+
+
+class AdvancedOptions(object):
+    def __init__(self,
+                 failIndexKeyTooLong: Optional[bool]  = None,
+                 javascriptEnabled: Optional[bool] = None,
+                 minimumEnabledTlsProtocol: Optional[TLSProtocols] = None,
+                 noTableScan: Optional[bool] = None,
+                 oplogSizeMB: Optional[int] = None,
+                 sampleSizeBIConnector: Optional[int] = None,
+                 sampleRefreshIntervalBIConnector: Optional[int] = None):
+        """
+        Container for Atlas Cluster Advanced options
+
+
+        :param failIndexKeyTooLong: When true, documents can only be updated or inserted if,
+        for all indexed fields on the target collection, the corresponding index entries do not exceed 1024 bytes.
+            When false, mongod writes documents that breach the limit but does not index them.
+        :param javascriptEnabled: When true, the cluster allows execution of operations that perform server-side
+            executions of JavaScript. When false, the cluster disables execution of those operations.
+        :param minimumEnabledTlsProtocol: The minimum Transport Layer Security (TLS) version the cluster accepts
+            for incoming connections.
+        :param noTableScan: When true, the cluster disables the execution of any query that requires a collection scan
+            to return results. When false, the cluster allows the execution of those operations.
+        :param oplogSizeMB: The custom oplog size of the cluster. A value of null indicates that the cluster
+            uses the default oplog size calculated by Atlas.
+        :param sampleSizeBIConnector: Number of documents per database to sample when gathering schema information.
+        :param sampleRefreshIntervalBIConnector: Interval in seconds at which the mongosqld process re-samples data
+            to create its relational schema.
+        """
+        self.sampleRefreshIntervalBIConnector = sampleRefreshIntervalBIConnector
+        self.sampleSizeBIConnector = sampleSizeBIConnector
+        self.oplogSizeMB = oplogSizeMB
+        self.noTableScan = noTableScan
+        self.minimumEnabledTlsProtocol = minimumEnabledTlsProtocol
+        self.javascriptEnabled = javascriptEnabled
+        self.failIndexKeyTooLong = failIndexKeyTooLong
+
+    @classmethod
+    def fill_from_dict(cls, data_dict: dict):
+        """
+        Fills the advanced options object from an Atlas Dict
+
+        :param data_dict: A dict as returned from Atlas
+        :return:
+        """
+        failIndexKeyTooLong = data_dict.get('failIndexKeyTooLong', None)
+        javascriptEnabled = data_dict.get('javascriptEnabled', None)
+        minimumEnabledTlsProtocol = data_dict.get('minimumEnabledTlsProtocol', None)
+        noTableScan = data_dict.get('noTableScan', None)
+        oplogSizeMB = data_dict.get('oplogSizeMB', None)
+        sampleSizeBIConnector = data_dict.get('sampleSizeBIConnector', None)
+        sampleRefreshIntervalBIConnector = data_dict.get('sampleRefreshIntervalBIConnector', None)
+        if data_dict.get('minimumEnabledTlsProtocol', None):
+            minimumEnabledTlsProtocol = TLSProtocols[data_dict.get('minimumEnabledTlsProtocol', None)]
+
+        return cls(failIndexKeyTooLong, javascriptEnabled, minimumEnabledTlsProtocol, noTableScan, oplogSizeMB,
+                   sampleSizeBIConnector, sampleRefreshIntervalBIConnector)
+
+    @property
+    def as_dict(self) -> dict:
+        """
+        Returns a json-able dict of only non-null properties.
+
+        :return:
+        """
+        return_dict = dict()
+        for key, value in self.__dict__.items():
+            if value is not None:
+                if isinstance(value, Enum):
+                    return_dict[key] = value.name
+                else:
+                    return_dict[key] = value
+            else:
+                pass
+        return return_dict
+
+
+

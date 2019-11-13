@@ -281,10 +281,27 @@
 </div>
 <div class="section" id="module-atlasapi.clusters">
 <span id="atlasapi-clusters-module"></span><h2>atlasapi.clusters module<a class="headerlink" href="#module-atlasapi.clusters" title="Permalink to this headline">¶</a></h2>
+<p>Classes related to Atlas clusters.</p>
+<p>Supports the creation and configuration of Atlas clusters of various types.</p>
+<p>Enums are used in order to minimize invalid configuration values.</p>
 <dl class="class">
 <dt id="atlasapi.clusters.AdvancedOptions">
 <em class="property">class </em><code class="sig-prename descclassname">atlasapi.clusters.</code><code class="sig-name descname">AdvancedOptions</code><span class="sig-paren">(</span><em class="sig-param">failIndexKeyTooLong: Optional[bool] = None</em>, <em class="sig-param">javascriptEnabled: Optional[bool] = None</em>, <em class="sig-param">minimumEnabledTlsProtocol: Optional[atlasapi.clusters.TLSProtocols] = None</em>, <em class="sig-param">noTableScan: Optional[bool] = None</em>, <em class="sig-param">oplogSizeMB: Optional[int] = None</em>, <em class="sig-param">sampleSizeBIConnector: Optional[int] = None</em>, <em class="sig-param">sampleRefreshIntervalBIConnector: Optional[int] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.clusters.AdvancedOptions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Container for Atlas Cluster Advanced options</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>failIndexKeyTooLong</strong> – When true, documents can only be updated or inserted if, for all indexed fields on the target collection, the corresponding index entries do not exceed 1024 bytes.When false, mongod writes documents that breach the limit but does not index them.</p></li>
+<li><p><strong>javascriptEnabled</strong> – When true, the cluster allows execution of operations that perform server-side executions of JavaScript. When false, the cluster disables execution of those operations.</p></li>
+<li><p><strong>minimumEnabledTlsProtocol</strong> – The minimum Transport Layer Security (TLS) version the cluster accepts for incoming connections.</p></li>
+<li><p><strong>noTableScan</strong> – When true, the cluster disables the execution of any query that requires a collection scan to return results. When false, the cluster allows the execution of those operations.</p></li>
+<li><p><strong>oplogSizeMB</strong> – The custom oplog size of the cluster. A value of null indicates that the cluster uses the default oplog size calculated by Atlas.</p></li>
+<li><p><strong>sampleSizeBIConnector</strong> – Number of documents per database to sample when gathering schema information.</p></li>
+<li><p><strong>sampleRefreshIntervalBIConnector</strong> – Interval in seconds at which the mongosqld process re-samples data to create its relational schema.</p></li>
+</ul>
+</dd>
+</dl>
 <dl class="method">
 <dt id="atlasapi.clusters.AdvancedOptions.as_dict">
 <em class="property">property </em><code class="sig-name descname">as_dict</code><a class="headerlink" href="#atlasapi.clusters.AdvancedOptions.as_dict" title="Permalink to this definition">¶</a></dt>
@@ -406,7 +423,7 @@
 <dt id="atlasapi.clusters.ClusterType">
 <em class="property">class </em><code class="sig-prename descclassname">atlasapi.clusters.</code><code class="sig-name descname">ClusterType</code><a class="headerlink" href="#atlasapi.clusters.ClusterType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
-<p>THe types of clusteres available in Atlas.</p>
+<p>The types of clusteres available in Atlas.</p>
 <p>GEOSHARDED is a Global write cluster sharded by geo information.</p>
 <dl class="attribute">
 <dt id="atlasapi.clusters.ClusterType.GEOSHARDED">
@@ -429,7 +446,7 @@
 <dt id="atlasapi.clusters.InstanceSizeName">
 <em class="property">class </em><code class="sig-prename descclassname">atlasapi.clusters.</code><code class="sig-name descname">InstanceSizeName</code><a class="headerlink" href="#atlasapi.clusters.InstanceSizeName" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></p>
-<p>The Atas instance sizes, which are equivalent across all providers.</p>
+<p>The Atlas instance sizes, which are equivalent across all providers.</p>
 <p>NVME suggixed types provide loval NVME disk.</p>
 <dl class="attribute">
 <dt id="atlasapi.clusters.InstanceSizeName.M0">
@@ -632,11 +649,23 @@
 <dt id="atlasapi.clusters.RegionConfig">
 <em class="property">class </em><code class="sig-prename descclassname">atlasapi.clusters.</code><code class="sig-name descname">RegionConfig</code><span class="sig-paren">(</span><em class="sig-param">electable_node_count: int = 3</em>, <em class="sig-param">priority: int = 7</em>, <em class="sig-param">read_only_node_count: int = 0</em>, <em class="sig-param">analytics_node_count: int = 0</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.clusters.RegionConfig" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Configuration object for each region.</p>
+<p>Allows for the configuration of each region independently. Includes sane defaults.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>electable_node_count</strong> – Number of electable nodes.</p></li>
+<li><p><strong>priority</strong> – Priority of the region in the replica set.</p></li>
+<li><p><strong>read_only_node_count</strong> – Count of read_only nodes.</p></li>
+<li><p><strong>analytics_node_count</strong> – Count of analytics nodes.</p></li>
+</ul>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="class">
 <dt id="atlasapi.clusters.ReplicationSpecs">
-<em class="property">class </em><code class="sig-prename descclassname">atlasapi.clusters.</code><code class="sig-name descname">ReplicationSpecs</code><span class="sig-paren">(</span><em class="sig-param">id: Optional[str] = 'f6039e52-deeb-4c76-beb7-3724123566e6'</em>, <em class="sig-param">num_shards: Optional[int] = 1</em>, <em class="sig-param">zone_name: Optional[str] = None</em>, <em class="sig-param">regions_config: Optional[dict] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.clusters.ReplicationSpecs" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">atlasapi.clusters.</code><code class="sig-name descname">ReplicationSpecs</code><span class="sig-paren">(</span><em class="sig-param">id: Optional[str] = '97766425-c91c-4731-9bda-67e1a33020eb'</em>, <em class="sig-param">num_shards: Optional[int] = 1</em>, <em class="sig-param">zone_name: Optional[str] = None</em>, <em class="sig-param">regions_config: Optional[dict] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.clusters.ReplicationSpecs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="method">
 <dt id="atlasapi.clusters.ReplicationSpecs.as_create_dict">
@@ -3835,7 +3864,7 @@ and sub measurements.</p>
 <div class="section" id="module-atlasapi.network">
 <span id="atlasapi-network-module"></span><h2>atlasapi.network module<a class="headerlink" href="#module-atlasapi.network" title="Permalink to this headline">¶</a></h2>
 <p>Network module</p>
-<p>Permit to communicate with external APIs</p>
+<p>Module which handles the basic network operations with the Atlas API&gt;</p>
 <dl class="class">
 <dt id="atlasapi.network.Network">
 <em class="property">class </em><code class="sig-prename descclassname">atlasapi.network.</code><code class="sig-name descname">Network</code><span class="sig-paren">(</span><em class="sig-param">user</em>, <em class="sig-param">password</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.network.Network" title="Permalink to this definition">¶</a></dt>
@@ -3972,7 +4001,7 @@ and sub measurements.</p>
 <div class="section" id="module-atlasapi.settings">
 <span id="atlasapi-settings-module"></span><h2>atlasapi.settings module<a class="headerlink" href="#module-atlasapi.settings" title="Permalink to this headline">¶</a></h2>
 <p>Settings module</p>
-<p>Provide few constants, APIs endpoint, …</p>
+<p>Provides few constants, APIs endpoints.</p>
 <dl class="class">
 <dt id="atlasapi.settings.Settings">
 <em class="property">class </em><code class="sig-prename descclassname">atlasapi.settings.</code><code class="sig-name descname">Settings</code><a class="headerlink" href="#atlasapi.settings.Settings" title="Permalink to this definition">¶</a></dt>

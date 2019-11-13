@@ -41,7 +41,7 @@ class ClusterStates(Enum):
 
 class ClusterType(Enum):
     """
-    THe types of clusteres available in Atlas.
+    The types of clusteres available in Atlas.
 
     GEOSHARDED is a Global write cluster sharded by geo information.
 
@@ -110,11 +110,22 @@ class TLSProtocols(Enum):
 # Classes
 
 class RegionConfig(object):
+    """Configuration object for each region.
+
+                       Allows for the configuration of each region independently. Includes sane defaults.
+
+                       Args:
+                           electable_node_count (int):  Number of electable nodes.
+                           priority: Priority of the region in the replica set.
+                           read_only_node_count: Count of read_only nodes.
+                           analytics_node_count:  Count of analytics nodes.
+    """
     def __init__(self,
                  electable_node_count: int = 3,
                  priority: int = 7,
                  read_only_node_count: int = 0,
                  analytics_node_count: int = 0):
+
         self.analyticsNodes = analytics_node_count
         self.electableNodes = electable_node_count
         self.priority = priority
@@ -237,6 +248,32 @@ class ProviderSettings(object):
 
 
 class ClusterConfig(object):
+    """Stores the Atlas Cluster Config, is sent back to the API for any reconfiguations.
+
+        https://docs.atlas.mongodb.com/reference/api/clusters-get-one/#http-response-elements
+
+         Args:
+            backup_enabled:
+            cluster_type:
+            disk_size_gb:
+            name:
+            mongodb_major_version:
+            mongodb_version:
+            num_shards:
+            mongo_uri:
+            mongo_uri_updated:
+            mongo_uri_with_options:
+            paused:
+            pit_enabled:
+            replication_factor:
+            state_name:
+            autoscaling:
+            replication_specs:
+            srv_address:
+            providerSettings:
+            links:
+
+    """
     def __init__(self, backup_enabled: bool = False,
                  cluster_type: ClusterType = ClusterType.REPLICASET,
                  disk_size_gb: int = 32,
@@ -257,31 +294,6 @@ class ClusterConfig(object):
                  providerSettings: Optional[ProviderSettings] = None,
                  links: list = None
                  ) -> None:
-        """
-        Stores the Atlas Cluster Config, is sent back to the API for any reconfiguations.
-
-        https://docs.atlas.mongodb.com/reference/api/clusters-get-one/#http-response-elements
-
-        :param backup_enabled:
-        :param cluster_type:
-        :param disk_size_gb:
-        :param name:
-        :param mongodb_major_version:
-        :param mongodb_version:
-        :param num_shards:
-        :param mongo_uri:
-        :param mongo_uri_updated:
-        :param mongo_uri_with_options:
-        :param paused:
-        :param pit_enabled:
-        :param replication_factor:
-        :param state_name:
-        :param autoscaling:
-        :param replication_specs:
-        :param srv_address:
-        :param providerSettings:
-        :param links:
-        """
         self.providerSettings = providerSettings
         self.backup_enabled: bool = backup_enabled
         self.cluster_type: ClusterType = cluster_type
@@ -517,6 +529,20 @@ class ShardedClusterConfig(ClusterConfig):
 
 
 class AtlasBasicReplicaSet(object):
+    """Helper object for the creation of a basic replica set with default options.
+
+    Only the cluster name is required.
+
+    Other parameters will default to An M10 cluster on AWS US_WEST_2 running 4.0 with a 10 GB disk.
+
+            Args:
+                name: The name given to the cluster/replica set.
+                size: The InstanceSizeName of the cluster/replica set
+                disk_size: Size of disks on all members
+                provider: The Cloud provider
+                region: The region in the cloud provider
+                version: The MongoDB major version
+            """
     def __init__(self, name: str,
                  size: InstanceSizeName = InstanceSizeName.M10,
                  disk_size: int = 10,
@@ -524,6 +550,7 @@ class AtlasBasicReplicaSet(object):
                  region: str = 'US_WEST_2',
                  version: MongoDBMajorVersion = MongoDBMajorVersion.v4_0,
                  ) -> None:
+
         provider_settings = ProviderSettings(size=size,
                                              provider=provider, region=region)
         regions_config = RegionConfig()
@@ -539,6 +566,17 @@ class AtlasBasicReplicaSet(object):
 
 
 class AdvancedOptions(object):
+    """Container for Atlas Cluster Advanced options
+
+            Args:
+                failIndexKeyTooLong: When true, documents can only be updated or inserted if, for all indexed fields on the target collection, the corresponding index entries do not exceed 1024 bytes.When false, mongod writes documents that breach the limit but does not index them.
+                javascriptEnabled:  When true, the cluster allows execution of operations that perform server-side executions of JavaScript. When false, the cluster disables execution of those operations.
+                minimumEnabledTlsProtocol: The minimum Transport Layer Security (TLS) version the cluster accepts for incoming connections.
+                noTableScan: When true, the cluster disables the execution of any query that requires a collection scan to return results. When false, the cluster allows the execution of those operations.
+                oplogSizeMB: The custom oplog size of the cluster. A value of null indicates that the cluster uses the default oplog size calculated by Atlas.
+                sampleSizeBIConnector: Number of documents per database to sample when gathering schema information.
+                sampleRefreshIntervalBIConnector: Interval in seconds at which the mongosqld process re-samples data to create its relational schema.
+            """
     def __init__(self,
                  failIndexKeyTooLong: Optional[bool]  = None,
                  javascriptEnabled: Optional[bool] = None,
@@ -547,25 +585,7 @@ class AdvancedOptions(object):
                  oplogSizeMB: Optional[int] = None,
                  sampleSizeBIConnector: Optional[int] = None,
                  sampleRefreshIntervalBIConnector: Optional[int] = None):
-        """
-        Container for Atlas Cluster Advanced options
 
-
-        :param failIndexKeyTooLong: When true, documents can only be updated or inserted if,
-        for all indexed fields on the target collection, the corresponding index entries do not exceed 1024 bytes.
-            When false, mongod writes documents that breach the limit but does not index them.
-        :param javascriptEnabled: When true, the cluster allows execution of operations that perform server-side
-            executions of JavaScript. When false, the cluster disables execution of those operations.
-        :param minimumEnabledTlsProtocol: The minimum Transport Layer Security (TLS) version the cluster accepts
-            for incoming connections.
-        :param noTableScan: When true, the cluster disables the execution of any query that requires a collection scan
-            to return results. When false, the cluster allows the execution of those operations.
-        :param oplogSizeMB: The custom oplog size of the cluster. A value of null indicates that the cluster
-            uses the default oplog size calculated by Atlas.
-        :param sampleSizeBIConnector: Number of documents per database to sample when gathering schema information.
-        :param sampleRefreshIntervalBIConnector: Interval in seconds at which the mongosqld process re-samples data
-            to create its relational schema.
-        """
         self.sampleRefreshIntervalBIConnector = sampleRefreshIntervalBIConnector
         self.sampleSizeBIConnector = sampleSizeBIConnector
         self.oplogSizeMB = oplogSizeMB

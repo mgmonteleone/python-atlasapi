@@ -26,15 +26,15 @@ Status : [100%]
 Clusters
 --------
 
-Status : [80%]
+Status : [100%]
 
 - Get All Clusters [100%]
 - Get a Single Cluster [100%]
 - Create a Cluster [100%]
 - Modify a Cluster [100%]
 - Delete a Cluster [100%]
-- Get Advanced Configuration Options for One Cluster [0%]
-- Modify Advanced Configuration Options for One Cluster [0%]
+- Get Advanced Configuration Options for One Cluster [100%]
+- Modify Advanced Configuration Options for One Cluster [100%]
 - Test Failover [100%]
 
 - (Helper) Modify cluster instance size

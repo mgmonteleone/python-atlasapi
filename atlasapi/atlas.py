@@ -143,7 +143,16 @@ class Atlas:
             return cluster_data
 
         def get_single_cluster_advanced_options(self, cluster: str, as_obj: bool = True) -> Union[dict,
-                                                                                                     AdvancedOptions]:
+                                                                                                  AdvancedOptions]:
+            """
+            Retrieves advanced options from a cluster, either as a obj, or optionally as a dict.
+
+            GET /groups/{GROUP-ID}/clusters/{CLUSTER-NAME}/processArgs
+
+            :param cluster:
+            :param as_obj: True to return, AdvancedOptions, false for a dict
+            :return: AdvancedOptions object or dict
+            """
             uri = Settings.api_resources["Clusters"]["Advanced Configuration Options"].format(GROUP_ID=self.atlas.group,
                                                                                               CLUSTER_NAME=cluster)
             advanced_options = self.atlas.network.get(Settings.BASE_URL + uri)
@@ -309,6 +318,31 @@ class Atlas:
 
             existing_config.providerSettings.instance_size_name = new_cluster_size
             return self.modify_cluster(cluster=cluster, cluster_config=existing_config)
+
+        def modify_cluster_advanced_options(self, cluster: str,
+                                            advanced_options: AdvancedOptions,
+                                            as_obj: bool = True) -> Union[AdvancedOptions, dict]:
+            """
+            Modifies cluster advanced options using a AdvancedOptions object.
+
+            PATCH /groups/{GROUP-ID}/clusters/{CLUSTER-NAME}/processArgs
+
+            :param cluster: The clutster name
+            :param advanced_options: An AdvancedOptions object with the options to be set.
+            :param as_obj: Return the new AdvancedOptions as an object.
+            :return:
+            """
+            uri = Settings.api_resources["Clusters"]["Advanced Configuration Options"].format(GROUP_ID=self.atlas.group,
+                                                                                              CLUSTER_NAME=cluster)
+
+            value_returned = self.atlas.network.patch(uri=Settings.BASE_URL + uri, payload=advanced_options.as_dict)
+
+            if as_obj is True:
+                return_obj = AdvancedOptions.fill_from_dict(data_dict=value_returned)
+            else:
+                return_obj = value_returned
+
+            return return_obj
 
         def pause_cluster(self, cluster: str, toggle_if_paused: bool = False) -> dict:
             """
@@ -599,9 +633,9 @@ class Atlas:
                 self.logger.info('There are {} measurements.'.format(measurements_count))
 
                 for each in measurements:
-                    measurement_obj = AtlasMeasurement(name=each.get('name')
-                                                       , period=period
-                                                       , granularity=granularity)
+                    measurement_obj = AtlasMeasurement(name=each.get('name'),
+                                                       period=period,
+                                                       granularity=granularity)
                     for each_and_every in each.get('dataPoints'):
                         measurement_obj.measurements = AtlasMeasurementValue(each_and_every)
 

@@ -554,13 +554,15 @@ class AdvancedOptions(object):
         :param data_dict: A dict as returned from Atlas
         :return:
         """
-        failIndexKeyTooLong = data_dict.get('failIndexKeyTooLong')
-        javascriptEnabled = data_dict.get('javascriptEnabled')
-        minimumEnabledTlsProtocol = data_dict.get('minimumEnabledTlsProtocol')
-        noTableScan = data_dict.get('noTableScan')
-        oplogSizeMB = data_dict.get('oplogSizeMB')
-        sampleSizeBIConnector = data_dict.get('sampleSizeBIConnector')
-        sampleRefreshIntervalBIConnector = data_dict.get('sampleRefreshIntervalBIConnector')
+        failIndexKeyTooLong = data_dict.get('failIndexKeyTooLong', None)
+        javascriptEnabled = data_dict.get('javascriptEnabled', None)
+        minimumEnabledTlsProtocol = data_dict.get('minimumEnabledTlsProtocol', None)
+        noTableScan = data_dict.get('noTableScan', None)
+        oplogSizeMB = data_dict.get('oplogSizeMB', None)
+        sampleSizeBIConnector = data_dict.get('sampleSizeBIConnector', None)
+        sampleRefreshIntervalBIConnector = data_dict.get('sampleRefreshIntervalBIConnector', None)
+        if data_dict.get('minimumEnabledTlsProtocol', None):
+            minimumEnabledTlsProtocol = TLSProtocols[data_dict.get('minimumEnabledTlsProtocol', None)]
 
         return cls(failIndexKeyTooLong, javascriptEnabled, minimumEnabledTlsProtocol, noTableScan, oplogSizeMB,
                    sampleSizeBIConnector, sampleRefreshIntervalBIConnector)

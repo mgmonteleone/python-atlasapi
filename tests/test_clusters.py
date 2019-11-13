@@ -10,7 +10,7 @@ from atlasapi.lib import AtlasPeriods, AtlasUnits, AtlasGranularities
 from json import dumps
 from atlasapi.clusters import AtlasBasicReplicaSet, MongoDBMajorVersion as mdb_version, ClusterConfig
 from atlasapi.clusters import ClusterConfig, ProviderSettings, ReplicationSpecs, InstanceSizeName
-from atlasapi.clusters import RegionConfig, AdvancedOptions
+from atlasapi.clusters import RegionConfig, AdvancedOptions, TLSProtocols
 from tests import BaseTests
 import logging
 from time import sleep
@@ -92,8 +92,8 @@ class ClusterTests(BaseTests):
     test_07_create_a_cluster.advanced = True
 
     def test_08_resize_a_cluster(self):
-        output = self.a.Clusters.modify_cluster_instance_size(cluster=self.TEST_CLUSTER3_NAME_UNIQUE,
-                                                              new_cluster_size=InstanceSizeName.M20)
+        self.a.Clusters.modify_cluster_instance_size(cluster=self.TEST_CLUSTER3_NAME_UNIQUE,
+                                                     new_cluster_size=InstanceSizeName.M20)
 
     test_08_resize_a_cluster.advanced = True
 
@@ -118,7 +118,7 @@ class ClusterTests(BaseTests):
     def test_11_test_failover(self):
         self.a.Clusters.test_failover(self.TEST_CLUSTER_NAME)
 
-    test_11_test_failover.basic = True
+    test_11_test_failover.basic = False
 
     def test_12_get_advanced_options(self):
         out_obj = self.a.Clusters.get_single_cluster_advanced_options(self.TEST_CLUSTER_NAME)
@@ -127,3 +127,36 @@ class ClusterTests(BaseTests):
         self.assertEqual(type(out_dict), dict, msg="output should be a dict")
 
     test_12_get_advanced_options.basic = True
+
+    def test_13_set_advanced_options(self):
+        set_1 = AdvancedOptions(failIndexKeyTooLong=True)
+        out_set_1 = self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,
+                                                                    advanced_options=set_1)
+        self.assertEqual(set_1.failIndexKeyTooLong, out_set_1.failIndexKeyTooLong,
+                         msg='in = {}: out= {}'.format(set_1.__dict__, out_set_1.__dict__))
+
+        set_2 = AdvancedOptions(javascriptEnabled=True)
+        out_set_2 = self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,
+                                                                    advanced_options=set_2)
+        self.assertEqual(set_2.javascriptEnabled, out_set_2.javascriptEnabled,
+                         msg='in = {}: out= {}'.format(set_2.__dict__, out_set_2.__dict__))
+
+        set_3 = AdvancedOptions(minimumEnabledTlsProtocol=TLSProtocols.TLS1_2)
+        out_set_3 = self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,
+                                                                    advanced_options=set_3)
+        self.assertEqual(set_3.minimumEnabledTlsProtocol, out_set_3.minimumEnabledTlsProtocol,
+                         msg='in = {}: out= {}'.format(set_3.__dict__, out_set_3.__dict__))
+
+        set_4 = AdvancedOptions(noTableScan=True)
+        out_set_4 = self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,
+                                                                    advanced_options=set_4)
+        self.assertEqual(set_4.noTableScan, out_set_4.noTableScan,
+                         msg='in = {}: out= {}'.format(set_4.__dict__, out_set_4.__dict__))
+
+        set_5 = AdvancedOptions(oplogSizeMB=1000)
+        out_set_5 = self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,
+                                                                    advanced_options=set_5)
+        self.assertEqual(set_5.oplogSizeMB, out_set_5.oplogSizeMB,
+                         msg='in = {}: out= {}'.format(set_5.__dict__, out_set_5.__dict__))
+
+    test_13_set_advanced_options.basic = True

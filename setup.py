@@ -3,18 +3,18 @@ from setuptools import setup, find_packages
 
 setup(
     name='atlasapi',
-    version='0.5.4',
-    python_requires='>=3.5',
+    version='0.10.1',
+    python_requires='>=3.6',
     packages=find_packages(),
-    install_requires=['requests', 'python-dateutil'],
+    install_requires=['requests', 'python-dateutil', 'isodate', 'future', 'pytz','coolname'],
 
     # Metadata
-    author="Yellow Pages Inc.",
-    author_email="cloud@yp.ca",
+    author="Matthew G. Monteleone",
+    author_email="mgm@mgm.dev",
     license="Apache License 2.0",
     description="Expose MongoDB Atlas Cloud provider APIs",
     long_description=open('README.rst').read(),
-    url="https://github.com/mickybart/python-atlasapi",
+    url="https://github.com/mgmonteleone/python-atlasapi",
     keywords=["atlas", "mongo", "mongodb", "cloud", "api"],
     classifiers=[
         # How mature is this project? Common values are
@@ -34,7 +34,6 @@ setup(
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],

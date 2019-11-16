@@ -15,55 +15,86 @@
 """
 Settings module
 
-Provide few constants, APIs endpoint, ...
+Provides few constants, APIs endpoints.
 """
+
 
 class Settings:
     # Atlas APIs
     BASE_URL = 'https://cloud.mongodb.com'
-    
+
     api_resources = {
-        "Database Users" : {
-            "Get All Database Users" : "/api/atlas/v1.0/groups/%s/databaseUsers?pageNum=%d&itemsPerPage=%d",
-            "Get a Single Database User" : "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s",
-            "Create a Database User" : "/api/atlas/v1.0/groups/%s/databaseUsers",
-            "Update a Database User" : "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s",
-            "Delete a Database User" : "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s"
+        "Monitoring and Logs": {
+            "Get all processes for group": "/api/atlas/v1.0/groups/{group_id}/processes?pageNum={"
+                                           "page_num}&itemsPerPage={items_per_page}",
+            "Get information for process in group": "/api/atlas/v1.0/groups/%s/processes/%s:&s?pageNum=%d"
+                                                    "&itemsPerPage=%d",
+            "Get measurement for host": "/api/atlas/v1.0/groups/{group_id}/processes/{host}:{"
+                                        "port}/measurements?granularity={granularity}&period={period}&m={measurement}",
+            "Get list of databases for host": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/databases",
+            "Get measurements of database for host.": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{"
+                                                      "PORT}/databases/{DATABASE-NAME}/measurements",
+            "Get list of disks or partitions for host.": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{"
+                                                         "PORT}/disks",
+            "Get measurements of for host": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/disks/{"
+                                            "DISK-NAME}/measurements",
+            "Get the log file for a host in the cluster.": "/api/atlas/v1.0/groups/{GROUP-ID}/clusters/{"
+                                                           "HOSTNAME}/logs/mongodb.gz"
         },
-        "Projects" : {
-            "Get All Projects" : "/api/atlas/v1.0/groups?pageNum=%d&itemsPerPage=%d",
-            "Get One Project" : "/api/atlas/v1.0/groups/%s",
-            "Create a Project" : "/api/atlas/v1.0/groups"
+        "Events": {
+            "Get All Project Events": "/api/atlas/v1.0/groups/{group_id}/events?pageNum={"
+                                      "page_num}&itemsPerPage={items_per_page}"
         },
-        "Clusters" : {
-            "Get All Clusters" : "/api/atlas/v1.0/groups/%s/clusters?pageNum=%d&itemsPerPage=%d",
-            "Get a Single Cluster" : "/api/atlas/v1.0/groups/%s/clusters/%s",
-            "Delete a Cluster" : "/api/atlas/v1.0/groups/%s/clusters/%s"
+        "Clusters": {
+            "Get All Clusters": "/api/atlas/v1.0/groups/%s/clusters?pageNum=%d&itemsPerPage=%d",
+            "Get a Single Cluster": "/api/atlas/v1.0/groups/%s/clusters/%s",
+            "Delete a Cluster": "/api/atlas/v1.0/groups/%s/clusters/%s",
+            "Create a Cluster": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/",
+            "Modify a Cluster": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}",
+            "Test Failover": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}/restartPrimaries",
+            "Advanced Configuration Options": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/{"
+                                              "CLUSTER_NAME}/processArgs",
+
         },
-        "Alerts" : {
-            "Get All Alerts" : "/api/atlas/v1.0/groups/%s/alerts?pageNum=%d&itemsPerPage=%d",
-            "Get All Alerts with status" : "/api/atlas/v1.0/groups/%s/alerts?status=%s&pageNum=%d&itemsPerPage=%d",
-            "Get an Alert" : "/api/atlas/v1.0/groups/%s/alerts/%s",
-            "Acknowledge an Alert" : "/api/atlas/v1.0/groups/%s/alerts/%s"
+        "Database Users": {
+            "Get All Database Users": "/api/atlas/v1.0/groups/%s/databaseUsers?pageNum=%d&itemsPerPage=%d",
+            "Get a Single Database User": "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s",
+            "Create a Database User": "/api/atlas/v1.0/groups/%s/databaseUsers",
+            "Update a Database User": "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s",
+            "Delete a Database User": "/api/atlas/v1.0/groups/%s/databaseUsers/admin/%s"
+        },
+        "Alerts": {
+            "Get All Alerts": "/api/atlas/v1.0/groups/%s/alerts?pageNum=%d&itemsPerPage=%d",
+            "Get All Alerts with status": "/api/atlas/v1.0/groups/%s/alerts?status=%s&pageNum=%d&itemsPerPage=%d",
+            "Get an Alert": "/api/atlas/v1.0/groups/%s/alerts/%s",
+            "Acknowledge an Alert": "/api/atlas/v1.0/groups/%s/alerts/%s"
+        }
+        ,
+        "Whitelist": {
+            "Get All Whitelist Entries": "/api/atlas/v1.0/groups/%s/whitelist?pageNum=%d&itemsPerPage=%d",
+            "Get Whitelist Entry": "/api/atlas/v1.0/groups/%s/whitelist/%s",
+            "Create Whitelist Entry": "/api/atlas/v1.0/groups/%s/whitelist",
+            "Delete Whitelist Entry": "/api/atlas/v1.0/groups/%s/whitelist/%s"
         }
     }
-    
+
     # Atlas enforced
     databaseName = "admin"
-    
+
     # Atlas default pagination
     pageNum = 1
-    itemsPerPage = 100
+    itemsPerPage = 1000
     itemsPerPageMin = 1
-    itemsPerPageMax = 100
-    
+    itemsPerPageMax = 2000
+
     # Requests
     requests_timeout = 10
-    
+
     # HTTP Return code
     SUCCESS = 200
     CREATED = 201
     ACCEPTED = 202
+    NO_CONTENT = 204
     BAD_REQUEST = 400
     UNAUTHORIZED = 401
     FORBIDDEN = 403

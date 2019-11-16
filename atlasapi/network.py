@@ -15,13 +15,20 @@
 """
 Network module
 
-Permit to communicate with external APIs
+Module which handles the basic network operations with the Atlas API>
 """
 
 import requests
 from requests.auth import HTTPDigestAuth
 from .settings import Settings
 from .errors import *
+from pprint import pprint
+import logging
+from json import dumps
+logger = logging.getLogger('network')
+
+logger.setLevel(logging.WARNING)
+
 
 class Network:
     """Network constructor
@@ -54,7 +61,7 @@ class Network:
             ErrAtlasServerErrors
         
         """
-        if c in [Settings.SUCCESS, Settings.CREATED, Settings.ACCEPTED]:
+        if c in [Settings.SUCCESS, Settings.CREATED, Settings.ACCEPTED, Settings.NO_CONTENT]:
             return details
         elif c == Settings.BAD_REQUEST:
             raise ErrAtlasBadRequest(c, details)
@@ -92,8 +99,13 @@ class Network:
                              timeout=Settings.requests_timeout,
                              headers={},
                              auth=HTTPDigestAuth(self.user, self.password))
+            print("Auth information = {} {}".format(self.user, self.password))
+
             return self.answer(r.status_code, r.json())
-        except:
+
+        except Exception:
+            logger.warning('Request: {}'.format(r.request.__dict__))
+            logger.warning('Response: {}'.format(r.__dict__))
             raise
         finally:
             if r:
@@ -142,7 +154,6 @@ class Network:
             Exception: Network issue
         """
         r = None
-        
         try:
             r = requests.patch(uri,
                                json=payload,
@@ -151,8 +162,9 @@ class Network:
                                headers={"Content-Type" : "application/json"},
                                auth=HTTPDigestAuth(self.user, self.password))
             return self.answer(r.status_code, r.json())
-        except:
-            raise
+        except Exception as e:
+
+            raise e
         finally:
             if r:
                 r.connection.close()
@@ -177,9 +189,9 @@ class Network:
                                 timeout=Settings.requests_timeout,
                                 headers={},
                                 auth=HTTPDigestAuth(self.user, self.password))
-            return self.answer(r.status_code, r.json())
-        except:
-            raise
+            return self.answer(r.status_code, {"deleted": True})
+        except Exception as e:
+            raise e
         finally:
             if r:
                 r.connection.close()

@@ -7,24 +7,23 @@ A Python package for MongoDB Atlas Cloud provider.
 
 `Configure Atlas API Access <https://docs.atlas.mongodb.com/configure-api-access/>`__
 
-`Current state of the python-atlasapi support <https://github.com/mickybart/python-atlasapi/blob/master/API.rst>`__
+`Current state of the python-atlasapi support <https://github.com/mgmonteleone/python-atlasapi/blob/master/API.rst>`__
 
-`Code documentation (sphinx) <https://mickybart.github.io/python-atlasapi/>`__
+Version 0.10.0 (Beta)
 
 Installation
 ------------
 
-This package is available for Python 3.5+.
+This package is available for Python 3.6+.
+
+
+Install the development version from github:
 
 .. code:: bash
 
-    pip3 install atlasapi
+    pip3 install git+https://github.com/mgmonteleone/python-atlasapi.git
 
-Or install the development version from github:
-
-.. code:: bash
-
-    pip3 install git+https://github.com/mickybart/python-atlasapi.git
+Repo coming soon. . .
 
 Usage
 -----
@@ -126,7 +125,8 @@ Clusters
 .. code:: python
 
     from atlasapi.atlas import Atlas
-    
+    from atlasapi.clusters import  AdvancedOptions
+
     a = Atlas("<user>","<password>","<groupid>")
     
     # Is existing cluster ?
@@ -145,6 +145,47 @@ Clusters
     # Delete a Cluster (approved)
     details = a.Clusters.delete_a_cluster("cluster-dev", areYouSure=True)
 
+    # Create a Simple Replica Set Cluster
+
+    details = a.Clusters.create_basic_rs(name="cluster-dev")
+
+    # Create a cluster
+
+    provider_settings: ProviderSettings = ProviderSettings()
+    regions_config = RegionConfig()
+    replication_specs = ReplicationSpecs(regions_config={provider_settings.region_name: regions_config.__dict__})
+
+    cluster_config = ClusterConfig(name='test2',
+                               providerSettings=provider_settings,
+                               replication_specs=replication_specs)
+
+    output = a.Clusters.create_a_cluster(cluster_config)
+
+
+    # Modify a cluster
+     existing_config = a.Clusters.get_a_single_cluster_as_obj(cluster=TEST_CLUSTER_NAME)
+     out.providerSettings.instance_size_name = InstanceSizeName.M10
+     out.disk_size_gb = 13
+     new_config = a.Clusters.modify_a_cluster('pyAtlasAPIClustersTest', out)
+     pprint(new_config)
+
+    # Modify cluster instance size
+
+    a.Clusters.modify_cluster_instanct_size(cluster='pyAtlasAPIClustersTest',new_cluster_size=InstanceSizeName.M20)
+
+    # Pause(unpause) a cluster
+
+    a.Clusters.pause_cluster(cluster='pyAtlasAPIClustersTest', toggle_if_paused=True)
+
+
+    # Get Advanced Options
+    a.Clusters.get_single_cluster_advanced_options(cluster='pyAtlasAPIClustersTest')
+
+    # Set Advanced Options
+    options = AdvancedOptions(failIndexKeyTooLong=True)
+    self.a.Clusters.modify_cluster_advanced_options(cluster='pyAtlasAPIClustersTest',
+                                                                    advanced_options=options)
+
 Alerts
 ^^^^^^
 
@@ -162,18 +203,29 @@ Alerts
     # Get an Alert
     details = a.Alerts.get_an_alert("597f221fdf9db113ce1755cd")
     
-    # Acknowledge an Alert
+    # Acknowledge an Alert (BROKEN)
     #  until (now + 6 hours)
     from datetime import datetime, timezone, timedelta
     now = datetime.now(timezone.utc)
     until = now + timedelta(hours=6)
     details = a.Alerts.acknowledge_an_alert("597f221fdf9db113ce1755cd", until, "Acknowledge reason")
     
-    #  forever
+    #  forever (BROKEN)
     details = a.Alerts.acknowledge_an_alert_forever("597f221fdf9db113ce1755cd", "Acknowledge reason")
     
-    # Unacknowledge an Alert
+    # Unacknowledge an Alert (BROKEN
     details = a.Alerts.unacknowledge_an_alert("597f221fdf9db113ce1755cd")
+
+Metrics
+^^^^^^^
+Examples coming soon.
+
+Whitelists
+^^^^^^^^^^
+Examples coming soon.
+
+
+
 
 Error Types
 -----------
@@ -221,13 +273,10 @@ Exceptions
 - ErrConfirmationRequested
     Confirmation requested to execute the call.
 
-Internal Notes
---------------
 
-`Code documentation (sphinx) <https://mickybart.github.io/python-atlasapi/>`__
 
 Bugs or Issues
 --------------
 
 Please report bugs, issues or feature requests to `Github
-Issues <https://github.com/mickybart/python-atlasapi/issues>`__
+Issues <https://github.com/mgmonteleone/python-atlasapi/issues>`__

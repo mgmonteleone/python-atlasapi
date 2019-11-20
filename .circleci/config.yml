@@ -1,0 +1,17 @@
+jobs:
+  build:
+    executor: python/default
+    steps:
+      - checkout
+      - python/load-cache
+      - python/install-deps
+      - python/save-cache
+      - run:
+          command: |
+            # pytest would be a dep in requirements.txt
+            pip install nose2
+            nose2 -s tests/ --verbose --plugin nose2.plugins.attrib -A basic
+          name: Test
+orbs:
+  python: circleci/python@0.1
+version: 2.1

@@ -9,7 +9,7 @@ jobs:
       - run:
           command: |
             # pytest would be a dep in requirements.txt
-            pip install nose2
+            sudo pip install nose2
             nose2 -s tests/ --verbose --plugin nose2.plugins.attrib -A basic
           name: Test
 orbs:

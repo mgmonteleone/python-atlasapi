@@ -1,7 +1,9 @@
 Atlas API
 ==========
 
-A
+Python Bindongs for the Atlas Public API
+
+`development` : [![CircleCI](https://circleci.com/gh/mgmonteleone/python-atlasapi/tree/develop.svg?style=svg)](https://circleci.com/gh/mgmonteleone/python-atlasapi/tree/develop)
 
 `Atlas API <https://docs.atlas.mongodb.com/api/>`__
 

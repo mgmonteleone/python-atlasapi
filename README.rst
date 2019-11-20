@@ -3,7 +3,7 @@ Atlas API
 
 Python Bindings for the Atlas Public API
 
-`development` : [CircleCI](https://circleci.com/gh/mgmonteleone/python-atlasapi/tree/develop.svg?style=svg)](https://circleci.com/gh/mgmonteleone/python-atlasapi/tree/develop)
+[![CircleCI](https://circleci.com/gh/mgmonteleone/python-atlasapi.svg?style=svg)](https://circleci.com/gh/mgmonteleone/python-atlasapi)
 
 `Atlas API <https://docs.atlas.mongodb.com/api/>`__
 

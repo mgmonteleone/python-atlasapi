@@ -3,7 +3,7 @@ Atlas API
 
 Python Bindings for the Atlas Public API
 
-[![CircleCI](https://circleci.com/gh/mgmonteleone/python-atlasapi.svg?style=svg)](https://circleci.com/gh/mgmonteleone/python-atlasapi)
+[![CircleCI](https://circleci.com/gh/mgmonteleone/python-atlasapi.svg?style=svg&circle-token=34ce5f4745b141a0ee643bd212d85359c0594884)]
 
 `Atlas API <https://docs.atlas.mongodb.com/api/>`__
 

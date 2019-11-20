@@ -1,7 +1,7 @@
 Atlas API
 ==========
 
-A Python package for MongoDB Atlas Cloud provider.
+A
 
 `Atlas API <https://docs.atlas.mongodb.com/api/>`__
 

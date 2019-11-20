@@ -6,48 +6,62 @@ Status about API implementation
 Database Users
 --------------
 
-Status : [100%]
+Status : [100%] :heavy_check_mark:
 
-- Get All Database Users
-- Get a Single Database User
-- Create a Database User
-- Update a Database User
-- Delete a Database User
+- Get All Database Users :ballot_box_with_check:
+- Get a Single Database User :ballot_box_with_check:
+- Create a Database User :ballot_box_with_check:
+- Update a Database User :ballot_box_with_check:
+- Delete a Database User :ballot_box_with_check:
+
+
+
+
+Custom MongoDB Roles
+---------------------
+
+Status : [0%]
+
+- Get all custom MongoDB roles in the project.
+- Get the custom MongoDB role named {ROLE-NAME}.
+- Create a new custom MongoDB role in the project.
+- Update a custom MongoDB role in the project.
+- Delete a custom MongoDB role from the project.
 
 Projects
 --------
 
 Status : [100%]
 
-- Get All Projects
-- Get One Project
-- Create a Project
+- Get All Projects :ballot_box_with_check:
+- Get One Project :ballot_box_with_check:
+- Create a Project :ballot_box_with_check:
 
 Clusters
 --------
 
 Status : [100%]
 
-- Get All Clusters [100%]
-- Get a Single Cluster [100%]
-- Create a Cluster [100%]
-- Modify a Cluster [100%]
-- Delete a Cluster [100%]
-- Get Advanced Configuration Options for One Cluster [100%]
-- Modify Advanced Configuration Options for One Cluster [100%]
-- Test Failover [100%]
+- Get All Clusters :ballot_box_with_check:
+- Get a Single Cluster :ballot_box_with_check:
+- Create a Cluster :ballot_box_with_check:
+- Modify a Cluster :ballot_box_with_check:
+- Delete a Cluster :ballot_box_with_check:
+- Get Advanced Configuration Options for One Cluster :ballot_box_with_check:
+- Modify Advanced Configuration Options for One Cluster :ballot_box_with_check:
+- Test Failover :ballot_box_with_check:
 
-- (Helper) Modify cluster instance size
-- (Helper) Pause/Unpause Cluster
+- (Helper) Modify cluster instance size :ballot_box_with_check:
+- (Helper) Pause/Unpause Cluster :ballot_box_with_check:
 
 Alerts
 ------
 
 Status : [50%]
 
-- Get All Alerts
-- Get an Alert
-- Acknowledge an Alert (include Unacknowledge) (BROKEN)
+- Get All Alerts :ballot_box_with_check:
+- Get an Alert :ballot_box_with_check:
+- Acknowledge an Alert (include Unacknowledge) (BROKEN) :SOS:
 
 Alert Configurations
 --------------------
@@ -114,3 +128,9 @@ Status: [50%]
 - Get One Organization Event
 - Get All Project Events
 - Ge One Project Event
+
+Organizations
+--------------
+
+Status: [0%]
+

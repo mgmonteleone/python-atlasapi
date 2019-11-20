@@ -3,11 +3,11 @@ from setuptools import setup, find_packages
 
 setup(
     name='atlasapi',
-    version='0.10.1',
+    version='0.10.2',
     python_requires='>=3.6',
-    packages=find_packages(),
+    packages=find_packages(exclude=("tests",)),
     install_requires=['requests', 'python-dateutil', 'isodate', 'future', 'pytz','coolname'],
-
+    setup_requires=['wheel'],
     # Metadata
     author="Matthew G. Monteleone",
     author_email="mgm@mgm.dev",

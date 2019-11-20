@@ -3,15 +3,6 @@ Atlas API
 
 Python Bindings for the Atlas Public API
 
-Development
-
-.. image:: https://circleci.com/gh/mgmonteleone/python-atlasapi/tree/develop.svg?style=svg&circle-token=34ce5f4745b141a0ee643bd212d85359c0594884
-
-Master:
-
-.. image:: https://circleci.com/gh/mgmonteleone/python-atlasapi/tree/master.svg?style=svg&circle-token=34ce5f4745b141a0ee643bd212d85359c0594884
-
-
 
 `Atlas API <https://docs.atlas.mongodb.com/api/>`__
 
@@ -291,5 +282,8 @@ Bugs or Issues
 Please report bugs, issues or feature requests to `Github
 Issues <https://github.com/mgmonteleone/python-atlasapi/issues>`__
 
+Testing
+-------
 
+`Circle Ci <https://circleci.com/gh/mgmonteleone/python-atlasapi/>`__
 

@@ -30,7 +30,6 @@ All calls to the Atlas API require API credentials, you can configure them in yo
 
 .. image:: https://img.shields.io/pypi/pyversions/atlasapi.svg
      :target: https://pypi.org/project/atlasapi/
-       :alt:  Versions
 
 Installation
 ------------
@@ -39,7 +38,6 @@ This package is available for Python 3.6+.
 
 .. image:: https://badge.fury.io/py/atlasapi.svg
      :target: https://pypi.org/project/atlasapi/
-       :alt: PyPI
 
 
 You can install the latest released version from pypi.

@@ -22,14 +22,22 @@ jobs:
       - python/load-cache
       - python/install-deps
       - python/save-cache
-      - pylint/lint
-
       - run:
           command: |
             # pytest would be a dep in requirements.txt
             sudo pip install nose2
             nose2 -s tests/ --verbose --plugin nose2.plugins.attrib -A basic
           name: Test
+  docs:
+    executor: python/default
+    steps:
+      - checkout
+      - run:
+          name: Build Documentation
+          command: |
+            cd gendocs && make clean && make html && cd ..
+            rsync -crv --delete --exclude=README.rst gendocs/_build/html/ docs/
+
   deploy:
     executor: python/default
     steps:

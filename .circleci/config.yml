@@ -13,12 +13,6 @@ jobs:
             nose2 -s tests/ --verbose --plugin nose2.plugins.attrib -A basic
           name: Test
       - run:
-          name: verify git tag vs. version
-          command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            python setup.py verify
-      - run:
           name: init .pypirc
           command: |
             echo -e "[pypi]" >> ~/.pypirc
@@ -27,7 +21,7 @@ jobs:
       - run:
           name: Build package
           command: |
-            rm -rf dist/*
+            python3 setup.py clean
             python3 setup.py sdist
             python3 setup.py bdist_wheel
 

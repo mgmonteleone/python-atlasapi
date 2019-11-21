@@ -296,3 +296,7 @@ master
 
 .. image:: https://circleci.com/gh/mgmonteleone/python-atlasapi/tree/master.svg?style=svg&circle-token=34ce5f4745b141a0ee643bd212d85359c0594884
     :target: https://circleci.com/gh/mgmonteleone/python-atlasapi/tree/master
+
+.. image:: https://readthedocs.org/projects/python-atlasapi/badge/?version=latest
+:target: https://python-atlasapi.readthedocs.io/en/latest/?badge=latest
+:alt: Documentation Status

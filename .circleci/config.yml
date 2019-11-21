@@ -1,3 +1,19 @@
+version: 2.1
+workflows:
+  build_and_deploy:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+      - deploy:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
+            branches:
+              ignore: /.*/
 jobs:
   build:
     executor: python/default
@@ -12,6 +28,40 @@ jobs:
             sudo pip install nose2
             nose2 -s tests/ --verbose --plugin nose2.plugins.attrib -A basic
           name: Test
+  docs:
+    executor: python/default
+    steps:
+      - checkout
+      - run:
+          name: Build Documentation
+          command: |
+            cd gendocs && make clean && make html && cd ..
+            rsync -crv --delete --exclude=README.rst gendocs/_build/html/ docs/
+
+  deploy:
+    executor: python/default
+    steps:
+      - checkout
+      - python/load-cache
+      - python/install-deps
+      - python/save-cache
+      - run:
+          name: init .pypirc
+          command: |
+            echo -e "[pypi]" >> ~/.pypirc
+            echo -e "username = levlaz" >> ~/.pypirc
+            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
+      - run:
+          name: Build package
+          command: |
+            python3 setup.py clean
+            python3 setup.py sdist
+            python3 setup.py bdist_wheel
+     # - run:
+     #     name: upload to pypi
+     #     command: |
+     #       . venv/bin/activate
+     #       twine upload dist/*
 orbs:
   python: circleci/python@0.1
-version: 2.1
+  pylint: qventus/python-lint@0.0.6

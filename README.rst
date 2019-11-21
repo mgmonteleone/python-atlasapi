@@ -3,6 +3,17 @@ Atlas API
 
 Python Bindings for the Atlas Public API
 
+This project intends to create a fairly opinionated set of bindings for the Atlas Public API which makes interacting
+with Atlas using Python easier. The API makes extensive use of enums and other helper type objects to take some
+of the guess work of administering Atlas clusters with Python.
+
+In most cases objects will be returned based upon the structure of the json returned but the API Endpoints. These objects
+are defined either in the `specs.py` module or in a module named after the objects themselves (`alerts.py` for example).
+
+
+All calls to the Atlas API require API credentials, you can configure them in your Atlas project.
+
+
 
 `Atlas API <https://docs.atlas.mongodb.com/api/>`__
 
@@ -10,21 +21,33 @@ Python Bindings for the Atlas Public API
 
 `Current state of the python-atlasapi support <https://github.com/mgmonteleone/python-atlasapi/blob/master/API.rst>`__
 
-Version 0.10.0 (Beta)
+
+.. image:: https://img.shields.io/pypi/l/atlasapi.svg
+     :target: https://pypi.org/project/atlasapi/
+
+.. image:: https://img.shields.io/pypi/status/atlasapi.svg
+     :target: https://pypi.org/project/atlasapi/
+
+.. image:: https://img.shields.io/pypi/pyversions/atlasapi.svg
+     :target: https://pypi.org/project/atlasapi/
 
 Installation
 ------------
 
 This package is available for Python 3.6+.
 
+.. image:: https://badge.fury.io/py/atlasapi.svg
+     :target: https://pypi.org/project/atlasapi/
 
-Install the development version from github:
+
+You can install the latest released version from pypi.
 
 .. code:: bash
 
-    pip3 install git+https://github.com/mgmonteleone/python-atlasapi.git
+    pip3 install atlasapi
 
-Repo coming soon. . .
+
+
 
 Usage
 -----
@@ -296,3 +319,7 @@ master
 
 .. image:: https://circleci.com/gh/mgmonteleone/python-atlasapi/tree/master.svg?style=svg&circle-token=34ce5f4745b141a0ee643bd212d85359c0594884
     :target: https://circleci.com/gh/mgmonteleone/python-atlasapi/tree/master
+
+.. image:: https://readthedocs.org/projects/python-atlasapi/badge/?version=latest
+     :target: https://python-atlasapi.readthedocs.io/en/latest/?badge=latest
+       :alt: Documentation Status

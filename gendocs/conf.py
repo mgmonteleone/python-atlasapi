@@ -54,8 +54,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'atlasapi'
-copyright = '2018, Yellow Pages Inc'
-author = 'Yellow Pages Inc'
+copyright = '2019, Matthew G. Monteleone'
+author = 'Matthew G. Monteleone'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

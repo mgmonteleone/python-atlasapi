@@ -333,12 +333,52 @@
 <dt id="atlasapi.clusters.AtlasBasicReplicaSet">
 <em class="property">class </em><code class="sig-prename descclassname">atlasapi.clusters.</code><code class="sig-name descname">AtlasBasicReplicaSet</code><span class="sig-paren">(</span><em class="sig-param">name: str</em>, <em class="sig-param">size: atlasapi.clusters.InstanceSizeName = &lt;InstanceSizeName.M10: 'M10'&gt;</em>, <em class="sig-param">disk_size: int = 10</em>, <em class="sig-param">provider: atlasapi.clusters.ProviderName = &lt;ProviderName.AWS: 'Amazon Web Services'&gt;</em>, <em class="sig-param">region: str = 'US_WEST_2'</em>, <em class="sig-param">version: atlasapi.clusters.MongoDBMajorVersion = &lt;MongoDBMajorVersion.v4_0: '4.0'&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.clusters.AtlasBasicReplicaSet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Helper object for the creation of a basic replica set with default options.</p>
+<p>Only the cluster name is required.</p>
+<p>Other parameters will default to An M10 cluster on AWS US_WEST_2 running 4.0 with a 10 GB disk.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>Args:</dt><dd><p>name: The name given to the cluster/replica set.
+size: The InstanceSizeName of the cluster/replica set
+disk_size: Size of disks on all members
+provider: The Cloud provider
+region: The region in the cloud provider
+version: The MongoDB major version</p>
+</dd>
+</dl>
+</div></blockquote>
 </dd></dl>
 
 <dl class="class">
 <dt id="atlasapi.clusters.ClusterConfig">
 <em class="property">class </em><code class="sig-prename descclassname">atlasapi.clusters.</code><code class="sig-name descname">ClusterConfig</code><span class="sig-paren">(</span><em class="sig-param">backup_enabled: bool = False</em>, <em class="sig-param">cluster_type: atlasapi.clusters.ClusterType = &lt;ClusterType.REPLICASET: 'Replica Set'&gt;</em>, <em class="sig-param">disk_size_gb: int = 32</em>, <em class="sig-param">name: str = None</em>, <em class="sig-param">mongodb_major_version: atlasapi.clusters.MongoDBMajorVersion = &lt;MongoDBMajorVersion.v4_0: '4.0'&gt;</em>, <em class="sig-param">mongodb_version: Optional[str] = None</em>, <em class="sig-param">num_shards: int = 1</em>, <em class="sig-param">mongo_uri: Optional[str] = None</em>, <em class="sig-param">mongo_uri_updated: Optional[str] = None</em>, <em class="sig-param">mongo_uri_with_options: Optional[str] = None</em>, <em class="sig-param">paused: bool = False</em>, <em class="sig-param">pit_enabled: bool = False</em>, <em class="sig-param">replication_factor: Optional[int] = None</em>, <em class="sig-param">state_name: Optional[atlasapi.clusters.ClusterStates] = None</em>, <em class="sig-param">autoscaling: dict = None</em>, <em class="sig-param">replication_specs: atlasapi.clusters.ReplicationSpecs = None</em>, <em class="sig-param">srv_address: Optional[str] = None</em>, <em class="sig-param">providerSettings: Optional[atlasapi.clusters.ProviderSettings] = None</em>, <em class="sig-param">links: list = None</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.clusters.ClusterConfig" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Stores the Atlas Cluster Config, is sent back to the API for any reconfiguations.</p>
+<p><a class="reference external" href="https://docs.atlas.mongodb.com/reference/api/clusters-get-one/#http-response-elements">https://docs.atlas.mongodb.com/reference/api/clusters-get-one/#http-response-elements</a></p>
+<blockquote>
+<div><dl class="simple">
+<dt>Args:</dt><dd><p>backup_enabled:
+cluster_type:
+disk_size_gb:
+name:
+mongodb_major_version:
+mongodb_version:
+num_shards:
+mongo_uri:
+mongo_uri_updated:
+mongo_uri_with_options:
+paused:
+pit_enabled:
+replication_factor:
+state_name:
+autoscaling:
+replication_specs:
+srv_address:
+providerSettings:
+links:</p>
+</dd>
+</dl>
+</div></blockquote>
 <dl class="method">
 <dt id="atlasapi.clusters.ClusterConfig.as_create_dict">
 <code class="sig-name descname">as_create_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#atlasapi.clusters.ClusterConfig.as_create_dict" title="Permalink to this definition">¶</a></dt>
@@ -654,7 +694,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>electable_node_count</strong> – Number of electable nodes.</p></li>
+<li><p><strong>electable_node_count</strong> (<em>int</em>) – Number of electable nodes.</p></li>
 <li><p><strong>priority</strong> – Priority of the region in the replica set.</p></li>
 <li><p><strong>read_only_node_count</strong> – Count of read_only nodes.</p></li>
 <li><p><strong>analytics_node_count</strong> – Count of analytics nodes.</p></li>
@@ -665,7 +705,7 @@
 
 <dl class="class">
 <dt id="atlasapi.clusters.ReplicationSpecs">
-<em class="property">class </em><code class="sig-prename descclassname">atlasapi.clusters.</code><code class="sig-name descname">ReplicationSpecs</code><span class="sig-paren">(</span><em class="sig-param">id: Optional[str] = '97766425-c91c-4731-9bda-67e1a33020eb'</em>, <em class="sig-param">num_shards: Optional[int] = 1</em>, <em class="sig-param">zone_name: Optional[str] = None</em>, <em class="sig-param">regions_config: Optional[dict] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.clusters.ReplicationSpecs" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">atlasapi.clusters.</code><code class="sig-name descname">ReplicationSpecs</code><span class="sig-paren">(</span><em class="sig-param">id: Optional[str] = '7f82aa58-5f4d-442b-8c7a-139e429453df'</em>, <em class="sig-param">num_shards: Optional[int] = 1</em>, <em class="sig-param">zone_name: Optional[str] = None</em>, <em class="sig-param">regions_config: Optional[dict] = None</em><span class="sig-paren">)</span><a class="headerlink" href="#atlasapi.clusters.ReplicationSpecs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="method">
 <dt id="atlasapi.clusters.ReplicationSpecs.as_create_dict">

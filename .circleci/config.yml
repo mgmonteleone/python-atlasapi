@@ -29,8 +29,7 @@ jobs:
             nose2 -s tests/ --verbose --plugin nose2.plugins.attrib -A basic
           name: Test
   deploy:
-    docker:
-      - image: circleci/python:3.6
+    executor: python/default
     steps:
       - checkout
       - python/load-cache

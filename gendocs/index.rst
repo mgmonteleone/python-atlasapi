@@ -6,6 +6,8 @@
 Welcome to atlasapi's documentation!
 ====================================
 
+Python Bindings for the Atlas Public API
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:

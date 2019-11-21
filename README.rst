@@ -22,8 +22,9 @@ All calls to the Atlas API require API credentials, you can configure them in yo
 `Current state of the python-atlasapi support <https://github.com/mgmonteleone/python-atlasapi/blob/master/API.rst>`__
 
 
-.. image:: https://img.shields.io/pypi/pypi/l/atlasapi.svg
+.. image:: https://img.shields.io/pypi/l/atlasapi.svg
      :target: https://pypi.org/project/atlasapi/
+
 .. image:: https://img.shields.io/pypi/status/atlasapi.svg
      :target: https://pypi.org/project/atlasapi/
 

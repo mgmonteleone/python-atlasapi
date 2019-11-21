@@ -4,7 +4,7 @@ Atlas API
 Python Bindings for the Atlas Public API
 
 This project intends to create a fairly opinionated set of bindings for the Atlas Public API which makes interacting
-with the Atlas using Python easier. The API makes extensive use of enums and other helper type objects to take some
+with Atlas using Python easier. The API makes extensive use of enums and other helper type objects to take some
 of the guess work of administering Atlas clusters with Python.
 
 In most cases objects will be returned based upon the structure of the json returned but the API Endpoints. These objects
@@ -21,21 +21,28 @@ All calls to the Atlas API require API credentials, you can configure them in yo
 
 `Current state of the python-atlasapi support <https://github.com/mgmonteleone/python-atlasapi/blob/master/API.rst>`__
 
-Version 0.10.1 (Beta)
+.. |PyPI license| image:: https://badge.fury.io/py/atlasapi.svg
+   :target: https://pypi.org/project/atlasapi/
+
+.. |PyPI pyversions| image:: https://img.shields.io/pypi/pyversions/atlasapi.svg
+   :target: https://pypi.org/project/atlasapi/
 
 Installation
 ------------
 
 This package is available for Python 3.6+.
 
+.. |PyPI version fury.io| image:: https://badge.fury.io/py/atlasapi.svg
+   :target: https://pypi.org/project/atlasapi/
 
-Install the development version from github:
+You can install the latest released version from pypi.
 
 .. code:: bash
 
-    pip3 install git+https://github.com/mgmonteleone/python-atlasapi.git
+    pip3 install atlasapi
 
-Repo coming soon. . .
+
+
 
 Usage
 -----

@@ -21,19 +21,22 @@ All calls to the Atlas API require API credentials, you can configure them in yo
 
 `Current state of the python-atlasapi support <https://github.com/mgmonteleone/python-atlasapi/blob/master/API.rst>`__
 
-.. |PyPI license| image:: https://badge.fury.io/py/atlasapi.svg
-   :target: https://pypi.org/project/atlasapi/
+.. image:: https://badge.fury.io/py/atlasapi.svg
+     :target: https://pypi.org/project/atlasapi/
+       :alt: PyPI license
 
-.. |PyPI pyversions| image:: https://img.shields.io/pypi/pyversions/atlasapi.svg
-   :target: https://pypi.org/project/atlasapi/
+
+.. image:: https://img.shields.io/pypi/pyversions/atlasapi.svg
+     :target: https://pypi.org/project/atlasapi/
+       :alt:  Versions
 
 Installation
 ------------
 
 This package is available for Python 3.6+.
 
-.. |PyPI version fury.io| image:: https://badge.fury.io/py/atlasapi.svg
-   :target: https://pypi.org/project/atlasapi/
+.. image:: https://img.shields.io/pypi/py/atlasapi.svg
+     :target: https://pypi.org/project/atlasapi/
 
 You can install the latest released version from pypi.
 

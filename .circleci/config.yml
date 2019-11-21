@@ -1,3 +1,27 @@
+version: 2.1
+workflows:
+  build_and_deploy:
+    jobs:
+      - build:
+          filters:
+            tags:
+              only: /.*/
+      - test-python-install:
+          version: "3.6"
+          requires:
+            - build
+      - test-python-install:
+          version: "3.7"
+          requires:
+            - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            tags:
+              only: /[0-9]+(\.[0-9]+)*/
+            branches:
+              ignore: /.*/
 jobs:
   build:
     executor: python/default
@@ -12,6 +36,22 @@ jobs:
             sudo pip install nose2
             nose2 -s tests/ --verbose --plugin nose2.plugins.attrib -A basic
           name: Test
+  deploy:
+    docker:
+      - image: circleci/python:3.6
+    steps:
+      - checkout
+      - python/load-cache
+      - python/install-deps
+      - python/save-cache
+      - restore_cache:
+          key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "Makefile" }}
+      - run:
+          name: install python dependencies
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            make dev
       - run:
           name: init .pypirc
           command: |
@@ -25,7 +65,10 @@ jobs:
             python3 setup.py sdist
             python3 setup.py bdist_wheel
 
-
+     # - run:
+     #     name: upload to pypi
+     #     command: |
+     #       . venv/bin/activate
+     #       twine upload dist/*
 orbs:
   python: circleci/python@0.1
-version: 2.1

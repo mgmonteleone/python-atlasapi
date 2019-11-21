@@ -35,6 +35,7 @@ jobs:
       - python/load-cache
       - python/install-deps
       - python/save-cache
+      - pylint/lint
       - restore_cache:
           key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "Makefile" }}
       - run:
@@ -63,3 +64,4 @@ jobs:
      #       twine upload dist/*
 orbs:
   python: circleci/python@0.1
+  python-lint: qventus/python-lint@0.0.6

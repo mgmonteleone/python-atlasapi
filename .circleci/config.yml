@@ -22,6 +22,8 @@ jobs:
       - python/load-cache
       - python/install-deps
       - python/save-cache
+      - pylint/lint
+
       - run:
           command: |
             # pytest would be a dep in requirements.txt
@@ -35,7 +37,6 @@ jobs:
       - python/load-cache
       - python/install-deps
       - python/save-cache
-      - pylint/lint
       - run:
           name: init .pypirc
           command: |

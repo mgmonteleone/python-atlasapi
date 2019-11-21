@@ -36,14 +36,6 @@ jobs:
       - python/install-deps
       - python/save-cache
       - pylint/lint
-      - restore_cache:
-          key: v1-dependency-cache-{{ checksum "setup.py" }}-{{ checksum "Makefile" }}
-      - run:
-          name: install python dependencies
-          command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            make dev
       - run:
           name: init .pypirc
           command: |
@@ -56,7 +48,6 @@ jobs:
             python3 setup.py clean
             python3 setup.py sdist
             python3 setup.py bdist_wheel
-
      # - run:
      #     name: upload to pypi
      #     command: |

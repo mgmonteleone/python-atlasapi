@@ -14,7 +14,6 @@ are defined either in the `specs.py` module or in a module named after the objec
 All calls to the Atlas API require API credentials, you can configure them in your Atlas project.
 
 
-
 `Atlas API <https://docs.atlas.mongodb.com/api/>`__
 
 `Configure Atlas API Access <https://docs.atlas.mongodb.com/configure-api-access/>`__

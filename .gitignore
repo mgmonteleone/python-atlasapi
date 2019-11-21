@@ -7,3 +7,4 @@ dist
 *.egg-info
 .eggs
 gendocs/_build/
+/docs/

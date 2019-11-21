@@ -3,6 +3,17 @@ Atlas API
 
 Python Bindings for the Atlas Public API
 
+This project intends to create a fairly opinionated set of bindings for the Atlas Public API which makes interacting
+with the Atlas using Python easier. The API makes extensive use of enums and other helper type objects to take some
+of the guess work of administering Atlas clusters with Python.
+
+In most cases objects will be returned based upon the structure of the json returned but the API Endpoints. These objects
+are defined either in the `specs.py` module or in a module named after the objects themselves (`alerts.py` for example).
+
+
+All calls to the Atlas API require API credentials, you can configure them in your Atlas project.
+
+
 
 `Atlas API <https://docs.atlas.mongodb.com/api/>`__
 
@@ -10,7 +21,7 @@ Python Bindings for the Atlas Public API
 
 `Current state of the python-atlasapi support <https://github.com/mgmonteleone/python-atlasapi/blob/master/API.rst>`__
 
-Version 0.10.0 (Beta)
+Version 0.10.1 (Beta)
 
 Installation
 ------------

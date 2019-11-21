@@ -29,6 +29,14 @@ All calls to the Atlas API require API credentials, you can configure them in yo
 
 .. image:: https://img.shields.io/pypi/pyversions/atlasapi.svg
      :target: https://pypi.org/project/atlasapi/
+     
+
+Documentation
+-------------
+.. image:: https://readthedocs.org/projects/python-atlasapi/badge/?version=latest
+     :target: https://python-atlasapi.readthedocs.io/en/latest/?badge=latest Found at https://python-atlasapi.readthedocs.io/
+
+Autobuilt on each commit.
 
 Documentation
 -------------

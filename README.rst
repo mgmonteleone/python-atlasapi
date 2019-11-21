@@ -298,5 +298,5 @@ master
     :target: https://circleci.com/gh/mgmonteleone/python-atlasapi/tree/master
 
 .. image:: https://readthedocs.org/projects/python-atlasapi/badge/?version=latest
-:target: https://python-atlasapi.readthedocs.io/en/latest/?badge=latest
-:alt: Documentation Status
+     :target: https://python-atlasapi.readthedocs.io/en/latest/?badge=latest
+       :alt: Documentation Status

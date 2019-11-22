@@ -30,13 +30,13 @@ logger = logging.getLogger('maintenance_window')
 
 
 class Weekdays(Enum):
-    SUNDAY = 0
-    MONDAY = 1
-    TUESDAY = 2
-    WEDNESDAY = 3
-    THURSDAY = 4
-    FRIDAY = 5
-    SATURDAY = 6
+    SUNDAY = 1
+    MONDAY = 2
+    TUESDAY = 3
+    WEDNESDAY = 4
+    THURSDAY = 5
+    FRIDAY = 6
+    SATURDAY = 7
 
 
 class MaintenanceWindow(object):
@@ -73,7 +73,7 @@ class MaintenanceWindow(object):
 
         return cls(day_of_week, hour_of_day, number_of_deferrals, start_asap)
 
-    def as_dict(self):
+    def as_dict(self) -> dict:
         """
         Returns the Maintenance object as a serializable dict
 
@@ -82,5 +82,20 @@ class MaintenanceWindow(object):
 
         """
         out_dict = self.__dict__
-        out_dict['dayOfWeek'] = out_dict['dayOfWeek'].value
+        if type(out_dict['dayOfWeek']) == Weekdays:
+            out_dict['dayOfWeek'] = out_dict['dayOfWeek'].value
         return out_dict
+
+    def as_update_dict(self) -> dict:
+        """
+        Returns a dict with immutable properties removed.
+        Returns: dict
+        """
+        update_dict = self.as_dict()
+        del update_dict['numberOfDeferrals']
+        for key, val in update_dict.items():
+            if val is None:
+                del update_dict[key]
+
+
+        return update_dict

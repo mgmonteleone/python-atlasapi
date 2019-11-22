@@ -1066,7 +1066,23 @@ class Atlas:
             else:
                 return MaintenanceWindow.from_dict(response)
 
-        @property
+        def _update_maint_window(self, new_config: MaintenanceWindow) -> bool:
+            """
+            Uses the patch endpoint to update maint window settings.
+
+            Args:
+                as_obj: Return data as a MaintenanceWindowObj
+
+            Returns:
+
+            """
+
+            uri = Settings.api_resources["Maintenance Windows"]["Update Maintenance Window"].format(
+                GROUP_ID=self.atlas.group)
+            self.atlas.network.patch(Settings.BASE_URL + uri, payload=new_config.as_update_dict())
+
+            return True
+
         def current_config(self) -> MaintenanceWindow:
             """
             The current Maintainable Window configuration.
@@ -1075,6 +1091,22 @@ class Atlas:
 
             """
             return self._get_maint_window(as_obj=True)
+
+        def set_config(self, new_config: MaintenanceWindow) -> bool:
+            """
+            Sets the maint configuration to the values in the passed MaintWindow Object
+
+            Will only set those values which are not none in the MaintWindow Object. Currently you can not use
+            this method to set a value as null. (This is not supported by the API anyway)
+
+            Args:
+                new_config: A MaintainenceWindow Object
+
+            Returns: bool: True is success
+
+            """
+            output: bool = self._update_maint_window(new_config=new_config)
+            return output
 
 
 class AtlasPagination:

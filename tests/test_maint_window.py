@@ -51,12 +51,15 @@ class MaintTests(BaseTests):
 
         self.assertTrue(output)
 
-
-
         updated_config = self.a.MaintenanceWindows.current_config()
 
-        pprint('New Config: {} Updated Config: {}'.format(new_config.dayOfWeek,updated_config.dayOfWeek))
         self.assertEquals(new_config.dayOfWeek, updated_config.dayOfWeek.value)
         self.assertEquals(new_config.hourOfDay, updated_config.hourOfDay)
 
     test_02_update_maint_window.basic = True
+
+    def test_03_defer_maint_window(self):
+        output = self.a.MaintenanceWindows._defer_maint_window()
+        self.assertIn(output, [True, False])
+
+    test_03_defer_maint_window.basic = True

@@ -1083,6 +1083,37 @@ class Atlas:
 
             return True
 
+        def _defer_maint_window(self) -> bool:
+            """
+            Used to defer the current maint window.
+
+            TODO: Is this private method really needed? It is orignally here to provide a more flexible method to use
+            if the public one was too simple, but may not be needed in the end.
+            Returns:
+
+            """
+            uri = Settings.api_resources["Maintenance Windows"]["Defer Maintenance Window"].format(
+                GROUP_ID=self.atlas.group)
+            try:
+                self.atlas.network.post(uri=Settings.BASE_URL + uri, payload={})
+            except ErrAtlasBadRequest as e:
+                if e.details.get('errorCode', None) == 'ATLAS_MAINTENANCE_NOT_SCHEDULED':
+                    logger.warning(e.details.get('detail', 'No Detail available'))
+                    return False
+                else:
+                    raise e
+            return True
+
+        def defer(self) -> dict:
+            """
+            Defers the currently scheduled maintenance window. 
+            
+            Returns: bool:
+
+            """
+            output = self._defer_maint_window()
+            return dict(maint_deffered=output)
+        
         def current_config(self) -> MaintenanceWindow:
             """
             The current Maintainable Window configuration.

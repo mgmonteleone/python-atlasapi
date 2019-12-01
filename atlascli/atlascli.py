@@ -21,20 +21,20 @@ import os
 
 from atlasapi.atlas import Atlas
 
-
 def main(args):
     """
 
     :param args: Expect sys.argv
     :return: None
     """
-    parser = argparse.ArgumentParser(prog="atlascli",
-                                     description="A command line interface too the MongoDB Atlas"
-                                                 "database as a service."
-                                                 "https://www.mongodb.com/cloud/atlas for more info"
-                                                 "See also https://docs.atlas.mongodb.com/configure-api-access/#programmatic-api-keys"
-                                                 "For how to obtain a programmatic API key required to access the API"
-                                     )
+    parser = argparse.ArgumentParser(
+         prog="atlascli",
+         description="A command line interface too the MongoDB Atlas"
+                     "database as a service."
+                     "https://www.mongodb.com/cloud/atlas for more info"
+                     "See also https://docs.atlas.mongodb.com/configure-api-access/#programmatic-api-keys"
+                     "For how to obtain a programmatic API key required to access the API"
+         )
 
 
     parser.add_argument("--publickey", help="MongoDB Atlas public API key")

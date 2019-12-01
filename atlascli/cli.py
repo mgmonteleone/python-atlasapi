@@ -18,8 +18,21 @@ import sys
 import pprint
 import logging
 import os
+from enum import Enum
 
 from atlasapi.atlas import Atlas
+
+
+from atlascli.listcommand import ListCommand, ListFormat
+
+
+class AtlasResource(Enum):
+    ORGANIZATION = "organization"
+    PROJECT = "project"
+    CLUSTER = "cluster"
+
+    def __str__(self):
+        return self.value
 
 def main(args):
     """
@@ -41,8 +54,25 @@ def main(args):
     parser.add_argument("--privatekey", help="MongoDB Atlas private API key")
     parser.add_argument("--atlasgroup", help="Default group (aka project)")
 
+    parser.add_argument("--format", type=ListFormat,
+                        choices=list(ListFormat),
+                        default=ListFormat.short,
+                        help="Format for output of list command [default: %(default)s]")
+
+    parser.add_argument("--resource",
+                        type=AtlasResource, default=AtlasResource.CLUSTER,
+                        choices=list(AtlasResource),
+                        help="Which resource type are we operating on:"
+                             "organization, project or cluster? [default: %(default)s]")
+
+    parser.add_argument('--id', type=str, help='Specify a resource id')
+
     parser.add_argument("--debug", default=False, action="store_true",
-                        help="Turn on logging at debug level")
+                        help="Turn on logging at debug level [default: %(default)s]")
+
+    parser.add_argument("--list", default=False, action="store_true",
+                        help="List a set of resources [default: %(default)s]")
+
     args = parser.parse_args(args)
 
     if args.debug:
@@ -74,10 +104,19 @@ def main(args):
 
     atlas = Atlas(public_key, private_key, args.atlasgroup)
 
-    print("List Clusters:")
-    for i in atlas.Clusters.get_all_clusters(iterable=True):
-        pprint.pprint(i)
+    if args.list:
+        if args.resource == AtlasResource.CLUSTER:
+            list_cmd = ListCommand(args.format)
+            if args.id:
+                print("Cluster:")
+                cluster = atlas.Clusters.get_single_cluster(cluster=args.id)
+                list_cmd.list_one(cluster)
+            else:
+                print("Cluster list:")
+                clusters = atlas.Clusters.get_all_clusters(iterable=True)
+                total = list_cmd.list_all(clusters)
+                print(f"{total} cluster(s)")
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main(sys.argv[1:]) # strip off the program name

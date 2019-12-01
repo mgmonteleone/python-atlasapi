@@ -17,6 +17,7 @@ Python Bindings for the Atlas Public API
 
    atlasapi.rst
    atlasapi-atlas-nested.rst
+   atlascli.rst
 
 Indices and tables
 ==================

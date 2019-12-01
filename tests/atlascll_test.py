@@ -2,7 +2,7 @@ import unittest
 import os
 import sys
 
-from atlascli.atlascli import main
+from atlascli.cli import main
 
 
 class AtlascliTest(unittest.TestCase):
@@ -14,8 +14,25 @@ class AtlascliTest(unittest.TestCase):
         self.assertTrue(atlas_private_key)
         atlas_group = os.getenv("ATLAS_GROUP")
         self.assertTrue(atlas_group)
-        main(["--publickey", atlas_public_key, "--privatekey", atlas_private_key, "--atlasgroup", atlas_group])
 
+        main(["--publickey", atlas_public_key,
+              "--privatekey", atlas_private_key,
+              "--atlasgroup", atlas_group,
+              "--list",
+              ])
 
+        main(["--publickey", atlas_public_key,
+              "--privatekey", atlas_private_key,
+              "--atlasgroup", atlas_group,
+              "--list",
+              "--format", "full",
+              ])
+
+        main(["--publickey", atlas_public_key,
+              "--privatekey", atlas_private_key,
+              "--atlasgroup", atlas_group,
+              "--list",
+              "--format", "short",
+              ])
 if __name__ == '__main__':
     unittest.main()

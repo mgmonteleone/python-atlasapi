@@ -253,13 +253,39 @@ Alerts
     # Unacknowledge an Alert (BROKEN
     details = a.Alerts.unacknowledge_an_alert("597f221fdf9db113ce1755cd")
 
-Metrics
+
+
+Metrics (Measurements)
 ^^^^^^^
 Examples coming soon.
+
+Logs
+^^^^^^^^^^^^^^^^^^^
+
+.. code:: python
+
+    from atlasapi.atlas import Atlas
+    from atlasapi.specs import AlertStatusSpec
+
+    atlas = Atlas("<user>","<password>","<groupid>")
+
+    atlas.Hosts.fill_host_list()
+        test_host = atlas.Hosts.host_list[0]
+        print(f'Will get a mongod log for {test_host.hostname}')
+        out = atlas.Hosts.get_loglines_for_host(host_obj=test_host, log_name=AtlasLogNames.MONGODB)
+        for each_line in out:
+            print(each_line.__dict__)
+
 
 Whitelists
 ^^^^^^^^^^
 Examples coming soon.
+
+Maintenance Windows
+^^^^^^^^^^^^^^^^^^^
+
+Examples coming soon.
+
 
 
 

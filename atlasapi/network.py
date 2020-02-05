@@ -22,9 +22,10 @@ import requests
 from requests.auth import HTTPDigestAuth
 from .settings import Settings
 from .errors import *
-from pprint import pprint
 import logging
 from json import dumps
+from io import BytesIO
+from typing import Union
 logger = logging.getLogger('network')
 
 logger.setLevel(logging.WARNING)
@@ -41,7 +42,7 @@ class Network:
         self.user = user
         self.password = password
 
-    def answer(self, c, details):
+    def answer(self, c, details: Union[dict,BytesIO]):
         """Answer will provide all necessary feedback for the caller
         
         Args:
@@ -78,7 +79,48 @@ class Network:
         else:
             # Settings.SERVER_ERRORS
             raise ErrAtlasServerErrors(c, details)
-    
+
+    def get_file(self, uri):
+        """Get request which returns a binary file
+
+        Args:
+            uri (str): URI
+
+        Returns:
+            Binary File: API response as file
+
+        Raises:
+            Exception: Network issue
+        """
+        r = None
+
+        try:
+            file_obj = BytesIO()
+            r = requests.get(uri,
+                             allow_redirects=False,
+                             stream = True,
+                             timeout=Settings.file_request_timeout,
+                             headers={},
+                             auth=HTTPDigestAuth(self.user, self.password))
+            logger.debug("Auth information = {} {}".format(self.user, self.password))
+
+            for chunk in r.iter_content(chunk_size=1024):
+                # writing one chunk at a time to  file
+                if chunk:
+                    logger.warning("Writing 1 Kbyte chunk to the file like object")
+                    file_obj.write(chunk)
+            logger.info("---- Completed downloading the file. ----")
+            return self.answer(r.status_code, file_obj)
+
+        except Exception:
+            logger.warning('Request: {}'.format(r.request.__dict__))
+            logger.warning('Response: {}'.format(r.__dict__))
+            raise
+        finally:
+            if r:
+                r.connection.close()
+
+
     def get(self, uri):
         """Get request
         
@@ -99,7 +141,7 @@ class Network:
                              timeout=Settings.requests_timeout,
                              headers={},
                              auth=HTTPDigestAuth(self.user, self.password))
-            print("Auth information = {} {}".format(self.user, self.password))
+            logger.debug("Auth information = {} {}".format(self.user, self.password))
 
             return self.answer(r.status_code, r.json())
 
@@ -161,7 +203,14 @@ class Network:
                                timeout=Settings.requests_timeout,
                                headers={"Content-Type" : "application/json"},
                                auth=HTTPDigestAuth(self.user, self.password))
-            return self.answer(r.status_code, r.json())
+
+            try:
+                output = r.json()
+            except:
+                logger.warning("PATCH doesnt return data!")
+                output = {}
+
+            return self.answer(r.status_code, output)
         except Exception as e:
 
             raise e

@@ -17,7 +17,6 @@ Atlas module
 
 Core module which provides access to MongoDB Atlas Cloud Provider APIs
 """
-
 from .settings import Settings
 from .network import Network
 from .errors import *
@@ -34,11 +33,15 @@ from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, 
     OptionalAtlasMeasurement
 from atlasapi.events import atlas_event_factory, ListOfEvents
 import logging
-from typing import Union, Iterable, Set
+from typing import Union, Iterable, Set, BinaryIO
 from atlasapi.errors import ErrAtlasUnauthorized
 from atlasapi.alerts import Alert
 from time import time
 from atlasapi.whitelist import WhitelistEntry
+from atlasapi.maintenance_window import MaintenanceWindow, Weekdays
+from atlasapi.lib import AtlasLogNames, LogLine
+from requests import get
+import gzip
 
 logger = logging.getLogger('Atlas')
 
@@ -67,6 +70,7 @@ class Atlas:
         self.logger = logging.getLogger(name='Atlas')
         self.Alerts = Atlas._Alerts(self)
         self.Whitelist = Atlas._Whitelist(self)
+        self.MaintenanceWindows = Atlas._MaintenanceWindows(self)
 
     class _Clusters:
         """Clusters API
@@ -270,7 +274,8 @@ class Atlas:
 
 
             :param cluster: The name of the cluster to modify
-            :param cluster_config: A ClusterConfig object containing the new configuration, or a dict containing fragment.
+            :param cluster_config: A ClusterConfig object containing the new configuration,
+                                   or a dict containing fragment.
             :return: dict:  A dictionary of the new cluster config
             TODO: Option to return a cluster config object
             """
@@ -278,12 +283,12 @@ class Atlas:
                                                                                 CLUSTER_NAME=cluster)
             try:
                 self.get_single_cluster_as_obj(cluster=cluster)
-            except ErrAtlasNotFound as e:
+            except ErrAtlasNotFound:
                 logger.error('Could not find existing cluster {}'.format(cluster))
                 raise ValueError('Could not find existing cluster {}'.format(cluster))
 
             if type(cluster_config) == ClusterConfig:
-                logger.warning("We recevied a full cluster_config, converting to dict")
+                logger.warning("We received a full cluster_config, converting to dict")
                 try:
                     new_config = cluster_config.as_modify_dict()
                 except Exception as e:
@@ -554,6 +559,92 @@ class Atlas:
                     logger.error('An error occurred while retrieving metrics for host: {}.'
                                  'The error was {}'.format(each_host.hostname, e))
                     logger.warning('Will continue with next host. . . ')
+
+        def get_log_for_host(self, host_obj: Host,
+                             log_name: AtlasLogNames = AtlasLogNames.MONGODB,
+                             date_from: datetime = None,
+                             date_to: datetime = None,
+                             ) -> BinaryIO:
+            """
+            Retrieves the designated logfile archive of designated log_name and for the designated dates,
+            and returns a binary file like object.
+            Args:
+                host_obj: And atlas Host object to retrieve logs for
+                log_name: an AtlasLogNames type
+                date_from: The datetime to start from
+                date_to: The datetime to gather till
+
+            Returns: A BinaryIO object containing the gzipped log file.
+
+            """
+            uri = Settings.api_resources["Monitoring and Logs"]["Get the log file for a host in the cluster"].format(
+                group_id=self.atlas.group,
+                host=host_obj.hostname,
+                logname=log_name.value,
+                date_from=date_from,
+                date_to=date_to
+            )
+            # Build the request
+            if date_to is None and date_from is None:
+                logger.info('No dates passed so we are not going to send date params, API default will be used.')
+                uri = Settings.BASE_URL + uri
+            elif date_to is None and date_from is not None:
+                logger.info('Received only a date_from, so sending only startDate')
+                uri = Settings.BASE_URL + uri + f'?startDate={int(round(date_from.timestamp()))}'
+            elif date_to is not None and date_from is None:
+                uri = Settings.BASE_URL + uri + f'?endDate={int(round(date_to.timestamp()))}'
+            else:
+                uri = Settings.BASE_URL + uri + f'?endDate={int(round(date_to.timestamp()))}' \
+                                                f'&startDate={int(round(date_from.timestamp()))}'
+            logger.info(f'The URI used will be {uri}')
+            return_val = self.atlas.network.get_file(uri)
+            return return_val
+
+        def get_loglines_for_host(self, host_obj: Host,
+                                  log_name: AtlasLogNames = AtlasLogNames.MONGODB,
+                                  date_from: datetime = None,
+                                  date_to: datetime = None,
+                                  ) -> Iterable[LogLine]:
+            """
+            Gathers the designated log file from Atlas, and then returns the lines therin contained.
+
+            Args:
+                host_obj: And atlas Host object to retrive logs for
+                log_name: an AtlasLogNames type
+                date_from: The datetime to start from
+                date_to: The datetime to gather till
+            """
+            result = self.get_log_for_host(host_obj, log_name, date_from, date_to)
+            result.seek(0)
+            content = gzip.GzipFile(fileobj=result)
+            for each in content.readlines():
+                yield LogLine(each.decode())
+
+        def get_logs_for_project(self,
+                                 log_name: AtlasLogNames = AtlasLogNames.MONGODB,
+                                 date_from: datetime = None,
+                                 date_to: datetime = None) -> Iterable[Host]:
+            """
+            Yields File-like objects containing the gzipped log file requested for each and every host in the project
+            using the same date filters and log_name (type)
+            Args:
+                log_name: AtlasLognames: The type of log to be retrieved
+                date_from: datetime : Start of log entries
+                date_to: datetime: End of log entries
+
+            Returns:
+                Iterable[BinaryIO]: An iterable of file-like objects.
+            """
+            for each_host in self.host_list:
+                try:
+                    log_file: BinaryIO = self.get_log_for_host(host_obj=each_host,
+                                                               log_name=log_name,
+                                                               date_from=date_from,
+                                                               date_to=date_to)
+                except Exception as e:
+                    raise e
+                each_host.add_log_file(name=log_name,file=log_file)
+                yield each_host
 
         def _get_measurement_for_host(self, host_obj: Host, granularity: AtlasGranularities = AtlasGranularities.HOUR,
                                       period: AtlasPeriods = AtlasPeriods.WEEKS_1,
@@ -1026,6 +1117,115 @@ class Atlas:
             uri = Settings.api_resources["Whitelist"]["Delete Whitelist Entry"] % (
                 self.atlas.group, ip_address)
             return self.atlas.network.delete(Settings.BASE_URL + uri)
+
+    class _MaintenanceWindows:
+        """Maintenance Windows API
+
+        see: https://docs.atlas.mongodb.com/reference/api/maintenance-windows/
+
+        The maintenanceWindow resource provides access to retrieve or update the current Atlas project maintenance
+         window. To learn more about Maintenance Windows, see the Set Preferred Cluster Maintenance Start Time setting
+         on the View/Modify Project Settings page.
+
+        Args:
+            atlas (Atlas): Atlas instance
+        """
+
+        def __init__(self, atlas):
+            self.atlas = atlas
+
+        def _get_maint_window(self, as_obj: bool = True) -> Union[dict, MaintenanceWindow]:
+            """
+            (Internal)Gets the current maint window configuration for the the project.
+
+            the current_config should be used instead.
+
+            Args:
+                as_obj: Return data as a MaintenanceWindowObj
+
+            Returns:
+
+            """
+            uri = Settings.api_resources["Maintenance Windows"]["Get Maintenance Window"].format(
+                GROUP_ID=self.atlas.group)
+            response = self.atlas.network.get(Settings.BASE_URL + uri)
+            if as_obj is False:
+                return response
+            else:
+                return MaintenanceWindow.from_dict(response)
+
+        def _update_maint_window(self, new_config: MaintenanceWindow) -> bool:
+            """
+            Uses the patch endpoint to update maint window settings.
+
+            Args:
+                as_obj: Return data as a MaintenanceWindowObj
+
+            Returns:
+
+            """
+
+            uri = Settings.api_resources["Maintenance Windows"]["Update Maintenance Window"].format(
+                GROUP_ID=self.atlas.group)
+            self.atlas.network.patch(Settings.BASE_URL + uri, payload=new_config.as_update_dict())
+
+            return True
+
+        def _defer_maint_window(self) -> bool:
+            """
+            Used to defer the current maint window.
+
+            TODO: Is this private method really needed? It is orignally here to provide a more flexible method to use
+            if the public one was too simple, but may not be needed in the end.
+            Returns:
+
+            """
+            uri = Settings.api_resources["Maintenance Windows"]["Defer Maintenance Window"].format(
+                GROUP_ID=self.atlas.group)
+            try:
+                self.atlas.network.post(uri=Settings.BASE_URL + uri, payload={})
+            except ErrAtlasBadRequest as e:
+                if e.details.get('errorCode', None) == 'ATLAS_MAINTENANCE_NOT_SCHEDULED':
+                    logger.warning(e.details.get('detail', 'No Detail available'))
+                    return False
+                else:
+                    raise e
+            return True
+
+        def defer(self) -> dict:
+            """
+            Defers the currently scheduled maintenance window. 
+            
+            Returns: bool:
+
+            """
+            output = self._defer_maint_window()
+            return dict(maint_deffered=output)
+
+        def current_config(self) -> MaintenanceWindow:
+            """
+            The current Maintainable Window configuration.
+
+            Returns: MaintainableWindow object
+
+            """
+            return self._get_maint_window(as_obj=True)
+
+        def set_config(self, new_config: MaintenanceWindow) -> bool:
+            """
+            Sets the maint configuration to the values in the passed MaintWindow Object
+
+            Will only set those values which are not none in the MaintWindow Object. Currently you can not use
+            this method to set a value as null. (This is not supported by the API anyway)
+
+            Args:
+                new_config: A MaintainenceWindow Object
+
+            Returns: bool: True is success
+
+            """
+            output: bool = self._update_maint_window(new_config=new_config)
+            return output
 
 
 class AtlasPagination:

@@ -61,7 +61,7 @@ Status : [50%]
 
 - Get All Alerts :ballot_box_with_check:
 - Get an Alert :ballot_box_with_check:
-- Acknowledge an Alert (include Unacknowledge) (BROKEN) :SOS:
+- Acknowledge an Alert (include Unacknowledge) (BROKEN)
 
 Alert Configurations
 --------------------
@@ -87,7 +87,8 @@ Hosts
 +++++
 
 - Get measurements for the specified host.
-
+- Get logfile for the specified host.
+- Get Loglines for the specified host.
 
 Databases
 +++++++++
@@ -105,9 +106,14 @@ Disks
 Logs
 ++++
 
-- Get the log file for a host in the cluster.
+Status : [50%]
 
-Status : [12.5%]
+
+- Get the log file for a host in the cluster. :ballot_box_with_check:
+- Get loglines for a host in the cluster. :ballot_box_with_check:
+- Get log files for all hosts in a cluster (#24)
+- Get log files for all hosts in a project (#25) :ballot_box_with_check:
+
 
 IP Whitelist
 ------------
@@ -134,3 +140,14 @@ Organizations
 
 Status: [0%]
 
+
+Maintenance Windows
+--------------------
+
+Status: [60%]
+
+- Get Maintenance Window Settings :ballot_box_with_check:
+- Update Maintenance Window Settings :ballot_box_with_check:
+- Defer Maintenance for one week :ballot_box_with_check:
+- Commence Maintenance ASAP
+- Clear Maintenance Window

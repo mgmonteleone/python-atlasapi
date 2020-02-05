@@ -40,13 +40,13 @@ class Alert(object):
 
         try:
             self.resolved: Union[datetime, None] = datetime.strptime(data_dict.get("resolved", None),
-                                                                         FORMAT).astimezone(tz=pytz.UTC)
+                                                                     FORMAT).astimezone(tz=pytz.UTC)
         except ValueError:
             self.resolved: Union[datetime, None] = None
 
         try:
             self.updated: Union[datetime, None] = datetime.strptime(data_dict.get("updated", None),
-                                                                         FORMAT).astimezone(tz=pytz.UTC)
+                                                                    FORMAT).astimezone(tz=pytz.UTC)
         except ValueError:
             self.updated: Union[datetime, None] = None
 

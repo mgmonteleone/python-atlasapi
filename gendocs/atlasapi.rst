@@ -93,3 +93,10 @@ atlasapi\.specs module
     :undoc-members:
     :show-inheritance:
 
+atlasapi\.maintenance_window module
+------------------------
+
+.. automodule:: atlasapi.maintenance_window
+    :members:
+    :undoc-members:
+    :show-inheritance:

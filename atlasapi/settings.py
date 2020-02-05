@@ -38,8 +38,8 @@ class Settings:
                                                          "PORT}/disks",
             "Get measurements of for host": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/disks/{"
                                             "DISK-NAME}/measurements",
-            "Get the log file for a host in the cluster.": "/api/atlas/v1.0/groups/{GROUP-ID}/clusters/{"
-                                                           "HOSTNAME}/logs/mongodb.gz"
+            "Get the log file for a host in the cluster": "/api/atlas/v1.0/groups/{group_id}/clusters/{"
+                                                           "host}/logs/{logname}"
         },
         "Events": {
             "Get All Project Events": "/api/atlas/v1.0/groups/{group_id}/events?pageNum={"
@@ -75,7 +75,14 @@ class Settings:
             "Get Whitelist Entry": "/api/atlas/v1.0/groups/%s/whitelist/%s",
             "Create Whitelist Entry": "/api/atlas/v1.0/groups/%s/whitelist",
             "Delete Whitelist Entry": "/api/atlas/v1.0/groups/%s/whitelist/%s"
+        },
+        "Maintenance Windows": {
+            "Get Maintenance Window": "/api/atlas/v1.0/groups/{GROUP_ID}/maintenanceWindow",
+            "Update Maintenance Window": "/api/atlas/v1.0/groups/{GROUP_ID}/maintenanceWindow",
+            "Defer Maintenance Window": "/api/atlas/v1.0/groups/{GROUP_ID}/maintenanceWindow/defer",
+            "Delete Maintenance Window": "/api/atlas/v1.0/groups/{GROUP_ID}/maintenanceWindow"
         }
+
     }
 
     # Atlas enforced
@@ -89,6 +96,7 @@ class Settings:
 
     # Requests
     requests_timeout = 10
+    file_request_timeout = 360
 
     # HTTP Return code
     SUCCESS = 200

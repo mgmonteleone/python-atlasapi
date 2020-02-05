@@ -20,6 +20,8 @@ class BaseTests(unittest.TestCase):
         self.API_KEY = getenv('ATLAS_KEY', None)
         self.GROUP_ID = getenv('ATLAS_GROUP', None)
 
+        #print("env var is".format(getenv('ATLAS_USER', None)))
+
         self.TEST_CLUSTER_NAME = TEST_CLUSTER_NAME
         self.TEST_CLUSTER2_NAME = TEST_CLUSTER2_NAME
 

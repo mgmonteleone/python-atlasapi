@@ -33,11 +33,11 @@ from datetime import datetime
 from enum import Enum
 from dateutil import parser
 from .atlas_types import *
-from typing import Optional, NewType, List, Any, Union, Iterable
+from typing import Optional, NewType, List, Any, Union, Iterable, BinaryIO
 from datetime import datetime
 import isodate
 from .measurements import AtlasMeasurement, AtlasMeasurementTypes
-from .lib import AtlasGranularities, AtlasPeriods
+from .lib import AtlasGranularities, AtlasPeriods, AtlasLogNames
 import logging
 from future import standard_library
 
@@ -59,6 +59,18 @@ class ReplicaSetTypes(Enum):
     NO_DATA = 'No data available'
     SHARD_CONFIG_PRIMARY = 'Config server'
     SHARD_CONFIG_SECONDARY = 'Config server'
+
+
+class HostLogFile(object):
+    def __init__(self, log_name: AtlasLogNames = None, log_file_binary: BinaryIO = None ):
+        """
+        Container for Atlas log files for a host instance
+        Args:
+            log_name: AtlasLogName: They type of log file
+            log_file_binary: BinaryIO: The binary of the gzipped log file
+        """
+        self.log_file_binary = log_file_binary
+        self.log_name = log_name
 
 
 class Host(object):
@@ -90,6 +102,7 @@ class Host(object):
             self.type = ReplicaSetTypes[data.get("typeName", "NO_DATA")]
             self.measurements = []
             self.cluster_name = self.hostname.split('-')[0]
+            self.log_files: Optional[List[HostLogFile]] = None
 
     def get_measurement_for_host(self, granularity: AtlasGranularities = AtlasGranularities.HOUR,
                                  period: AtlasPeriods = AtlasPeriods.WEEKS_1,
@@ -179,6 +192,19 @@ class Host(object):
     def add_measurements(self, measurement):
         # TODO: Make measurements unique, use a set instead, but then how do we concat 2?
         self.measurements = self.measurements + measurement
+
+    def add_log_file(self, name: AtlasLogNames, file: BinaryIO):
+        """
+        Adds the passed log file to the hosts object
+        Args:
+            name: AtlasLogNames: The type of logfile to be appended.
+            file: BinaryIO: The file to be appended
+        """
+        log_obj = HostLogFile(log_name=name, log_file_binary=file)
+        if self.log_files is None:
+            self.log_files = [log_obj]
+        else:
+            self.log_files.append(log_obj)
 
     def __hash__(self):
         return hash(self.hostname)

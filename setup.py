@@ -37,6 +37,12 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
+    entry_points={
+        'console_scripts': [
+            #final script name:local package name:local function name
+            'atlascli=atlascli.cli:main',
+        ]
+    },
     extras_require={}
 
 )

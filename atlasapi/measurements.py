@@ -204,15 +204,17 @@ ListOfAtlasMeasurementValues = NewType('ListOfAtlasMeasurementValues', List[Opti
 
 
 class AtlasMeasurement(object):
+    """A point in time container for an Atlas measurement.
+
+            For a certain period, granularity and measurementType hoslds a list fo measurementValues.
+
+            Args:
+                name (AtlasMeasurementTypes): The name of the measurement type
+                period (AtlasPeriods): The period the measurement covers
+                granularity (AtlasGranularities): The granularity used for the measurement
+                measurements (List[AtlasMeasurementValue]): A list of the actual measurement values
+            """
     def __init__(self, name, period, granularity, measurements=list()):
-        """
-
-        :type measurements: ListOfAtlasMeasurementValues
-        :type granularity: AtlasGranularities
-
-        :type period: AtlasPeriods
-        :type name: atlasapi.measurements.AtlasMeasurementTypes
-        """
         self.name = name
         self.period = period
         self.granularity = granularity
@@ -220,6 +222,12 @@ class AtlasMeasurement(object):
 
     @property
     def measurements(self):
+        """
+        Getter for the measurements.
+
+        Returns:
+            Iterator[AtlasMeasurementValue]: An iterator containing values objects.
+        """
         for item in self._measurements:
             yield item
 
@@ -241,34 +249,40 @@ class AtlasMeasurement(object):
 
     @property
     def date_start(self):
-        """
-        :rtype: datetime
+        """The date of the first measurement.
+
+        Returns:
+            datetime: The date of the first measurement.
         """
         seq = [x.timestamp for x in self._measurements]
         return min(seq)
 
     @property
     def date_end(self):
-        """
+        """The date of the last measurement
 
-        :rtype: datetime
+        Returns:
+            datetime: The date of the last measurement.
+
         """
         seq = [x.timestamp for x in self._measurements]
         return max(seq)
 
     @property
     def measurements_count(self):
-        """
+        """The count of measurements
 
-        :rtype: int
+        Returns:
+            int: The count of measurements in the set
         """
         return len(self._measurements)
 
     @property
     def as_dict(self):
-        """
-        Returns the measurement as a dict, including the computed properties.
-        :rtype: dict
+        """Returns the measurement as a dict, including the computed properties.
+
+        Returns:
+            dict:
         """
         return dict(measurements=self._measurements, date_start=self.date_start, date_end=self.date_end, name=self.name,
                     period=self.period, granularity=self.granularity, measurements_count=self.measurements_count

@@ -397,7 +397,7 @@ class Atlas:
         """
 
         def __init__(self, atlas):
-            self.atlas = atlas
+            self.atlas: atlas = atlas
             self.logger = logging.getLogger('Atlas.Hosts')
             self.host_list_with_measurements: Optional[List[Host]] = list()
             self.host_list: Optional[List[Host]] = list()
@@ -446,14 +446,18 @@ class Atlas:
 
             return return_val
 
-        def fill_host_list(self, for_cluster: Optional[str] = None) -> ListOfHosts:
+        def fill_host_list(self, for_cluster: Optional[str] = None) -> List[Host]:
             """
             Fills the `self.hostname` property with the current hosts for the project/group.
 
             Optionally, one can specify the `for_cluster` parameter to fill the host list with
             hosts only from the specified cluster.
 
-            :param for_cluster: str: The name of the cluster for filter the host list.
+            Args:
+                for_cluster (str): The name of the cluster for filter the host list.
+
+            Returns:
+                List[Host]: A lost of  `Host` objects
             """
             host_list = self._get_all_hosts(iterable=True)
             if for_cluster:
@@ -484,6 +488,9 @@ class Atlas:
 
 
             This is done by parsing the hostnames of the hosts, so any changes to that logic will break this.
+
+            Returns:
+                Set[str}: A set of cluster names
             """
             cluster_list = set()
             for host in self.host_list:
@@ -493,7 +500,10 @@ class Atlas:
         def host_list_by_cluster(self, cluster_name: str) -> Iterable[Host]:
             """
             Returns hosts belonging to the named cluster.
-            :param cluster_name:
+            Args:
+                cluster_name (str):
+            Returns:
+                 Iterable[Host]: An interator of Host Objects.
             """
             for host in self.host_list:
                 if host.cluster_name == cluster_name:
@@ -501,11 +511,13 @@ class Atlas:
 
         def update_host_list(self, host_obj: Host) -> None:
             """
-            Replaces a host into the host_list property.
+            Places a host into the host_list property.
 
-            Returns boolean indicating if the object was replaced.
-            :rtype: bool
-            :param host_obj: Host: A host object ith measurements.
+            Args:
+                host_obj: Host: A host object with measurements.
+
+            Returns:
+                None:
             """
             for n, i in enumerate(self.host_list):
                 if i == host_obj:
@@ -526,7 +538,7 @@ class Atlas:
                         host objects, which may unnecessarily consume memory.
 
                         Keyword Args:
-                            granularity (AtlasGranuarities): the desired granularity
+                            granularity (AtlasGranularities): the desired granularity
                             period (AtlasPeriods): The desired period
                             measurement (AtlasMeasurementTypes) : The desired measurement or Measurement class
 
@@ -567,13 +579,15 @@ class Atlas:
             """
             Retrieves the designated logfile archive of designated log_name and for the designated dates,
             and returns a binary file like object.
-            Args:
-                host_obj: And atlas Host object to retrieve logs for
-                log_name: an AtlasLogNames type
-                date_from: The datetime to start from
-                date_to: The datetime to gather till
 
-            Returns: A BinaryIO object containing the gzipped log file.
+            Args:
+                host_obj (Host): And atlas Host object to retrieve logs for
+                log_name (AtlasLogNames): an AtlasLogNames type
+                date_from (datetime.datetime): The datetime to start from
+                date_to (datetime.datetime): The datetime to gather till
+
+            Returns:
+                BinaryIO: A BinaryIO object containing the gzipped log file.
 
             """
             uri = Settings.api_resources["Monitoring and Logs"]["Get the log file for a host in the cluster"].format(
@@ -605,13 +619,19 @@ class Atlas:
                                   date_to: datetime = None,
                                   ) -> Iterable[LogLine]:
             """
-            Gathers the designated log file from Atlas, and then returns the lines therin contained.
+            Gathers the designated log file from Atlas, and then returns the lines therein contained.
+
+            Does so by downloading the gzip file into memory, ungzipping and then unpacking each log line
+            as a LogLine Object.
 
             Args:
-                host_obj: And atlas Host object to retrive logs for
-                log_name: an AtlasLogNames type
-                date_from: The datetime to start from
-                date_to: The datetime to gather till
+                host_obj (Host): An atlas Host object to retrive logs for
+                log_name (str): an AtlasLogNames type
+                date_from (datetime): The datetime to start from
+                date_to (datetime): The datetime to gather till
+
+            Returns:
+                Iterable[LogLine] : Yeilds LogLine objects, one for each logline found in the file.
             """
             result = self.get_log_for_host(host_obj, log_name, date_from, date_to)
             result.seek(0)
@@ -624,15 +644,19 @@ class Atlas:
                                  date_from: datetime = None,
                                  date_to: datetime = None) -> Iterable[Host]:
             """
-            Yields File-like objects containing the gzipped log file requested for each and every host in the project
-            using the same date filters and log_name (type)
+            Yields A Host object per Host in the project with  a File-like objects containing the gzipped log file
+            requested for each  host in the project using the same date filters and log_name (type) in the log_files
+            property.
+
+            Currently the log_file property (List) is usually with only one item.
             Args:
-                log_name: AtlasLognames: The type of log to be retrieved
-                date_from: datetime : Start of log entries
-                date_to: datetime: End of log entries
+                log_name (AtlasLogNames): The type of log to be retrieved
+                date_from (datetime) : Start of log entries
+                date_to (datetime): End of log entries
 
             Returns:
-                Iterable[BinaryIO]: An iterable of file-like objects.
+                Iterable[Host]: Yields Host objects, with full host information as well as the logfile in the log_files
+                property.
             """
             for each_host in self.host_list:
                 try:

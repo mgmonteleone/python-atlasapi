@@ -63,34 +63,49 @@ class ReplicaSetTypes(Enum):
 
 class HostLogFile(object):
     def __init__(self, log_name: AtlasLogNames = None, log_file_binary: BinaryIO = None ):
-        """
-        Container for Atlas log files for a host instance
+        """Container for Atlas log files for a host instance
+
         Args:
-            log_name: AtlasLogName: They type of log file
-            log_file_binary: BinaryIO: The binary of the gzipped log file
+            log_name (AtlasLogName): They type of log file
+            log_file_binary (BinaryIO): The binary of the gzipped log file
         """
         self.log_file_binary = log_file_binary
         self.log_name = log_name
 
 
 class Host(object):
-    """A Atlas host"""
+    """
+        An Atlas Host
 
+        Args:
+            data (dict): An Atlas format host data dictionary.
+
+        Attributes:
+            created (datetime): The datetime the host was created.
+            group_id (str): The Atlas group(project) id that this host belongs to
+            hostname (str): The fqdn hostname
+            id (str): The internal atlas id of the host.
+            last_ping (Union[datetime,str]): The datetime of the last Automation Agent ping
+            links (List[str]): A list of internal reference links for the host
+            port (int): The TCP port the instance is running on.
+            replica_set_name (str): The name of the replica set running on the instance
+            type (ReplicaSetTypes): The type of replica set this intstance is a member of
+            measurements (Optional[List[AtlasMeasurement]]: Holds list of host Measurements
+            cluster_name (str): The cluster name (taken from the hostname)
+            log_files (Optional[List[HostLogFile]]): Holds list of log files when requested.
+
+    """
     def __init__(self, data):
-        """
-
-        :type data: dict
-        """
         if type(data) != dict:
             raise NotADirectoryError('The data parameter must be ann dict, you sent a {}'.format(type(data)))
         else:
             try:
-                self.created = parser.parse(data.get("created", None))
+                self.created: datetime = parser.parse(data.get("created", None))
             except (ValueError, OverflowError):
-                self.create = data.get("created", None)
-            self.group_id = data.get("group_id", None)
-            self.hostname = data.get("hostname", None)
-            self.id = data.get("id", None)
+                self.created = data.get("created", None)
+            self.group_id: str = data.get("group_id", None)
+            self.hostname: str = data.get("hostname", None)
+            self.id: str = data.get("id", None)
 
             try:
                 self.last_ping = parser.parse(data.get("lastPing", None))
@@ -124,7 +139,7 @@ class Host(object):
 
         Keyword Args:
             host_obj (Host): the host
-            granularity (AtlasGranuarities): the desired granularity
+            granularity (AtlasGranularities): the desired granularity
             period (AtlasPeriods): The desired period
             measurement (AtlasMeasurementTypes) : The desired measurement or Measurement class
             pageNum (int): Page number
@@ -137,13 +152,6 @@ class Host(object):
         Raises:
             ErrPaginationLimits: Out of limits
 
-            :rtype: List[AtlasMeasurement]
-            :type iterable: OptionalBool
-            :type itemsPerPage: OptionalInt
-            :type pageNum: OptionalInt
-            :type period: AtlasPeriods
-            :type granularity: AtlasGranularities
-            :type measurement: AtlasMeasurementTypes
 
         """
 
@@ -189,16 +197,17 @@ class Host(object):
         else:
             return return_val
 
-    def add_measurements(self, measurement):
+    def add_measurements(self, measurement) -> None:
         # TODO: Make measurements unique, use a set instead, but then how do we concat 2?
         self.measurements = self.measurements + measurement
 
-    def add_log_file(self, name: AtlasLogNames, file: BinaryIO):
+    def add_log_file(self, name: AtlasLogNames, file: BinaryIO) -> None:
         """
         Adds the passed log file to the hosts object
+
         Args:
-            name: AtlasLogNames: The type of logfile to be appended.
-            file: BinaryIO: The file to be appended
+            name (AtlasLogNames): The type of logfile to be appended.
+            file (BinaryIO): The file to be appended
         """
         log_obj = HostLogFile(log_name=name, log_file_binary=file)
         if self.log_files is None:

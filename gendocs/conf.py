@@ -54,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'atlasapi'
-copyright = '2019, Matthew G. Monteleone'
+copyright = '2020, Matthew G. Monteleone'
 author = 'Matthew G. Monteleone'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -62,7 +62,7 @@ author = 'Matthew G. Monteleone'
 # built documents.
 #
 # The short X.Y version.
-version = '0.10.2'
+version = '0.11.0'
 # The full version, including alpha/beta/rc tags.
 release = '0.11.0'
 

@@ -39,6 +39,7 @@ from atlasapi.errors import ErrAtlasUnauthorized
 from atlasapi.alerts import Alert
 from time import time
 from atlasapi.whitelist import WhitelistEntry
+from atlasapi.maintenance_window import MaintenanceWindow, Weekdays
 
 logger = logging.getLogger('Atlas')
 
@@ -67,6 +68,7 @@ class Atlas:
         self.logger = logging.getLogger(name='Atlas')
         self.Alerts = Atlas._Alerts(self)
         self.Whitelist = Atlas._Whitelist(self)
+        self.MaintenanceWindows = Atlas._MaintenanceWindows(self)
 
     class _Clusters:
         """Clusters API
@@ -270,7 +272,8 @@ class Atlas:
 
 
             :param cluster: The name of the cluster to modify
-            :param cluster_config: A ClusterConfig object containing the new configuration, or a dict containing fragment.
+            :param cluster_config: A ClusterConfig object containing the new configuration,
+                                   or a dict containing fragment.
             :return: dict:  A dictionary of the new cluster config
             TODO: Option to return a cluster config object
             """
@@ -278,12 +281,12 @@ class Atlas:
                                                                                 CLUSTER_NAME=cluster)
             try:
                 self.get_single_cluster_as_obj(cluster=cluster)
-            except ErrAtlasNotFound as e:
+            except ErrAtlasNotFound:
                 logger.error('Could not find existing cluster {}'.format(cluster))
                 raise ValueError('Could not find existing cluster {}'.format(cluster))
 
             if type(cluster_config) == ClusterConfig:
-                logger.warning("We recevied a full cluster_config, converting to dict")
+                logger.warning("We received a full cluster_config, converting to dict")
                 try:
                     new_config = cluster_config.as_modify_dict()
                 except Exception as e:
@@ -1026,6 +1029,115 @@ class Atlas:
             uri = Settings.api_resources["Whitelist"]["Delete Whitelist Entry"] % (
                 self.atlas.group, ip_address)
             return self.atlas.network.delete(Settings.BASE_URL + uri)
+
+    class _MaintenanceWindows:
+        """Maintenance Windows API
+
+        see: https://docs.atlas.mongodb.com/reference/api/maintenance-windows/
+
+        The maintenanceWindow resource provides access to retrieve or update the current Atlas project maintenance
+         window. To learn more about Maintenance Windows, see the Set Preferred Cluster Maintenance Start Time setting
+         on the View/Modify Project Settings page.
+
+        Args:
+            atlas (Atlas): Atlas instance
+        """
+
+        def __init__(self, atlas):
+            self.atlas = atlas
+
+        def _get_maint_window(self, as_obj: bool = True) -> Union[dict, MaintenanceWindow]:
+            """
+            (Internal)Gets the current maint window configuration for the the project.
+
+            the current_config should be used instead.
+
+            Args:
+                as_obj: Return data as a MaintenanceWindowObj
+
+            Returns:
+
+            """
+            uri = Settings.api_resources["Maintenance Windows"]["Get Maintenance Window"].format(
+                GROUP_ID=self.atlas.group)
+            response = self.atlas.network.get(Settings.BASE_URL + uri)
+            if as_obj is False:
+                return response
+            else:
+                return MaintenanceWindow.from_dict(response)
+
+        def _update_maint_window(self, new_config: MaintenanceWindow) -> bool:
+            """
+            Uses the patch endpoint to update maint window settings.
+
+            Args:
+                as_obj: Return data as a MaintenanceWindowObj
+
+            Returns:
+
+            """
+
+            uri = Settings.api_resources["Maintenance Windows"]["Update Maintenance Window"].format(
+                GROUP_ID=self.atlas.group)
+            self.atlas.network.patch(Settings.BASE_URL + uri, payload=new_config.as_update_dict())
+
+            return True
+
+        def _defer_maint_window(self) -> bool:
+            """
+            Used to defer the current maint window.
+
+            TODO: Is this private method really needed? It is orignally here to provide a more flexible method to use
+            if the public one was too simple, but may not be needed in the end.
+            Returns:
+
+            """
+            uri = Settings.api_resources["Maintenance Windows"]["Defer Maintenance Window"].format(
+                GROUP_ID=self.atlas.group)
+            try:
+                self.atlas.network.post(uri=Settings.BASE_URL + uri, payload={})
+            except ErrAtlasBadRequest as e:
+                if e.details.get('errorCode', None) == 'ATLAS_MAINTENANCE_NOT_SCHEDULED':
+                    logger.warning(e.details.get('detail', 'No Detail available'))
+                    return False
+                else:
+                    raise e
+            return True
+
+        def defer(self) -> dict:
+            """
+            Defers the currently scheduled maintenance window. 
+            
+            Returns: bool:
+
+            """
+            output = self._defer_maint_window()
+            return dict(maint_deffered=output)
+        
+        def current_config(self) -> MaintenanceWindow:
+            """
+            The current Maintainable Window configuration.
+
+            Returns: MaintainableWindow object
+
+            """
+            return self._get_maint_window(as_obj=True)
+
+        def set_config(self, new_config: MaintenanceWindow) -> bool:
+            """
+            Sets the maint configuration to the values in the passed MaintWindow Object
+
+            Will only set those values which are not none in the MaintWindow Object. Currently you can not use
+            this method to set a value as null. (This is not supported by the API anyway)
+
+            Args:
+                new_config: A MaintainenceWindow Object
+
+            Returns: bool: True is success
+
+            """
+            output: bool = self._update_maint_window(new_config=new_config)
+            return output
 
 
 class AtlasPagination:

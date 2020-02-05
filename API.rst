@@ -61,7 +61,7 @@ Status : [50%]
 
 - Get All Alerts :ballot_box_with_check:
 - Get an Alert :ballot_box_with_check:
-- Acknowledge an Alert (include Unacknowledge) (BROKEN) :SOS:
+- Acknowledge an Alert (include Unacknowledge) (BROKEN)
 
 Alert Configurations
 --------------------
@@ -134,3 +134,14 @@ Organizations
 
 Status: [0%]
 
+
+Maintenance Windows
+--------------------
+
+Status: [40%]
+
+- Get Maintenance Window Settings :ballot_box_with_check:
+- Update Maintenance Window Settings :ballot_box_with_check:
+- Defer Maintenance for one week
+- Commence Maintenance ASAP
+- Clear Maintenance Window

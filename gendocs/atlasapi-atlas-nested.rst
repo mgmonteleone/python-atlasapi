@@ -33,3 +33,12 @@ Atlas._Alerts
     :undoc-members:
     :show-inheritance:
 
+
+Atlas._MaintenanceWindows
+-------------
+
+.. autoclass:: atlasapi.atlas::Atlas._MaintenanceWindows
+    :members:
+    :undoc-members:
+    :show-inheritance:
+

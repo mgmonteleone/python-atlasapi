@@ -75,7 +75,14 @@ class Settings:
             "Get Whitelist Entry": "/api/atlas/v1.0/groups/%s/whitelist/%s",
             "Create Whitelist Entry": "/api/atlas/v1.0/groups/%s/whitelist",
             "Delete Whitelist Entry": "/api/atlas/v1.0/groups/%s/whitelist/%s"
+        },
+        "Maintenance Windows": {
+            "Get Maintenance Window": "/api/atlas/v1.0/groups/{GROUP_ID}/maintenanceWindow",
+            "Update Maintenance Window": "/api/atlas/v1.0/groups/{GROUP_ID}/maintenanceWindow",
+            "Defer Maintenance Window": "/api/atlas/v1.0/groups/{GROUP_ID}/maintenanceWindow/defer",
+            "Delete Maintenance Window": "/api/atlas/v1.0/groups/{GROUP_ID}/maintenanceWindow"
         }
+
     }
 
     # Atlas enforced

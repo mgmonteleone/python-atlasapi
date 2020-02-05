@@ -161,7 +161,14 @@ class Network:
                                timeout=Settings.requests_timeout,
                                headers={"Content-Type" : "application/json"},
                                auth=HTTPDigestAuth(self.user, self.password))
-            return self.answer(r.status_code, r.json())
+
+            try:
+                output = r.json()
+            except:
+                logger.warning("PATCH doesnt return data!")
+                output = {}
+
+            return self.answer(r.status_code, output)
         except Exception as e:
 
             raise e

@@ -36,10 +36,6 @@ Documentation
 .. image:: https://readthedocs.org/projects/python-atlasapi/badge/?version=latest
      :target: https://python-atlasapi.readthedocs.io/en/latest/?badge=latest Found at https://python-atlasapi.readthedocs.io/
 
-Autobuilt on each commit.
-
-Documentation
--------------
 Found at https://python-atlasapi.readthedocs.io/
 
 Autobuilt on each commit.
@@ -200,11 +196,11 @@ Clusters
 
 
     # Modify a cluster
-     existing_config = a.Clusters.get_a_single_cluster_as_obj(cluster=TEST_CLUSTER_NAME)
-     out.providerSettings.instance_size_name = InstanceSizeName.M10
-     out.disk_size_gb = 13
-     new_config = a.Clusters.modify_a_cluster('pyAtlasAPIClustersTest', out)
-     pprint(new_config)
+    existing_config = a.Clusters.get_a_single_cluster_as_obj(cluster=TEST_CLUSTER_NAME)
+    out.providerSettings.instance_size_name = InstanceSizeName.M10
+    out.disk_size_gb = 13
+    new_config = a.Clusters.modify_a_cluster('pyAtlasAPIClustersTest', out)
+    pprint(new_config)
 
     # Modify cluster instance size
 
@@ -256,7 +252,7 @@ Alerts
 
 
 Metrics (Measurements)
-^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 Examples coming soon.
 
 Logs
@@ -270,11 +266,11 @@ Logs
     atlas = Atlas("<user>","<password>","<groupid>")
 
     atlas.Hosts.fill_host_list()
-        test_host = atlas.Hosts.host_list[0]
-        print(f'Will get a mongod log for {test_host.hostname}')
-        out = atlas.Hosts.get_loglines_for_host(host_obj=test_host, log_name=AtlasLogNames.MONGODB)
-        for each_line in out:
-            print(each_line.__dict__)
+    test_host = atlas.Hosts.host_list[0]
+    print(f'Will get a mongod log for {test_host.hostname}')
+    out = atlas.Hosts.get_loglines_for_host(host_obj=test_host, log_name=AtlasLogNames.MONGODB)
+    for each_line in out:
+        print(each_line.__dict__)
 
 
 Whitelists

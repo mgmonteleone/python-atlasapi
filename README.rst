@@ -261,9 +261,10 @@ Examples coming soon.
 
 Logs
 ^^^^^^^^^^^^^^^^^^^
+
 .. code:: python
 
-from atlasapi.atlas import Atlas
+    from atlasapi.atlas import Atlas
     from atlasapi.specs import AlertStatusSpec
 
     atlas = Atlas("<user>","<password>","<groupid>")

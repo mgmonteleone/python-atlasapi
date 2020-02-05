@@ -620,6 +620,32 @@ class Atlas:
             for each in content.readlines():
                 yield LogLine(each.decode())
 
+        def get_logs_for_project(self,
+                                 log_name: AtlasLogNames = AtlasLogNames.MONGODB,
+                                 date_from: datetime = None,
+                                 date_to: datetime = None) -> Iterable[Host]:
+            """
+            Yields File-like objects containing the gzipped log file requested for each and every host in the project
+            using the same date filters and log_name (type)
+            Args:
+                log_name: AtlasLognames: The type of log to be retrieved
+                date_from: datetime : Start of log entries
+                date_to: datetime: End of log entries
+
+            Returns:
+                Iterable[BinaryIO]: An iterable of file-like objects.
+            """
+            for each_host in self.host_list:
+                try:
+                    log_file: BinaryIO = self.get_log_for_host(host_obj=each_host,
+                                                               log_name=log_name,
+                                                               date_from=date_from,
+                                                               date_to=date_to)
+                except Exception as e:
+                    raise e
+                each_host.add_log_file(name=log_name,file=log_file)
+                yield each_host
+
         def _get_measurement_for_host(self, host_obj: Host, granularity: AtlasGranularities = AtlasGranularities.HOUR,
                                       period: AtlasPeriods = AtlasPeriods.WEEKS_1,
                                       measurement: AtlasMeasurementTypes = AtlasMeasurementTypes.Cache.dirty,

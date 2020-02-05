@@ -106,9 +106,14 @@ Disks
 Logs
 ++++
 
-- Get the log file for a host in the cluster.
+Status : [50%]
 
-Status : [12.5%]
+
+- Get the log file for a host in the cluster. :ballot_box_with_check:
+- Get loglines for a host in the cluster. :ballot_box_with_check:
+- Get log files for all hosts in a cluster (#24)
+- Get log files for all hosts in a project (#25) :ballot_box_with_check:
+
 
 IP Whitelist
 ------------

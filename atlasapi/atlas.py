@@ -17,7 +17,6 @@ Atlas module
 
 Core module which provides access to MongoDB Atlas Cloud Provider APIs
 """
-
 from .settings import Settings
 from .network import Network
 from .errors import *
@@ -34,12 +33,15 @@ from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, 
     OptionalAtlasMeasurement
 from atlasapi.events import atlas_event_factory, ListOfEvents
 import logging
-from typing import Union, Iterable, Set
+from typing import Union, Iterable, Set, BinaryIO
 from atlasapi.errors import ErrAtlasUnauthorized
 from atlasapi.alerts import Alert
 from time import time
 from atlasapi.whitelist import WhitelistEntry
 from atlasapi.maintenance_window import MaintenanceWindow, Weekdays
+from atlasapi.lib import AtlasLogNames, LogLine
+from requests import get
+import gzip
 
 logger = logging.getLogger('Atlas')
 
@@ -557,6 +559,66 @@ class Atlas:
                     logger.error('An error occurred while retrieving metrics for host: {}.'
                                  'The error was {}'.format(each_host.hostname, e))
                     logger.warning('Will continue with next host. . . ')
+
+        def get_log_for_host(self, host_obj: Host,
+                             log_name: AtlasLogNames = AtlasLogNames.MONGODB,
+                             date_from: datetime = None,
+                             date_to: datetime = None,
+                             ) -> BinaryIO:
+            """
+            Retrieves the designated logfile archive of designated log_name and for the designated dates,
+            and returns a binary file like object.
+            Args:
+                host_obj: And atlas Host object to retrieve logs for
+                log_name: an AtlasLogNames type
+                date_from: The datetime to start from
+                date_to: The datetime to gather till
+
+            Returns: A BinaryIO object containing the gzipped log file.
+
+            """
+            uri = Settings.api_resources["Monitoring and Logs"]["Get the log file for a host in the cluster"].format(
+                group_id=self.atlas.group,
+                host=host_obj.hostname,
+                logname=log_name.value,
+                date_from=date_from,
+                date_to=date_to
+            )
+            # Build the request
+            if date_to is None and date_from is None:
+                logger.info('No dates passed so we are not going to send date params, API default will be used.')
+                uri = Settings.BASE_URL + uri
+            elif date_to is None and date_from is not None:
+                logger.info('Received only a date_from, so sending only startDate')
+                uri = Settings.BASE_URL + uri + f'?startDate={int(round(date_from.timestamp()))}'
+            elif date_to is not None and date_from is None:
+                uri = Settings.BASE_URL + uri + f'?endDate={int(round(date_to.timestamp()))}'
+            else:
+                uri = Settings.BASE_URL + uri + f'?endDate={int(round(date_to.timestamp()))}' \
+                                                f'&startDate={int(round(date_from.timestamp()))}'
+            logger.info(f'The URI used will be {uri}')
+            return_val = self.atlas.network.get_file(uri)
+            return return_val
+
+        def get_loglines_for_host(self, host_obj: Host,
+                                  log_name: AtlasLogNames = AtlasLogNames.MONGODB,
+                                  date_from: datetime = None,
+                                  date_to: datetime = None,
+                                  ) -> Iterable[LogLine]:
+            """
+            Gathers the designated log file from Atlas, and then returns the lines therin contained.
+
+            Args:
+                host_obj: And atlas Host object to retrive logs for
+                log_name: an AtlasLogNames type
+                date_from: The datetime to start from
+                date_to: The datetime to gather till
+            """
+            result = self.get_log_for_host(host_obj, log_name, date_from, date_to)
+            result.seek(0)
+            content = gzip.GzipFile(fileobj=result)
+            for each in content.readlines():
+                yield LogLine(each.decode())
 
         def _get_measurement_for_host(self, host_obj: Host, granularity: AtlasGranularities = AtlasGranularities.HOUR,
                                       period: AtlasPeriods = AtlasPeriods.WEEKS_1,
@@ -1113,7 +1175,7 @@ class Atlas:
             """
             output = self._defer_maint_window()
             return dict(maint_deffered=output)
-        
+
         def current_config(self) -> MaintenanceWindow:
             """
             The current Maintainable Window configuration.

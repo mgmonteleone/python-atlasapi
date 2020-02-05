@@ -4,3 +4,4 @@ isodate
 future
 pytz
 coolname
+nose

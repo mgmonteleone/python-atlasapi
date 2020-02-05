@@ -87,7 +87,8 @@ Hosts
 +++++
 
 - Get measurements for the specified host.
-
+- Get logfile for the specified host.
+- Get Loglines for the specified host.
 
 Databases
 +++++++++
@@ -138,10 +139,10 @@ Status: [0%]
 Maintenance Windows
 --------------------
 
-Status: [40%]
+Status: [60%]
 
 - Get Maintenance Window Settings :ballot_box_with_check:
 - Update Maintenance Window Settings :ballot_box_with_check:
-- Defer Maintenance for one week
+- Defer Maintenance for one week :ballot_box_with_check:
 - Commence Maintenance ASAP
 - Clear Maintenance Window

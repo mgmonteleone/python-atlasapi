@@ -80,7 +80,7 @@ class Network:
             # Settings.SERVER_ERRORS
             raise ErrAtlasServerErrors(c, details)
 
-    def get_file(self, uri) -> self.answer:
+    def get_file(self, uri):
         """Get request which returns a binary file
 
         Args:
@@ -97,18 +97,18 @@ class Network:
         try:
             file_obj = BytesIO()
             r = requests.get(uri,
-                             allow_redirects=True,
+                             allow_redirects=False,
                              stream = True,
-                             timeout=Settings.requests_timeout,
+                             timeout=Settings.file_request_timeout,
                              headers={},
                              auth=HTTPDigestAuth(self.user, self.password))
             logger.debug("Auth information = {} {}".format(self.user, self.password))
-            with file_obj as the_file:
-                for chunk in r.iter_content(chunk_size=1024):
-                    # writing one chunk at a time to  file
-                    if chunk:
-                        logger.info("Writing 1 Kbyte chunk to the file like object")
-                        the_file.write(chunk)
+
+            for chunk in r.iter_content(chunk_size=1024):
+                # writing one chunk at a time to  file
+                if chunk:
+                    logger.warning("Writing 1 Kbyte chunk to the file like object")
+                    file_obj.write(chunk)
             logger.info("---- Completed downloading the file. ----")
             return self.answer(r.status_code, file_obj)
 

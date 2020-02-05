@@ -18,8 +18,6 @@ atlasapi\.atlas_types module
     :undoc-members:
     :show-inheritance:
 
-
-
 atlasapi\.alerts module
 ------------------------
 

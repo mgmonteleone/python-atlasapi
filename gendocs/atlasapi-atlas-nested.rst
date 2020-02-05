@@ -1,8 +1,8 @@
 Nested class for atlasapi\.atlas::Atlas
 =======================================
 
-Atlas._Cluster
---------------
+Atlas._Clusters
+---------------
 
 .. autoclass:: atlasapi.atlas::Atlas._Clusters
     :members:
@@ -40,6 +40,23 @@ Atlas._Hosts
 ------------
 
 .. autoclass:: atlasapi.atlas::Atlas._Hosts
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Atlas._Events
+-------------
+
+.. autoclass:: atlasapi.atlas::Atlas._Events
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Atlas._Whitelist
+----------------
+
+.. autoclass:: atlasapi.atlas::Atlas._Whitelist
     :members:
     :undoc-members:
     :show-inheritance:

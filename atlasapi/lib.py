@@ -19,6 +19,15 @@ from enum import Enum
 
 logger = logging.getLogger('atlasapi.lib')
 
+class AtlasLogNames(Enum):
+    """
+    The name of the log file that you want to retrieve:
+
+    """
+    MONGODB = "mongodb.gz"
+    MONGOS = "mongos.gz"
+    MONGOD_AUDIT = "mongodb-audit-log.gz"
+    MONGOS_AUDIT = "mongos-audit-log.gz"
 
 class AtlasUnits(Enum):
     SCALAR_PER_SECOND = 'SCALAR_PER_SECOND'

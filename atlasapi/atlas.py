@@ -277,7 +277,6 @@ class Atlas:
             :param cluster_config: A ClusterConfig object containing the new configuration,
                                    or a dict containing fragment.
             :return: dict:  A dictionary of the new cluster config
-            TODO: Option to return a cluster config object
             """
             uri = Settings.api_resources["Clusters"]["Modify a Cluster"].format(GROUP_ID=self.atlas.group,
                                                                                 CLUSTER_NAME=cluster)

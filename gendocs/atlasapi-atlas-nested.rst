@@ -17,13 +17,6 @@ Atlas._DatabaseUsers
     :undoc-members:
     :show-inheritance:
 
-Atlas._Projects
----------------
-
-.. autoclass:: atlasapi.atlas::Atlas._Projects
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 Atlas._Alerts
 -------------
@@ -35,10 +28,18 @@ Atlas._Alerts
 
 
 Atlas._MaintenanceWindows
--------------
+-------------------------
 
 .. autoclass:: atlasapi.atlas::Atlas._MaintenanceWindows
     :members:
     :undoc-members:
     :show-inheritance:
 
+
+Atlas._Hosts
+------------
+
+.. autoclass:: atlasapi.atlas::Atlas._Hosts
+    :members:
+    :undoc-members:
+    :show-inheritance:

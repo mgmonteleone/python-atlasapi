@@ -92,7 +92,7 @@ atlasapi\.specs module
     :show-inheritance:
 
 atlasapi\.maintenance_window module
------------------------------------
+------------------------------------
 
 .. automodule:: atlasapi.maintenance_window
     :members:

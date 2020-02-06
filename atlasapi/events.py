@@ -26,6 +26,11 @@ logger = logging.getLogger(name='Atlas_events')
 
 
 class AtlasEventTypes(Enum):
+    """An Enum of the possible event types seen in the Atlas Events API Endpoint.
+
+    UNKNOWN = "Unknown or None" is there as a catch all to avoid breaking when there is a missing event type.
+
+    """
     PEER_CREATED  = 'Peer Created'
     PEER_DELETED  = 'Peer Deleted'
     PEER_UPDATED  = 'Peer Updated'

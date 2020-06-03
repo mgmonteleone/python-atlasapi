@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Matthew G. Monteleone
+# Copyright (c) 2020 Matthew G. Monteleone
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,6 +14,10 @@
 
 
 file = open("events.javaj", 'r')
-
+print("class AtlasEventTypes(Enum):")
 for line in file.readlines():
-    print('{} = "{}"'.format(line.replace(',','').strip(), line.replace(',','').capitalize().replace('_',' ').strip().title()))
+    if line[3].isspace() is False and line.split("(",1)[0].lstrip()[0] not in ['/','@']:
+        base_name = line.split("(",1)[0].lstrip()
+        name_text = base_name.strip().replace('_'," ").title().replace("Gcp", "GCP").replace("Aws", "AWS").replace('Crl', "CRL").replace('Ofac', "OFAC").replace('Mtm', 'MTM').replace('Csv',"CSV").replace('Mfa', 'MFA').replace('Api', "API").replace('Ip', "IP").replace('Dns', "DNS").replace('Ssl', 'SSL')
+
+        print(f"    {base_name}  = '{name_text}'")

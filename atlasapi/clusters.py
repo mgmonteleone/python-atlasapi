@@ -292,9 +292,11 @@ class ClusterConfig(object):
                  replication_specs: ReplicationSpecs = None,
                  srv_address: Optional[str] = None,
                  providerSettings: Optional[ProviderSettings] = None,
-                 links: list = None
+                 links: list = None,
+                 id: Optional[str] = None
                  ) -> None:
-        self.providerSettings = providerSettings
+        self.id: Optional[str] = id
+        self.providerSettings: Optional[ProviderSettings] = providerSettings
         self.backup_enabled: bool = backup_enabled
         self.cluster_type: ClusterType = cluster_type
         self.disk_size_gb: int = disk_size_gb
@@ -353,9 +355,11 @@ class ClusterConfig(object):
         srv_address = data_dict.get('srvAddress', None)
         providerSettings = ProviderSettings.from_dict(provider_settings_dict)
         links = data_dict.get('links', [])
+        id = data_dict.get('id', None)
         return cls(backup_enabled, cluster_type, disk_size_gb, name, mongodb_major_version, mongodb_version,
                    num_shards, mongo_uri, mongo_uri_updated, mongo_uri_with_options, paused, pit_enabled,
-                   replication_factor, state_name, autoscaling, replication_specs, srv_address, providerSettings, links)
+                   replication_factor, state_name, autoscaling, replication_specs,
+                   srv_address, providerSettings, links,id)
 
     def as_dict(self) -> dict:
         return_dict = self.__dict__

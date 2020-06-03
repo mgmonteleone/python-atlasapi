@@ -669,6 +669,39 @@ class Atlas:
                 each_host.add_log_file(name=log_name,file=log_file)
                 yield each_host
 
+        def get_logs_for_cluster(self,
+                                 cluster_name: str,
+                                 log_name: AtlasLogNames = AtlasLogNames.MONGODB,
+                                 date_from: datetime = None,
+                                 date_to: datetime = None) -> Iterable[Host]:
+            """
+            Yields A Host object per Host in the passed cluster with  a File-like objects containing the gzipped log file
+            requested for each  host in the project using the same date filters and log_name (type) in the log_files
+            property.
+
+            Currently the log_file property (List) is usually with only one item.
+            Args:
+                log_name (AtlasLogNames): The type of log to be retrieved
+                date_from (datetime) : Start of log entries
+                date_to (datetime): End of log entries
+
+            Returns:
+                Iterable[Host]: Yields Host objects, with full host information as well as the logfile in the log_files
+                property.
+            """
+            for each_host in self.host_list_by_cluster(cluster_name=cluster_name):
+                try:
+                    log_file: BinaryIO = self.get_log_for_host(host_obj=each_host,
+                                                               log_name=log_name,
+                                                               date_from=date_from,
+                                                               date_to=date_to)
+                except Exception as e:
+                    raise e
+                each_host.add_log_file(name=log_name,file=log_file)
+                yield each_host
+
+
+
         def _get_measurement_for_host(self, host_obj: Host, granularity: AtlasGranularities = AtlasGranularities.HOUR,
                                       period: AtlasPeriods = AtlasPeriods.WEEKS_1,
                                       measurement: AtlasMeasurementTypes = AtlasMeasurementTypes.Cache.dirty,

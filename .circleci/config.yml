@@ -57,7 +57,7 @@ jobs:
             python3 setup.py clean
             python3 setup.py sdist
             python3 setup.py bdist_wheel
-     - run:
+      - run:
           name: upload to pypi
           command: |
             . venv/bin/activate

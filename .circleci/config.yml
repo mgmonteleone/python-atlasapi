@@ -57,11 +57,11 @@ jobs:
             python3 setup.py clean
             python3 setup.py sdist
             python3 setup.py bdist_wheel
-     # - run:
-     #     name: upload to pypi
-     #     command: |
-     #       . venv/bin/activate
-     #       twine upload dist/*
+     - run:
+          name: upload to pypi
+          command: |
+            . venv/bin/activate
+            twine upload dist/*
 orbs:
   python: circleci/python@0.1
   pylint: qventus/python-lint@0.0.6

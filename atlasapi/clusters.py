@@ -486,11 +486,12 @@ class ShardedClusterConfig(ClusterConfig):
                  autoscaling: dict = {},
                  replication_specs: list = [],
                  srv_address: Optional[str] = None,
-                 providerSettings: Optional[ProviderSettings] = None):
+                 providerSettings: Optional[ProviderSettings] = None,
+                 id: Optional[str] = None):
         super().__init__(backup_enabled, cluster_type, disk_size_gb, name, mongodb_major_version, mongodb_version,
                          num_shards, mongo_uri, mongo_uri_updated, mongo_uri_with_options, paused, pit_enabled,
                          replication_factor, state_name, autoscaling, [replication_specs], srv_address,
-                         providerSettings)
+                         providerSettings, id)
 
     def as_dict(self) -> dict:
         return_dict = self.__dict__

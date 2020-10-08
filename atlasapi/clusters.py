@@ -232,8 +232,10 @@ class ProviderSettings(object):
 
     def as_dict(self) -> dict:
         out_dict = self.__dict__
-        out_dict['instanceSizeName'] = self.instance_size_name.name
-        out_dict['providerName'] = self.provider_name.name
+        if type(self.instance_size_name) != str:
+            out_dict['instanceSizeName'] = self.instance_size_name.name
+        if type(self.provider_name) != str:
+            out_dict['providerName'] = self.provider_name.name
         try:
             out_dict['volumeType'] = self.volumeType.name
         except AttributeError:
@@ -568,6 +570,12 @@ class AtlasBasicReplicaSet(object):
                                                    replication_specs=replication_specs)
         self.config_running = None
         self.config_pending = None
+
+    def as_dict(self):
+        cluster_config_dict = self.config.providerSettings.as_dict()
+        raw_dict = self.__dict__
+        raw_dict['providerSettings'] = cluster_config_dict
+        return raw_dict
 
 
 class AdvancedOptions(object):

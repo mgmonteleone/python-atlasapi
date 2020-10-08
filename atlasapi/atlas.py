@@ -33,7 +33,7 @@ from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, 
     OptionalAtlasMeasurement
 from atlasapi.events import atlas_event_factory, ListOfEvents
 import logging
-from typing import Union, Iterable, Set, BinaryIO
+from typing import Union, Iterable, Set, BinaryIO, Generator, Iterator
 from atlasapi.errors import ErrAtlasUnauthorized
 from atlasapi.alerts import Alert
 from time import time
@@ -309,6 +309,12 @@ class Atlas:
             :return: dict: the new cluster configuration dict
 
             """
+            # Check new_cluster_size type:
+            try:
+                assert isinstance(new_cluster_size,InstanceSizeName)
+            except AssertionError:
+                raise TypeError(f'new_cluster_size must be an instance of InstanceSizeName, not a {type(new_cluster_size)}')
+
             # First check to see if this is a new size, and if the cluster exists
             try:
                 existing_config = self.get_single_cluster_as_obj(cluster=cluster)
@@ -666,7 +672,7 @@ class Atlas:
                                                                date_to=date_to)
                 except Exception as e:
                     raise e
-                each_host.add_log_file(name=log_name,file=log_file)
+                each_host.add_log_file(name=log_name, file=log_file)
                 yield each_host
 
         def get_logs_for_cluster(self,
@@ -697,10 +703,8 @@ class Atlas:
                                                                date_to=date_to)
                 except Exception as e:
                     raise e
-                each_host.add_log_file(name=log_name,file=log_file)
+                each_host.add_log_file(name=log_name, file=log_file)
                 yield each_host
-
-
 
         def _get_measurement_for_host(self, host_obj: Host, granularity: AtlasGranularities = AtlasGranularities.HOUR,
                                       period: AtlasPeriods = AtlasPeriods.WEEKS_1,

@@ -31,7 +31,7 @@ Status : [0%]
 Projects
 --------
 
-Status : [100%]
+Status : [0%]
 
 - Get All Projects :ballot_box_with_check:
 - Get One Project :ballot_box_with_check:

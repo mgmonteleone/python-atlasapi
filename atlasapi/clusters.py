@@ -81,11 +81,13 @@ class InstanceSizeName(Enum):
     M140 = 'M140'
     M200 = 'M200'
     M200_NVME = 'M200_NVME'
+    R200 = 'R200'
     M300 = 'M300'
     R300 = 'R300'
     M400 = 'M400'
     R400 = 'R400'
     M400_NVME = 'M400_NVME'
+    R700 = 'R700'
 
 
 class ProviderName(Enum):

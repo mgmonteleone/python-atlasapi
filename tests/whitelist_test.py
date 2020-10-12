@@ -54,7 +54,7 @@ a = Atlas(USER, API_KEY, GROUP_ID)
 print('----------Create a whitelist entry then get it.------------------')
 
 
-#returnit = a.Whitelist.create_whitelist_entry('67.180.12.52', 'Test 12')
+returnit = a.Whitelist.create_whitelist_entry('67.180.12.52', 'Test 12')
 
 out = a.Whitelist.get_whitelist_entry('67.180.12.52')
 

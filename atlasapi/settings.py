@@ -22,8 +22,12 @@ Provides few constants, APIs endpoints.
 class Settings:
     # Atlas APIs
     BASE_URL = 'https://cloud.mongodb.com'
+    URI_STUB = '/api/atlas/v1.0'
 
     api_resources = {
+        "Project": {
+            "Get One Project": URI_STUB + "/groups/{GROUP_ID}"
+        },
         "Monitoring and Logs": {
             "Get all processes for group": "/api/atlas/v1.0/groups/{group_id}/processes?pageNum={"
                                            "page_num}&itemsPerPage={items_per_page}",
@@ -81,6 +85,19 @@ class Settings:
             "Update Maintenance Window": "/api/atlas/v1.0/groups/{GROUP_ID}/maintenanceWindow",
             "Defer Maintenance Window": "/api/atlas/v1.0/groups/{GROUP_ID}/maintenanceWindow/defer",
             "Delete Maintenance Window": "/api/atlas/v1.0/groups/{GROUP_ID}/maintenanceWindow"
+        },
+        "Organization API Keys": {
+            "Get all Organization API Keys associated with org" : URI_STUB + "/orgs/{GROUP_ID}/apiKeys",
+            "Get one Organization API Key": URI_STUB + "/orgs/{ORG_ID}/apiKeys/{API_KEY_ID}",
+            "Get Whitelists for API Key": URI_STUB + "/orgs/{ORG_ID}/apiKeys/{API_KEY_ID}/whitelist",
+            "Create one or more whitelist entries for APi Key" : URI_STUB + "/orgs/{GROUP_ID}/apiKeys/{"
+                                                                            "API_KEY_ID}/whitelist",
+            "Get a single whitelist entry": URI_STUB + "/orgs/{GROUP_ID}/apiKeys/{API_KEY_ID}/whitelist/{IP_ADDRESS}"
+            # Incomplete
+        },
+        "Project API Keys": {
+            "Get All API Keys Assigned to Project" : URI_STUB + "/groups/{GROUP_ID}/apiKeys",
+
         }
 
     }

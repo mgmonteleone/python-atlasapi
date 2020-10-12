@@ -74,13 +74,16 @@ class InstanceSizeName(Enum):
     M60 = 'M60'
     R60 = 'R60'
     M60_NVME = 'M60 NVME'
+    M80 = 'M80'
     R80 = 'R80'
     M80_NVME = 'M80 NVME'
+    M100 = 'M100'
     M140 = 'M140'
     M200 = 'M200'
     M200_NVME = 'M200_NVME'
-    M400 = 'M400'
     M300 = 'M300'
+    R300 = 'R300'
+    M400 = 'M400'
     R400 = 'R400'
     M400_NVME = 'M400_NVME'
 
@@ -97,6 +100,7 @@ class MongoDBMajorVersion(Enum):
     v3_6 = '3.6'
     v4_0 = '4.0'
     v4_2 = '4.2'
+    v4_4 = '4.4'
     vX_x = 'Unknown'
 
 

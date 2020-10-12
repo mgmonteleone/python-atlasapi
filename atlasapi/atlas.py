@@ -464,7 +464,7 @@ class Atlas:
             return return_val
 
         def fill_host_list(self, for_cluster: Optional[str] = None) -> Union[
-            List[object], _SpecialForm[ListOfHosts, dict]]:
+            List[object], Union[ListOfHosts, dict]]:
             """
             Fills the `self.hostname` property with the current hosts for the project/group.
 

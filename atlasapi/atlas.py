@@ -49,7 +49,7 @@ logger = logging.getLogger('Atlas')
 # noinspection PyProtectedMember
 class Atlas:
     """Atlas constructor
-    
+
     Args:
         user (str): Atlas user
         password (str): Atlas password
@@ -286,7 +286,7 @@ class Atlas:
                 logger.error('Could not find existing cluster {}'.format(cluster))
                 raise ValueError('Could not find existing cluster {}'.format(cluster))
 
-            if type(cluster_config) == ClusterConfig:
+            if type(cluster_config) in (ShardedClusterConfig, ClusterConfig):
                 logger.warning("We received a full cluster_config, converting to dict")
                 try:
                     new_config = cluster_config.as_modify_dict()
@@ -311,9 +311,10 @@ class Atlas:
             """
             # Check new_cluster_size type:
             try:
-                assert isinstance(new_cluster_size,InstanceSizeName)
+                assert isinstance(new_cluster_size, InstanceSizeName)
             except AssertionError:
-                raise TypeError(f'new_cluster_size must be an instance of InstanceSizeName, not a {type(new_cluster_size)}')
+                raise TypeError(
+                    f'new_cluster_size must be an instance of InstanceSizeName, not a {type(new_cluster_size)}')
 
             # First check to see if this is a new size, and if the cluster exists
             try:
@@ -1254,8 +1255,8 @@ class Atlas:
 
         def defer(self) -> dict:
             """
-            Defers the currently scheduled maintenance window. 
-            
+            Defers the currently scheduled maintenance window.
+
             Returns: bool:
 
             """
@@ -1290,9 +1291,9 @@ class Atlas:
 
 class AtlasPagination:
     """Atlas Pagination Generic Implementation
-    
+
     Constructor
-        
+
     Args:
         atlas (Atlas): Atlas instance
         fetch (function): The function "get_all" to call
@@ -1308,7 +1309,7 @@ class AtlasPagination:
 
     def __iter__(self):
         """Iterable
-        
+
         Yields:
             str: One result
         """

@@ -14,10 +14,13 @@
 
 from ipaddress import IPv4Address, IPv4Network
 from pprint import pprint
-
-
+from typing import Optional
+import logging
+from datetime import datetime
+from isodate import parse_datetime
 class WhitelistEntry(object):
-    def __init__(self, cidrBlock: str = None, comment: str = None, ipAddress: str = None, links: list = None):
+    def __init__(self, cidrBlock: str = None, comment: str = None, ipAddress: str = None, links: list = None,
+                 last_used: str = None, count: int = None, last_used_address: str = None):
         """
         For a single whitelist entry. Contains a bit of helper intelligence for ip addresses.
 
@@ -26,6 +29,18 @@ class WhitelistEntry(object):
         :param ipAddress:
         :param links:
         """
+        self.last_used_address: Optional[IPv4Address]  = None
+        try:
+            self.last_used_address = IPv4Address(last_used_address)
+        except Exception:
+            logging.warning('No last used address')
+
+        self.count: Optional[int] = count
+        self.last_used: Optional[datetime] = None
+        try:
+            self.last_used = parse_datetime(last_used)
+        except Exception:
+            logging.warning('Could not get last used date.')
         self.links = links
         self.ipAddress = ipAddress
         self.comment = comment
@@ -50,8 +65,12 @@ class WhitelistEntry(object):
         comment = data_dict.get('comment', None)
         ipAddress = data_dict.get('ipAddress', None)
         links = data_dict.get('links', None)
+        last_used = data_dict.get('lastUsed', None)
+        count = data_dict.get('count', 0)
+        last_used_address = data_dict.get('lastUsedAddress', None)
 
-        return cls(cidrBlock=cidrBlock, comment=comment, ipAddress=ipAddress, links=links)
+        return cls(cidrBlock=cidrBlock, comment=comment, ipAddress=ipAddress, links=links,
+                   last_used=last_used,count=count,last_used_address=last_used_address)
 
     def as_dict(self) -> dict:
         """
@@ -61,4 +80,8 @@ class WhitelistEntry(object):
         orig_dict = self.__dict__
         orig_dict.__delitem__('ipAddressObj')
         orig_dict.__delitem__('cidrBlockObj')
+        try:
+            orig_dict['last_used_address'] = self.last_used_address.__str__()
+        except Exception:
+            pass
         return orig_dict

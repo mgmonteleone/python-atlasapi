@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from isodate import Duration, duration_isoformat
-from typing import Iterator, Tuple, NewType, List, Optional, Union
+from typing import Iterator, Tuple, NewType, List, Optional, Union, Dict
 from dateutil.parser import parse
 import logging
 from datetime import datetime
@@ -618,4 +618,4 @@ def atlas_event_factory(value_dict: dict) -> Union[
         return AtlasEvent(value_dict=value_dict)
 
 
-ListOfEvents = NewType('ListOfEvents', List[Union[dict, _AtlasBaseEvent]])
+ListOfEvents = NewType('ListOfEvents', List[Union[Dict, _AtlasBaseEvent]])

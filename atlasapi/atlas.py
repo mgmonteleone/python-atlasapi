@@ -41,7 +41,6 @@ from atlasapi.whitelist import WhitelistEntry
 from atlasapi.maintenance_window import MaintenanceWindow, Weekdays
 from atlasapi.lib import AtlasLogNames, LogLine
 from requests import get
-# from api_keys import ApiKey
 import gzip
 
 logger = logging.getLogger('Atlas')
@@ -72,15 +71,6 @@ class Atlas:
         self.Alerts = Atlas._Alerts(self)
         self.Whitelist = Atlas._Whitelist(self)
         self.MaintenanceWindows = Atlas._MaintenanceWindows(self)
-        self.ApiKeys = Atlas._ApiKeys(self)
-
-        # In order to get our own Org Id, need to call the Group endpoint for more information
-        uri = Settings.api_resources["Project"]["Get One Project"].format(GROUP_ID=self.group)
-        response = self.network.get(Settings.BASE_URL + uri)
-        group_info = response
-        self.org_id: str = group_info.get('orgId', None)
-        self.cluster_count: int = group_info.get('clusterCount', 0)
-        self.name: str = group_info.get('name', None)
 
     class _Clusters:
         """Clusters API
@@ -321,10 +311,9 @@ class Atlas:
             """
             # Check new_cluster_size type:
             try:
-                assert isinstance(new_cluster_size, InstanceSizeName)
+                assert isinstance(new_cluster_size,InstanceSizeName)
             except AssertionError:
-                raise TypeError(
-                    f'new_cluster_size must be an instance of InstanceSizeName, not a {type(new_cluster_size)}')
+                raise TypeError(f'new_cluster_size must be an instance of InstanceSizeName, not a {type(new_cluster_size)}')
 
             # First check to see if this is a new size, and if the cluster exists
             try:
@@ -463,8 +452,7 @@ class Atlas:
 
             return return_val
 
-        def fill_host_list(self, for_cluster: Optional[str] = None) -> Union[
-            List[object], Union[ListOfHosts, dict]]:
+        def fill_host_list(self, for_cluster: Optional[str] = None) -> List[Host]:
             """
             Fills the `self.hostname` property with the current hosts for the project/group.
 
@@ -699,7 +687,6 @@ class Atlas:
 
             Currently the log_file property (List) is usually with only one item.
             Args:
-                cluster_name (str): The human readable name of the cluster
                 log_name (AtlasLogNames): The type of log to be retrieved
                 date_from (datetime) : Start of log entries
                 date_to (datetime): End of log entries
@@ -1300,68 +1287,6 @@ class Atlas:
             output: bool = self._update_maint_window(new_config=new_config)
             return output
 
-    class _ApiKeys:
-        """Atlas API Keys API
-
-             see: https://docs.atlas.mongodb.com/reference/api/apiKeys/
-
-             The API Keys resource provides tools to create and maintain Organization and Project Scoped API keys,
-             as well as managing access whitelists.
-
-             Args:
-                 atlas (Atlas): Atlas instance
-             """
-
-        def __init__(self, atlas):
-            self.atlas = atlas
-
-        def _get_api_keys(self) -> List[dict]:
-            """Get all apikeys for the group/project.
-
-            url: https://docs.atlas.mongodb.com/reference/api/projectApiKeys/get-all-apiKeys-in-one-project/
-
-            Returns:
-                List[dict]: A list of dicts, direct payload from the Atlas API
-            """
-            uri = Settings.api_resources["Project API Keys"]["Get All API Keys Assigned to Project"].format(
-                GROUP_ID=self.atlas.group)
-            response = self.atlas.network.get(Settings.BASE_URL + uri)
-            return response['results']
-
-        @property
-        def all_keys(self) -> Iterator[ApiKey]:
-            key_list = self._get_api_keys()
-            for each_entry in key_list:
-                yield ApiKey.fill_from_dict(each_entry)
-
-        def _get_api_key(self, key_id: str) -> dict:
-            """Gets a single apikey
-
-            Args:
-                key_id: the key to be retrieved.
-
-            Returns: dict: single key in the form of the raw atlas response.
-
-            """
-            uri = Settings.api_resources["Organization API Keys"]["Get one Organization API Key"].format(
-                ORG_ID=self.atlas.org_id, API_KEY_ID=key_id)
-            response = self.atlas.network.get(Settings.BASE_URL + uri)
-            return response
-
-        def get_single_key(self, key_id: str) -> ApiKey:
-            """Retrieves a single key
-
-            Args:
-                key_id:
-            """
-            return ApiKey.fill_from_dict(self._get_api_key(key_id))
-
-        def _get_whitelist_entry_for_key(self, key_id: str):
-            uri = Settings.api_resources["Organization API Keys"]["Get Whitelists for API Key"].format(
-                ORG_ID=self.atlas.org_id, API_KEY_ID=key_id)
-            response = self.atlas.network.get(Settings.BASE_URL + uri)
-            return response
-
 
 class AtlasPagination:
     """Atlas Pagination Generic Implementation
@@ -1422,7 +1347,6 @@ class AtlasPagination:
             pageNum += 1
 
 
-# noinspection PyTypeChecker
 class ClustersGetAll(AtlasPagination):
     """Pagination for Clusters : Get All"""
 
@@ -1430,7 +1354,6 @@ class ClustersGetAll(AtlasPagination):
         super().__init__(atlas, atlas.Clusters.get_all_clusters, pageNum, itemsPerPage)
 
 
-# noinspection PyTypeChecker
 # noinspection PyProtectedMember
 class HostsGetAll(AtlasPagination):
     """Pagination for Processes : Get All"""
@@ -1440,14 +1363,12 @@ class HostsGetAll(AtlasPagination):
 
 
 # noinspection PyProtectedMember
-# noinspection PyTypeChecker
 class EventsGetForProject(AtlasPagination):
 
     def __init__(self, atlas: Atlas, pageNum: int, itemsPerPage: int):
         super().__init__(atlas, atlas.Events._get_all_project_events, pageNum, itemsPerPage)
 
 
-# noinspection PyTypeChecker
 class DatabaseUsersGetAll(AtlasPagination):
     """Pagination for Database User : Get All"""
 
@@ -1458,7 +1379,6 @@ class DatabaseUsersGetAll(AtlasPagination):
 class AlertsGetAll(AtlasPagination):
     """Pagination for Alerts : Get All"""
 
-    # noinspection PyTypeChecker
     def __init__(self, atlas, status, pageNum, itemsPerPage):
         super().__init__(atlas, self.fetch, pageNum, itemsPerPage)
         self.get_all_alerts = atlas.Alerts.get_all_alerts
@@ -1480,6 +1400,5 @@ class AlertsGetAll(AtlasPagination):
 class WhitelistGetAll(AtlasPagination):
     """Pagination for Database User : Get All"""
 
-    # noinspection PyTypeChecker
     def __init__(self, atlas, pageNum, itemsPerPage):
         super().__init__(atlas, atlas.Whitelist.get_all_whitelist_entries, pageNum, itemsPerPage)

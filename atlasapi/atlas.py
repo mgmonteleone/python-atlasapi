@@ -27,7 +27,7 @@ from .specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, Datab
 from typing import Union, Iterator, List, Optional
 from .atlas_types import OptionalInt, OptionalBool, ListofDict
 from .clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
-    MongoDBMajorVersion, InstanceSizeName, ProviderName, AdvancedOptions
+    MongoDBMajorVersion, InstanceSizeName, ProviderName, AdvancedOptions, TLSProtocols
 from .lib import AtlasPeriods, AtlasGranularities, AtlasUnits
 from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement, \
     OptionalAtlasMeasurement
@@ -344,6 +344,28 @@ class Atlas:
             """
             uri = Settings.api_resources["Clusters"]["Advanced Configuration Options"].format(GROUP_ID=self.atlas.group,
                                                                                               CLUSTER_NAME=cluster)
+
+            value_returned = self.atlas.network.patch(uri=Settings.BASE_URL + uri, payload=advanced_options.as_dict)
+
+            if as_obj is True:
+                return_obj = AdvancedOptions.fill_from_dict(data_dict=value_returned)
+            else:
+                return_obj = value_returned
+
+            return return_obj
+
+        def modify_cluster_tls(self, cluster: str,
+                               TLS_protocol: TLSProtocols,
+                               as_obj: bool = True) -> TLSProtocols:
+            """
+            Modifies cluster TLS settings.
+
+
+            """
+            uri = Settings.api_resources["Clusters"]["Advanced Configuration Options"].format(GROUP_ID=self.atlas.group,
+                                                                                              CLUSTER_NAME=cluster)
+
+            advanced_options = AdvancedOptions(minimumEnabledTlsProtocol=TLS_protocol)
 
             value_returned = self.atlas.network.patch(uri=Settings.BASE_URL + uri, payload=advanced_options.as_dict)
 

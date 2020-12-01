@@ -832,12 +832,12 @@ class Atlas:
             self.atlas = atlas  # type: Atlas
             self.logger = logging.getLogger('Atlas.Events')  # type: logging
 
-        def _get_all_project_events(self, pageNum: int = Settings.pageNum,
+        def _get_all_project_events(self, since_datetime: datetime = None, pageNum: int = Settings.pageNum,
                                     itemsPerPage: int = Settings.itemsPerPage,
                                     iterable: bool = False) -> ListOfEvents:
             """Get All Project Events
 
-            Internal use only, actual data retrieval comes from properties events_list
+            Internal use only, actual data retrieval comes from properties all
             url: https://docs.atlas.mongodb.com/reference/api/events-projects-get-all/
 
             Keyword Args:
@@ -861,11 +861,21 @@ class Atlas:
             ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
 
             if iterable:
-                item_list = list(EventsGetForProject(self.atlas, pageNum, itemsPerPage))
-                obj_list = list()
+                item_list = list(EventsGetForProject(self.atlas, since_datetime, pageNum, itemsPerPage))
+                obj_list: ListOfEvents = list()
                 for item in item_list:
                     obj_list.append(atlas_event_factory(item))
-                return_val = obj_list
+                return obj_list
+
+            if since_datetime:
+                uri = Settings.api_resources["Events"]["Get Project Events Since Date"].format(
+                    min_date = since_datetime.isoformat(),
+                    group_id=self.atlas.group,
+                    page_num=pageNum,
+                    items_per_page=itemsPerPage)
+
+                return_val = self.atlas.network.get(Settings.BASE_URL + uri)
+
             else:
                 uri = Settings.api_resources["Events"]["Get All Project Events"].format(
                     group_id=self.atlas.group,
@@ -875,6 +885,28 @@ class Atlas:
                 return_val = self.atlas.network.get(Settings.BASE_URL + uri)
 
             return return_val
+
+
+        @property
+        def all(self) -> ListOfEvents:
+            """
+            Returns all events for the current project/group.
+
+            Returns:
+                ListOfEvents: A list of event objects.
+
+            """
+            return self._get_all_project_events(iterable=True)
+
+        def since(self,since_datetime: datetime) -> ListOfEvents:
+            """
+            Returns all events since the passed datetime. (UTC)
+
+            Returns:
+                ListOfEvents:
+            """
+            return self._get_all_project_events(iterable=True,since_datetime=since_datetime)
+
 
     class _DatabaseUsers:
         """Database Users API
@@ -1388,8 +1420,22 @@ class HostsGetAll(AtlasPagination):
 # noinspection PyProtectedMember
 class EventsGetForProject(AtlasPagination):
 
-    def __init__(self, atlas: Atlas, pageNum: int, itemsPerPage: int):
-        super().__init__(atlas, atlas.Events._get_all_project_events, pageNum, itemsPerPage)
+    def __init__(self, atlas: Atlas, since_datetime: datetime, pageNum: int, itemsPerPage: int):
+        super().__init__(atlas, self.fetch, pageNum, itemsPerPage)
+        self._get_all_project_events = atlas.Events._get_all_project_events
+        self.since_datetime = since_datetime
+
+    def fetch(self, pageNum, itemsPerPage):
+        """Intermediate fetching
+
+        Args:
+            pageNum (int): Page number
+            itemsPerPage (int): Number of Events per Page
+
+        Returns:
+            dict: Response payload
+        """
+        return self._get_all_project_events(self.since_datetime, pageNum, itemsPerPage)
 
 
 class DatabaseUsersGetAll(AtlasPagination):

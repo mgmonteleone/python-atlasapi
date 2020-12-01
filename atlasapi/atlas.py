@@ -887,16 +887,26 @@ class Atlas:
             return return_val
 
 
-
         @property
         def all(self) -> ListOfEvents:
             """
             Returns all events for the current project/group.
 
-            Returns: A list of Events Objects.
+            Returns:
+                ListOfEvents: A list of event objects.
 
             """
             return self._get_all_project_events(iterable=True)
+
+        def since(self,since_datetime: datetime) -> ListOfEvents:
+            """
+            Returns all events since the passed datetime. (UTC)
+
+            Returns:
+                ListOfEvents:
+            """
+            return self._get_all_project_events(iterable=True,since_datetime=since_datetime)
+
 
     class _DatabaseUsers:
         """Database Users API
@@ -1405,13 +1415,6 @@ class HostsGetAll(AtlasPagination):
 
     def __init__(self, atlas: Atlas, pageNum: int, itemsPerPage: int):
         super().__init__(atlas, atlas.Hosts._get_all_hosts, pageNum, itemsPerPage)
-
-
-# noinspection PyProtectedMember
-#class EventsGetForProject(AtlasPagination):
-#
-#    def __init__(self, atlas: Atlas, since_datetime, pageNum: int, itemsPerPage: int):
-#        super().__init__(atlas, atlas.Events._get_all_project_events,  since_datetime,pageNum, itemsPerPage)
 
 
 # noinspection PyProtectedMember

@@ -49,4 +49,18 @@ class EventsTests(BaseTests):
 
     test_01_get_project_events_since.basic = False
 
+    def test_02_since(self):
+        test_datetime = datetime.utcnow() - timedelta(hours=12)
+        verbose_logger.info(f'Events Since (public) {test_datetime.isoformat()}')
+        out = self.a.Events.since(test_datetime)
+        verbose_logger.warning(f'The count of since events is {len(out)}')
+        self.assertIsInstance(out, list)
+        for each in out:
+            self.assertIsInstance(each, events._AtlasBaseEvent)
+
+    test_02_since.basic = False
+
+    def test_03_atlas(self):
+        self.assertIsInstance(self.a,Atlas)
+
 

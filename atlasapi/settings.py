@@ -43,11 +43,12 @@ class Settings:
             "Get measurements of for host": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/disks/{"
                                             "DISK-NAME}/measurements",
             "Get the log file for a host in the cluster": "/api/atlas/v1.0/groups/{group_id}/clusters/{"
-                                                           "host}/logs/{logname}"
+                                                          "host}/logs/{logname}"
         },
         "Events": {
-            "Get All Project Events": "/api/atlas/v1.0/groups/{group_id}/events?pageNum={"
-                                      "page_num}&itemsPerPage={items_per_page}"
+            "Get All Project Events": URI_STUB + "/groups/{group_id}/events?pageNum={page_num}&itemsPerPage={items_per_page}",
+            "Get Project Events Since Date": URI_STUB + "/groups/{group_id}/events?pageNum={"
+                                                          "page_num}&itemsPerPage={items_per_page}&minDate={min_date}"
         },
         "Clusters": {
             "Get All Clusters": "/api/atlas/v1.0/groups/%s/clusters?pageNum=%d&itemsPerPage=%d",
@@ -87,16 +88,16 @@ class Settings:
             "Delete Maintenance Window": "/api/atlas/v1.0/groups/{GROUP_ID}/maintenanceWindow"
         },
         "Organization API Keys": {
-            "Get all Organization API Keys associated with org" : URI_STUB + "/orgs/{GROUP_ID}/apiKeys",
+            "Get all Organization API Keys associated with org": URI_STUB + "/orgs/{GROUP_ID}/apiKeys",
             "Get one Organization API Key": URI_STUB + "/orgs/{ORG_ID}/apiKeys/{API_KEY_ID}",
             "Get Whitelists for API Key": URI_STUB + "/orgs/{ORG_ID}/apiKeys/{API_KEY_ID}/whitelist",
-            "Create one or more whitelist entries for APi Key" : URI_STUB + "/orgs/{GROUP_ID}/apiKeys/{"
-                                                                            "API_KEY_ID}/whitelist",
+            "Create one or more whitelist entries for APi Key": URI_STUB + "/orgs/{GROUP_ID}/apiKeys/{"
+                                                                           "API_KEY_ID}/whitelist",
             "Get a single whitelist entry": URI_STUB + "/orgs/{GROUP_ID}/apiKeys/{API_KEY_ID}/whitelist/{IP_ADDRESS}"
             # Incomplete
         },
         "Project API Keys": {
-            "Get All API Keys Assigned to Project" : URI_STUB + "/groups/{GROUP_ID}/apiKeys",
+            "Get All API Keys Assigned to Project": URI_STUB + "/groups/{GROUP_ID}/apiKeys",
 
         }
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 
-file = open("events.javaj", 'r')
+file = open("events.java", 'r')
 print("class AtlasEventTypes(Enum):")
 for line in file.readlines():
     if line[3].isspace() is False and line.split("(",1)[0].lstrip()[0] not in ['/','@']:

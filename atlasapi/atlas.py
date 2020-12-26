@@ -883,7 +883,6 @@ class Atlas:
                     items_per_page=itemsPerPage)
 
                 return_val = self.atlas.network.get(Settings.BASE_URL + uri)
-
             return return_val
 
 

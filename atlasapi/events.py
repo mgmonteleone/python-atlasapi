@@ -21,7 +21,7 @@ from enum import Enum
 from .atlas_types import OptionalFloat
 import ipaddress
 from copy import copy
-
+from pprint import pprint
 logger = logging.getLogger(name='Atlas_events')
 
 
@@ -597,12 +597,18 @@ class AtlasEventTypes(Enum):
     GLOBAL_ACCESS_LIST_ENTRY_CREATED = 'Global Access List Entry Created'
     GLOBAL_ACCESS_LIST_ENTRY_UPDATED = 'Global Access List Entry Updated'
     GLOBAL_ACCESS_LIST_ENTRY_DELETED = 'Global Access List Entry Deleted'
-    NDS_X509_USER_AUTHENTICATION_MANAGED_USER_CERTS_EXPIRATION_RESOLVED = 'Nds X509 User Authentication Managed User Certs Expiration Resolved'
-    NDS_X509_USER_AUTHENTICATION_MANAGED_USER_CERTS_EXPIRATION_CHECK = 'Nds X509 User Authentication Managed User Certs Expiration Check'
-    NDS_X509_USER_AUTHENTICATION_CUSTOMER_CA_EXPIRATION_RESOLVED = 'Nds X509 User Authentication Customer Ca Expiration Resolved'
-    NDS_X509_USER_AUTHENTICATION_CUSTOMER_CA_EXPIRATION_CHECK = 'Nds X509 User Authentication Customer Ca Expiration Check'
-    NDS_X509_USER_AUTHENTICATION_CUSTOMER_CRL_EXPIRATION_RESOLVED = 'Nds X509 User Authentication Customer CRL Expiration Resolved'
-    NDS_X509_USER_AUTHENTICATION_CUSTOMER_CRL_EXPIRATION_CHECK = 'Nds X509 User Authentication Customer CRL Expiration Check'
+    NDS_X509_USER_AUTHENTICATION_MANAGED_USER_CERTS_EXPIRATION_RESOLVED = 'Nds X509 User Authentication Managed User ' \
+                                                                          'Certs Expiration Resolved '
+    NDS_X509_USER_AUTHENTICATION_MANAGED_USER_CERTS_EXPIRATION_CHECK = 'Nds X509 User Authentication Managed User ' \
+                                                                       'Certs Expiration Check '
+    NDS_X509_USER_AUTHENTICATION_CUSTOMER_CA_EXPIRATION_RESOLVED = 'Nds X509 User Authentication Customer Ca ' \
+                                                                   'Expiration Resolved '
+    NDS_X509_USER_AUTHENTICATION_CUSTOMER_CA_EXPIRATION_CHECK = 'Nds X509 User Authentication Customer Ca Expiration ' \
+                                                                'Check '
+    NDS_X509_USER_AUTHENTICATION_CUSTOMER_CRL_EXPIRATION_RESOLVED = 'Nds X509 User Authentication Customer CRL ' \
+                                                                    'Expiration Resolved '
+    NDS_X509_USER_AUTHENTICATION_CUSTOMER_CRL_EXPIRATION_CHECK = 'Nds X509 User Authentication Customer CRL ' \
+                                                                 'Expiration Check '
     ONLINE_ARCHIVE_INSUFFICIENT_INDEXES_CHECK = 'Online Archive Insufficient Indexes Check'
     ONLINE_ARCHIVE_INSUFFICIENT_INDEXES_RESOLVED = 'Online Archive Insufficient Indexes Resolved'
     ONLINE_ARCHIVE_MAX_CONSECUTIVE_OFFLOADS_CHECK = 'Online Archive Max Consecutive Offloads Check'
@@ -701,11 +707,13 @@ class _AtlasBaseEvent(object):
         self.is_global_admin = value_dict.get('isGlobalAdmin', False)  # type: bool
         self.links = value_dict.get('links', None)  # type: list
         self.event_dict = value_dict  # type: dict
+        self.additional_data = value_dict.get('raw', None)
 
     def as_dict(self):
         original_dict = self.__dict__
         return_dict = copy(original_dict)
         del return_dict['event_dict']
+        del return_dict['additional_data']
         return_dict['created_date'] = datetime.isoformat(self.created_date)
         return_dict['event_type'] = self.event_type.name
         return_dict['event_type_desc'] = self.event_type.value
@@ -730,6 +738,38 @@ class _AtlasUserBaseEvent(_AtlasBaseEvent):
 class AtlasEvent(_AtlasBaseEvent):
     def __init__(self, value_dict: dict) -> None:
         super().__init__(value_dict)
+
+
+class AtlasCPSEvent(_AtlasBaseEvent):
+    def __init__(self, value_dict: dict) -> None:
+        """
+        Atlas Events for Cloud Provider Snapshot related events.
+
+        Contains extra data points directly related to CPS events. There
+        !NOTE! The extra data points are extracted from the "raw" property which is not guaranteed to be stable.
+
+        Args:
+            value_dict: The original dict of values from the Atlas API
+        """
+        super().__init__(value_dict)
+        if self.additional_data:
+            self.snapshot_id: Optional[str] = self.additional_data.get('snapshotId', None)
+            self.snapshot_completion_date: Optional[datetime] = None
+            self.snapshot_scheduled_creation_date: Optional[datetime] = None
+            self.cluster_name: str = self.additional_data.get('clusterName', None)
+            self.cluster_id: str =self.additional_data.get('clusterId', None)
+            snapshot_completion_date = None
+            snapshot_scheduled_creation_date = None
+            try:
+                snapshot_completion_date = self.additional_data.get('snapshotCompletionDate', None)
+                self.snapshot_completion_date: Optional[datetime] = parse(snapshot_completion_date)
+            except (ValueError, TypeError, AttributeError):
+                logger.warning(f'Could not parse a CPS snapshot completion date: {snapshot_completion_date}')
+            try:
+                snapshot_scheduled_creation_date = self.additional_data.get('snapshotScheduledCreationDate', None)
+                self.snapshot_scheduled_creation_date: Optional[datetime] = parse(snapshot_scheduled_creation_date)
+            except (ValueError, TypeError, AttributeError):
+                logger.warning(f'Could not parse a CPS snapshot completion date: {snapshot_scheduled_creation_date}')
 
 
 class AtlasDataExplorerEvent(_AtlasUserBaseEvent):
@@ -763,10 +803,11 @@ class AtlasFeatureEvent(_AtlasUserBaseEvent):
 
 
 def atlas_event_factory(value_dict: dict) -> Union[
-                            AtlasEvent, AtlasDataExplorerEvent, AtlasClusterEvent, AtlasHostEvent, AtlasFeatureEvent]:
-    if value_dict.get("featureName", None):
+        AtlasEvent, AtlasDataExplorerEvent, AtlasClusterEvent, AtlasHostEvent, AtlasFeatureEvent, AtlasCPSEvent]:
+    if 'CPS_' in value_dict.get("eventTypeName", None):
+        return AtlasCPSEvent(value_dict=value_dict)
+    elif value_dict.get("featureName", None):
         return AtlasFeatureEvent(value_dict=value_dict)
-
     elif value_dict.get("hostname", None):
         return AtlasHostEvent(value_dict=value_dict)
 
@@ -775,6 +816,8 @@ def atlas_event_factory(value_dict: dict) -> Union[
 
     elif value_dict.get("database", None):
         return AtlasDataExplorerEvent(value_dict=value_dict)
+
+
     else:
         return AtlasEvent(value_dict=value_dict)
 

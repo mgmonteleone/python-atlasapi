@@ -46,9 +46,11 @@ class Settings:
                                                           "host}/logs/{logname}"
         },
         "Events": {
-            "Get All Project Events": URI_STUB + "/groups/{group_id}/events?pageNum={page_num}&itemsPerPage={items_per_page}",
-            "Get Project Events Since Date": URI_STUB + "/groups/{group_id}/events?pageNum={"
-                                                          "page_num}&itemsPerPage={items_per_page}&minDate={min_date}"
+            "Get All Project Events": URI_STUB + "/groups/{group_id}/events??includeRaw=true&pageNum={page_num}&itemsPerPage={"
+                                                 "items_per_page}",
+            "Get Project Events Since Date": URI_STUB + "/groups/{group_id}/events?includeRaw=true&pageNum={"
+                                                        "page_num}&itemsPerPage={items_per_page}&minDate={"
+                                                        "min_date}"
         },
         "Clusters": {
             "Get All Clusters": "/api/atlas/v1.0/groups/%s/clusters?pageNum=%d&itemsPerPage=%d",

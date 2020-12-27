@@ -22,6 +22,7 @@ from .atlas_types import OptionalFloat
 import ipaddress
 from copy import copy
 from pprint import pprint
+
 logger = logging.getLogger(name='Atlas_events')
 
 
@@ -757,19 +758,19 @@ class AtlasCPSEvent(_AtlasBaseEvent):
             self.snapshot_completion_date: Optional[datetime] = None
             self.snapshot_scheduled_creation_date: Optional[datetime] = None
             self.cluster_name: str = self.additional_data.get('clusterName', None)
-            self.cluster_id: str =self.additional_data.get('clusterId', None)
+            self.cluster_id: str = self.additional_data.get('clusterId', None)
             snapshot_completion_date = None
             snapshot_scheduled_creation_date = None
             try:
                 snapshot_completion_date = self.additional_data.get('snapshotCompletionDate', None)
                 self.snapshot_completion_date: Optional[datetime] = parse(snapshot_completion_date)
             except (ValueError, TypeError, AttributeError):
-                logger.warning(f'Could not parse a CPS snapshot completion date: {snapshot_completion_date}')
+                logger.debug(f'Could not parse a CPS snapshot completion date: {snapshot_completion_date}')
             try:
                 snapshot_scheduled_creation_date = self.additional_data.get('snapshotScheduledCreationDate', None)
                 self.snapshot_scheduled_creation_date: Optional[datetime] = parse(snapshot_scheduled_creation_date)
             except (ValueError, TypeError, AttributeError):
-                logger.warning(f'Could not parse a CPS snapshot completion date: {snapshot_scheduled_creation_date}')
+                logger.debug(f'Could not parse a CPS snapshot scheduled creation date: {snapshot_scheduled_creation_date}')
 
 
 class AtlasDataExplorerEvent(_AtlasUserBaseEvent):
@@ -803,7 +804,7 @@ class AtlasFeatureEvent(_AtlasUserBaseEvent):
 
 
 def atlas_event_factory(value_dict: dict) -> Union[
-        AtlasEvent, AtlasDataExplorerEvent, AtlasClusterEvent, AtlasHostEvent, AtlasFeatureEvent, AtlasCPSEvent]:
+    AtlasEvent, AtlasDataExplorerEvent, AtlasClusterEvent, AtlasHostEvent, AtlasFeatureEvent, AtlasCPSEvent]:
     if 'CPS_' in value_dict.get("eventTypeName", None):
         return AtlasCPSEvent(value_dict=value_dict)
     elif value_dict.get("featureName", None):

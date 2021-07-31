@@ -131,7 +131,7 @@ Get a Single Database User
     
     a = Atlas("<user>","<password>","<groupid>")
     
-    details = a.DatabaseUser.get_a_single_database_user("test")
+    details = a.DatabaseUsers.get_a_single_database_user("test")
 
 Clusters
 ^^^^^^^^

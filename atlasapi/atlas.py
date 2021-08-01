@@ -27,8 +27,7 @@ from .specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, Datab
 from typing import Union, Iterator, List, Optional
 from .atlas_types import OptionalInt, OptionalBool, ListofDict
 from .clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
-    MongoDBMajorVersion, InstanceSizeName, ProviderName, AdvancedOptions, TLSProtocols
-from .lib import AtlasPeriods, AtlasGranularities, AtlasUnits
+    InstanceSizeName, AdvancedOptions, TLSProtocols
 from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement, \
     OptionalAtlasMeasurement
 from atlasapi.events import atlas_event_factory, ListOfEvents
@@ -39,7 +38,8 @@ from atlasapi.alerts import Alert
 from time import time
 from atlasapi.whitelist import WhitelistEntry
 from atlasapi.maintenance_window import MaintenanceWindow, Weekdays
-from atlasapi.lib import AtlasLogNames, LogLine
+from atlasapi.lib import AtlasLogNames, LogLine, ProviderName, MongoDBMajorVersion, AtlasPeriods, AtlasGranularities,\
+    AtlasUnits
 from requests import get
 import gzip
 

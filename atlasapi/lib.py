@@ -120,3 +120,19 @@ class _GetAll(object):
 
 class _GetAllLeaf(_GetAll):
     is_leaf = True
+
+
+class ProviderName(Enum):
+    AWS = 'Amazon Web Services'
+    GCP = 'Google Cloud Platform'
+    AZURE = 'Microsoft Azure'
+    TENANT = 'Shared Tier'
+
+
+class MongoDBMajorVersion(Enum):
+    v3_4 = '3.4'
+    v3_6 = '3.6'
+    v4_0 = '4.0'
+    v4_2 = '4.2'
+    v4_4 = '4.4'
+    vX_x = 'Unknown'

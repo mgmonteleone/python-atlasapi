@@ -7,11 +7,12 @@ Enums are used in order to minimize invalid configuration values.
 
 """
 from enum import Enum
-from typing import List, NewType, Optional
+from typing import List, Optional
 from datetime import datetime
 import pytz
 import uuid
-import copy
+
+from lib import ProviderName, MongoDBMajorVersion
 
 FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
@@ -88,22 +89,6 @@ class InstanceSizeName(Enum):
     R400 = 'R400'
     M400_NVME = 'M400_NVME'
     R700 = 'R700'
-
-
-class ProviderName(Enum):
-    AWS = 'Amazon Web Services'
-    GCP = 'Google Cloud Platform'
-    AZURE = 'Microsoft Azure'
-    TENANT = 'Shared Tier'
-
-
-class MongoDBMajorVersion(Enum):
-    v3_4 = '3.4'
-    v3_6 = '3.6'
-    v4_0 = '4.0'
-    v4_2 = '4.2'
-    v4_4 = '4.4'
-    vX_x = 'Unknown'
 
 
 class TLSProtocols(Enum):

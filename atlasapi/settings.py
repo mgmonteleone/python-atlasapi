@@ -46,8 +46,8 @@ class Settings:
                                                           "host}/logs/{logname}"
         },
         "Events": {
-            "Get All Project Events": URI_STUB + "/groups/{group_id}/events??includeRaw=true&pageNum={page_num}&itemsPerPage={"
-                                                 "items_per_page}",
+            "Get All Project Events": URI_STUB + "/groups/{group_id}/events??includeRaw=true&pageNum={page_num}"
+                                                 "&itemsPerPage={items_per_page}",
             "Get Project Events Since Date": URI_STUB + "/groups/{group_id}/events?includeRaw=true&pageNum={"
                                                         "page_num}&itemsPerPage={items_per_page}&minDate={"
                                                         "min_date}"
@@ -75,8 +75,7 @@ class Settings:
             "Get All Alerts with status": "/api/atlas/v1.0/groups/%s/alerts?status=%s&pageNum=%d&itemsPerPage=%d",
             "Get an Alert": "/api/atlas/v1.0/groups/%s/alerts/%s",
             "Acknowledge an Alert": "/api/atlas/v1.0/groups/%s/alerts/%s"
-        }
-        ,
+        },
         "Whitelist": {
             "Get All Whitelist Entries": "/api/atlas/v1.0/groups/%s/whitelist?pageNum=%d&itemsPerPage=%d",
             "Get Whitelist Entry": "/api/atlas/v1.0/groups/%s/whitelist/%s",
@@ -101,20 +100,31 @@ class Settings:
         "Project API Keys": {
             "Get All API Keys Assigned to Project": URI_STUB + "/groups/{GROUP_ID}/apiKeys",
 
-        }
-        ,
+        },
         "Cloud Backup": {
-            "Get all Cloud Backups for cluster.": URI_STUB + "/groups/{GROUP_ID}/clusters/"
-                                                             "{CLUSTER_NAME}/backup/snapshots",
+            "Get all Cloud Backups for cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/"
+                                                            "{CLUSTER_NAME}/backup/snapshots",
             "Get snapshot by SNAPSHOT-ID": URI_STUB + "/groups/{GROUP_ID}/clusters/"
                                                       "{CLUSTER_NAME}/backup/snapshots/{SNAPSHOT_ID}",
             "Delete snapshot by SNAPSHOT-ID": URI_STUB + "/groups/{GROUP_ID}/clusters/"
-                                                      "{CLUSTER_NAME}/backup/snapshots/{SNAPSHOT_ID}",
+                                                         "{CLUSTER_NAME}/backup/snapshots/{SNAPSHOT_ID}",
             "Take an on-demand snapshot": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}/backup/snapshots",
+
+        },
+        "Cloud Backup Restore Jobs": {
+            "Get all Cloud Backup restore jobs by cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/"
+                                                                       "{CLUSTER_NAME}/backup/restoreJobs",
+            "Get Cloud Backup restore job by cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/"
+                                                                  "{CLUSTER_NAME}/backup/restoreJobs/{JOB_ID}",
+            "Restore snapshot by cluster.": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}"
+                                                       "/backup/restoreJobs",
+            "Cancels  manual download restore job by job_id": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}"
+                                                                         "/backup/restoreJobs/{JOB_ID}"
 
         }
 
     }
+    #
 
     # Atlas enforced
     databaseName = "admin"

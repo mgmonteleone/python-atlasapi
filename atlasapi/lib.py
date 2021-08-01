@@ -137,3 +137,15 @@ class MongoDBMajorVersion(Enum):
     v4_4 = '4.4'
     v5_0 = '5.0'
     vX_x = 'Unknown'
+
+
+class ClusterType(Enum):
+    """
+    The types of clusteres available in Atlas.
+
+    GEOSHARDED is a Global write cluster sharded by geo information.
+
+    """
+    REPLICASET = 'Replica Set'
+    SHARDED = 'Sharded Cluster'
+    GEOSHARDED = 'Global Cluster'

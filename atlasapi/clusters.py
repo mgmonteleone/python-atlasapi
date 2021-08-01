@@ -12,7 +12,7 @@ from datetime import datetime
 import pytz
 import uuid
 
-from lib import ProviderName, MongoDBMajorVersion
+from lib import ProviderName, MongoDBMajorVersion, ClusterType
 
 FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
@@ -38,18 +38,6 @@ class ClusterStates(Enum):
     DELETED = 'Deleted'
     REPAIRING = 'Repairing'
     UNKNOWN = 'Unknown'
-
-
-class ClusterType(Enum):
-    """
-    The types of clusteres available in Atlas.
-
-    GEOSHARDED is a Global write cluster sharded by geo information.
-
-    """
-    REPLICASET = 'Replica Set'
-    SHARDED = 'Sharded Cluster'
-    GEOSHARDED = 'Global Cluster'
 
 
 class InstanceSizeName(Enum):

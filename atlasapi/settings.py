@@ -102,6 +102,17 @@ class Settings:
             "Get All API Keys Assigned to Project": URI_STUB + "/groups/{GROUP_ID}/apiKeys",
 
         }
+        ,
+        "Cloud Backup": {
+            "Get all Cloud Backups for cluster.": URI_STUB + "/groups/{GROUP_ID}/clusters/"
+                                                             "{CLUSTER_NAME}/backup/snapshots",
+            "Get snapshot by SNAPSHOT-ID": URI_STUB + "/groups/{GROUP_ID}/clusters/"
+                                                      "{CLUSTER_NAME}/backup/snapshots/{SNAPSHOT_ID}",
+            "Delete snapshot by SNAPSHOT-ID": URI_STUB + "/groups/{GROUP_ID}/clusters/"
+                                                      "{CLUSTER_NAME}/backup/snapshots/{SNAPSHOT_ID}",
+            "Take an on-demand snapshot": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}/backup/snapshots",
+
+        }
 
     }
 

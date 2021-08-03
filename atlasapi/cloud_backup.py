@@ -74,6 +74,17 @@ test_data = {
 }
 
 
+class CloudBackupRequest(object):
+    def __init__(self, cluster_name: str, retention_days: int = 1, description: str = 'Created by pyAtlasAPI') -> None:
+        self.description = description
+        self.retentionInDays = retention_days
+        self.cluster_name = cluster_name
+
+    @property
+    def as_dict(self):
+        return dict(description=self.description, retentionInDays=self.retentionInDays)
+
+
 class CloudBackupSnapshot(object):
     def __init__(self, id: Optional[str] = None,
                  cloud_provider: Optional[ProviderName] = None,

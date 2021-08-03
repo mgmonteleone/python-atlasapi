@@ -33,14 +33,14 @@ from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, 
 from atlasapi.events import atlas_event_factory, ListOfEvents
 import logging
 from typing import Union, Iterable, Set, BinaryIO, Generator, Iterator
-from atlasapi.errors import ErrAtlasUnauthorized
+from atlasapi.errors import ErrAtlasUnauthorized, ErrAtlasBadRequest
 from atlasapi.alerts import Alert
 from time import time
 from atlasapi.whitelist import WhitelistEntry
 from atlasapi.maintenance_window import MaintenanceWindow, Weekdays
 from atlasapi.lib import AtlasLogNames, LogLine, ProviderName, MongoDBMajorVersion, AtlasPeriods, AtlasGranularities, \
     AtlasUnits
-from cloud_backup import CloudBackupSnapshot
+from cloud_backup import CloudBackupSnapshot, CloudBackupRequest
 from requests import get
 import gzip
 
@@ -1354,6 +1354,39 @@ class Atlas:
 
         def __init__(self, atlas):
             self.atlas = atlas
+
+        def create_snapshot_for_cluster(self, cluster_name: str, retention_days: int = 7,
+                                        description: str = None, as_obj: bool = True) -> Union[CloudBackupSnapshot,dict]:
+            """
+            Creates and on demand snapshot for the passed cluster
+
+            Args:
+                as_obj:
+                cluster_name:
+                retention_days:
+                description:
+            """
+            request_obj = CloudBackupRequest(cluster_name=cluster_name,
+                                             retention_days=retention_days,
+                                             description=description)
+
+            uri = Settings.api_resources["Cloud Backup"]["Take an on-demand snapshot"] \
+                .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name)
+
+            try:
+                response = self.atlas.network.post(uri=Settings.BASE_URL + uri,payload=request_obj.as_dict)
+            except ErrAtlasBadRequest as e:
+                logger.warning('Received an Atlas bad request on Snapshot creation. Could be due to overlap')
+                raise IOError("Got a bad request error back from Atlas, this may be due to submitting"
+                              "a snapshot request before a previous request has "
+                              "completed.")
+            logger.warning(f'Create response: {response}')
+            if as_obj:
+                logger.warning(f'Create response: {response}')
+                return CloudBackupSnapshot(response)
+
+            if not as_obj:
+                return response
 
         def get_backup_snapshots_for_cluster(self, cluster_name: str,
                                              snapshot_id: Optional[str] = None, as_obj: bool = True) -> Union[

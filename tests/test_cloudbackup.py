@@ -46,4 +46,11 @@ class CloudBackupTests(BaseTests):
             pprint(each)
             self.assertEquals(type(each), CloudBackupSnapshot)
 
-
+#    def test_02_create_snapshot(self):
+#        cluster_name = 'pyAtlasTestCluster'
+#        response_obj = self.a.CloudBackups.create_snapshot_for_cluster(cluster_name=cluster_name,
+#                                                                       retention_days=1,description="Test 01",as_obj=True)
+#        self.assertEquals(type(response_obj), CloudBackupSnapshot)
+#        pprint('New Snapshot created!!')
+#        pprint(response_obj)
+#

@@ -484,7 +484,7 @@ class ShardedClusterConfig(ClusterConfig):
         try:
             return_dict['replicationSpecs'] = [self.replication_specs[0].as_dict()]
         except AttributeError:
-            return_dict['replicationSpecs'] = [self.replication_specs[0][0].as_dict()]
+            return_dict['replicationSpecs'] = [self.replication_specs[0][0].as_dict]
         return_dict.__delitem__('replication_specs')
         try:
             return_dict['stateName'] = self.state_name.name

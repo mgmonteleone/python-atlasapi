@@ -54,7 +54,7 @@ class ClusterTests(BaseTests):
         myoutput = self.a.Clusters.create_basic_rs(name=self.TEST_CLUSTER2_NAME_UNIQUE, version=mdb_version.v4_2,
                                                    size=InstanceSizeName.M10)
         self.assertEqual(type(myoutput), AtlasBasicReplicaSet)
-        pprint(myoutput.config.as_dict())
+        pprint(myoutput.config.as_dict)
         print('-------------------Waiting a bit to allow the cluster to be created......-------------')
         sleep(30)
         print('-----------------------------------Done Sleeping -------------------------------------')

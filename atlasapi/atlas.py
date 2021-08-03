@@ -38,8 +38,9 @@ from atlasapi.alerts import Alert
 from time import time
 from atlasapi.whitelist import WhitelistEntry
 from atlasapi.maintenance_window import MaintenanceWindow, Weekdays
-from atlasapi.lib import AtlasLogNames, LogLine, ProviderName, MongoDBMajorVersion, AtlasPeriods, AtlasGranularities,\
+from atlasapi.lib import AtlasLogNames, LogLine, ProviderName, MongoDBMajorVersion, AtlasPeriods, AtlasGranularities, \
     AtlasUnits
+from cloud_backup import CloudBackupSnapshot
 from requests import get
 import gzip
 
@@ -71,6 +72,7 @@ class Atlas:
         self.Alerts = Atlas._Alerts(self)
         self.Whitelist = Atlas._Whitelist(self)
         self.MaintenanceWindows = Atlas._MaintenanceWindows(self)
+        self.CloudBackups = Atlas._CloudBackups(self)
 
     class _Clusters:
         """Clusters API
@@ -869,7 +871,7 @@ class Atlas:
 
             if since_datetime:
                 uri = Settings.api_resources["Events"]["Get Project Events Since Date"].format(
-                    min_date = since_datetime.isoformat(),
+                    min_date=since_datetime.isoformat(),
                     group_id=self.atlas.group,
                     page_num=pageNum,
                     items_per_page=itemsPerPage)
@@ -885,7 +887,6 @@ class Atlas:
                 return_val = self.atlas.network.get(Settings.BASE_URL + uri)
             return return_val
 
-
         @property
         def all(self) -> ListOfEvents:
             """
@@ -897,15 +898,14 @@ class Atlas:
             """
             return self._get_all_project_events(iterable=True)
 
-        def since(self,since_datetime: datetime) -> ListOfEvents:
+        def since(self, since_datetime: datetime) -> ListOfEvents:
             """
             Returns all events since the passed datetime. (UTC)
 
             Returns:
                 ListOfEvents:
             """
-            return self._get_all_project_events(iterable=True,since_datetime=since_datetime)
-
+            return self._get_all_project_events(iterable=True, since_datetime=since_datetime)
 
     class _DatabaseUsers:
         """Database Users API
@@ -1341,6 +1341,76 @@ class Atlas:
             output: bool = self._update_maint_window(new_config=new_config)
             return output
 
+    class _CloudBackups:
+        """Cloud Backup  API
+
+        see: https://docs.atlas.mongodb.com/reference/api/cloud-backup/backup/backups/
+
+        The CloudBackups resource provides access to retrieve the Cloud provider backup snapshots.
+
+        Args:
+            atlas (Atlas): Atlas instance
+        """
+
+        def __init__(self, atlas):
+            self.atlas = atlas
+
+        def get_backup_snapshots_for_cluster(self, cluster_name: str,
+                                             snapshot_id: Optional[str] = None, as_obj: bool = True) -> Union[
+            Iterable[CloudBackupSnapshot], Iterable[dict]]:
+            """Get  backup snapshots for a cluster.
+
+            If not snapshot_id is provided, then all snapshots are retrieved.
+
+            If a snopshot id is provided, only one snapshot is returned.
+
+            Retrieves
+            url: https://docs.atlas.mongodb.com/reference/api/cloud-backup/backup/backups/
+
+            Keyword Args:
+                cluster_name (str) : The cluster name to fetch
+                pageNum (int): Page number
+                itemsPerPage (int): Number of Users per Page
+                iterable (bool): To return an iterable high level object instead of a low level API response
+
+            Returns:
+                AtlasPagination or dict: Iterable object representing this function OR Response payload
+
+            Raises:
+                ErrPaginationLimits: Out of limits
+            """
+            if not snapshot_id:
+                uri = Settings.api_resources["Cloud Backup"]["Get all Cloud Backups for cluster"] \
+                    .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name)
+            if snapshot_id:
+                logger.warning('Getting by snapshotid')
+                uri = Settings.api_resources["Cloud Backup"]["Get snapshot by SNAPSHOT-ID"] \
+                    .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name, SNAPSHOT_ID=snapshot_id)
+
+            logger.warning(f"The cloudbackup uri used is {Settings.BASE_URL}{uri}")
+
+            response = self.atlas.network.get(Settings.BASE_URL + uri)
+            try:
+                response_results: List[dict] = response['results']
+
+            except KeyError:
+                return_list = list()
+                return_list.append(response)
+                response_results: List[dict] = return_list
+
+            logger.warning(f'Response results: {response_results}')
+
+            if not as_obj:
+                if snapshot_id:
+                    return list(response_results)
+                else:
+                    for entry in response_results:
+                        yield entry
+            if as_obj:
+                for entry in response_results:
+                    logger.warning(f'This is the {entry}')
+                    yield CloudBackupSnapshot.from_dict(entry)
+
 
 class AtlasPagination:
     """Atlas Pagination Generic Implementation
@@ -1470,3 +1540,10 @@ class WhitelistGetAll(AtlasPagination):
 
     def __init__(self, atlas, pageNum, itemsPerPage):
         super().__init__(atlas, atlas.Whitelist.get_all_whitelist_entries, pageNum, itemsPerPage)
+
+
+class CloudBackupSnapshotsGetAll(AtlasPagination):
+    """Pagination for Database User : Get All"""
+
+    def __init__(self, atlas, pageNum, itemsPerPage):
+        super().__init__(atlas, atlas.CloudBackups.get_all_backup_snapshots, pageNum, itemsPerPage)

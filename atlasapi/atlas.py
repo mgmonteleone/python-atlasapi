@@ -1464,7 +1464,7 @@ class Atlas:
             else:
                 logger.info('The target cluster exists.')
             # Check if the snapshot_id is valid
-            if not self.atlas.CloudBackups.is_existing_snapshot(source_cluster_name, snapshot_id)
+            if not self.atlas.CloudBackups.is_existing_snapshot(source_cluster_name, snapshot_id):
                 error_text = f'The passed snapshot_id ({snapshot_id} ' \
                              f'is not valid for the source cluster {source_cluster_name})'
                 logger.error(error_text)

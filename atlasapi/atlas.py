@@ -40,7 +40,8 @@ from atlasapi.whitelist import WhitelistEntry
 from atlasapi.maintenance_window import MaintenanceWindow, Weekdays
 from atlasapi.lib import AtlasLogNames, LogLine, ProviderName, MongoDBMajorVersion, AtlasPeriods, AtlasGranularities, \
     AtlasUnits
-from cloud_backup import CloudBackupSnapshot, CloudBackupRequest
+from cloud_backup import CloudBackupSnapshot, CloudBackupRequest, SnapshotRestore, SnapshotRestoreResponse, \
+    DeliveryType
 from requests import get
 import gzip
 
@@ -88,7 +89,7 @@ class Atlas:
         def __init__(self, atlas):
             self.atlas = atlas
 
-        def is_existing_cluster(self, cluster):
+        def is_existing_cluster(self, cluster) -> bool:
             """Check if the cluster exists
 
             Not part of Atlas api but provided to simplify some code
@@ -1443,6 +1444,56 @@ class Atlas:
                 for entry in response_results:
                     logger.warning(f'This is the {entry}')
                     yield CloudBackupSnapshot.from_dict(entry)
+
+        def is_existing_snapshot(self, cluster_name: str, snapshot_id: str) -> bool:
+            try:
+                self.atlas.CloudBackups.get_backup_snapshots_for_cluster(cluster_name, snapshot_id)
+                return True
+            except ErrAtlasNotFound:
+                return False
+
+        def request_snapshot_restore(self, source_cluster_name: str, snapshot_id: str,
+                                     target_cluster_name: str,
+                                     delivery_type: DeliveryType = DeliveryType.automated,
+                                     retention_days: int = 30
+                                     ) -> SnapshotRestoreResponse:
+            # Check if the target_cluster_name is valid
+            if not self.atlas.Clusters.is_existing_cluster(target_cluster_name):
+                logger.error(f'The passed target cluster {target_cluster_name}, does not exist in this project.')
+                raise ValueError(f'The passed target cluster {target_cluster_name}, does not exist in this project.')
+            else:
+                logger.info('The target cluster exists.')
+            # Check if the snapshot_id is valid
+            if not self.atlas.CloudBackups.is_existing_snapshot(source_cluster_name, snapshot_id)
+                error_text = f'The passed snapshot_id ({snapshot_id} ' \
+                             f'is not valid for the source cluster {source_cluster_name})'
+                logger.error(error_text)
+                raise ValueError(error_text)
+            else:
+                logger.info('The snapshot_id is valid')
+
+            uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Cloud Backup Restore Jobs"] \
+                .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name)
+
+            request_obj = SnapshotRestore(delivery_type,snapshot_id,target_cluster_name,self.atlas.group)
+
+            try:
+                response = self.atlas.network.post(uri=Settings.BASE_URL + uri,payload=request_obj.as_dict)
+            except ErrAtlasBadRequest as e:
+                logger.warning('Received an Atlas bad request on Snapshot restore request.')
+                raise IOError("Received an Atlas bad request on Snapshot restore request.")
+
+            try:
+                response_obj = SnapshotRestoreResponse.from_dict(response)
+            except KeyError as e:
+                logger.error('Error encountered parsing response to a SnapshotRestoreResponse')
+                logger.error(e)
+                raise e
+
+
+
+
+
 
 
 class AtlasPagination:

@@ -75,7 +75,8 @@ class SnapshotRestore(object):
         self.target_cluster_name = target_cluster_name
         self.target_group_id = target_group_id
 
-    def as_dict(self):
+    @property
+    def as_dict(self) -> dict:
         return dict(
             deliveryType=self.deliveryType.name,
             snapshotId=self.snapshot_id,
@@ -88,8 +89,12 @@ class SnapshotRestoreResponse(SnapshotRestore):
     def __init__(self, restore_id: str, delivery_type: DeliveryType, snapshot_id: str, target_cluster_name: str,
                  target_group_id: str, cancelled: bool = False,
                  created_at: datetime = None, expired: bool = False, expires_at: datetime = None,
-                 finished_at: datetime = None, links: list = None, snapshot_timestamp: datetime = None):
+                 finished_at: datetime = None, links: list = None, snapshot_timestamp: datetime = None,
+                 target_deployment_item_name: str = None,
+                 delivery_url: str = None):
         super().__init__(delivery_type, snapshot_id, target_cluster_name, target_group_id)
+        self.delivery_url = delivery_url
+        self.target_deployment_item_name = target_deployment_item_name
         self.snapshot_timestamp = snapshot_timestamp
         self.links = links
         self.finished_at = finished_at
@@ -111,12 +116,14 @@ class SnapshotRestoreResponse(SnapshotRestore):
         target_cluster_name = data_dict.get('targetClusterName')
         target_group_id = data_dict.get('targetGroupId')
         cancelled = try_bool(data_dict.get('cancelled'))
-        created_at = try_date(data_dict.get('createdAt'))
+        created_at = try_date(data_dict.get('createdAt')) # Does not appear to be retunred at all, potential docs issue?
         expired = try_bool(data_dict.get('expired'))
-        expires_at = try_date(data_dict.get('expiresAt'))
-        finished_at = try_date(data_dict.get('finishedAt'))
+        expires_at = try_date(data_dict.get('expiresAt')) # Does not appear to be retunred at all, potential docs issue?
+        finished_at = try_date(data_dict.get('finishedAt')) # Does not appear to be retunred at all, potential docs issue?
         links = data_dict.get('links')
         snapshot_timestamp = try_date(data_dict.get('timestamp'))
+        target_deployment_item_name=data_dict.get('targetDeploymentItemName') # missing in documentation TODO: File docs ticket.
+        delivery_url = data_dict.get('deliveryUrl',None) # missing in documentation TODO: File docs ticket
 
         return cls(restore_id=restore_id,
                    delivery_type=delivery_type,
@@ -129,7 +136,9 @@ class SnapshotRestoreResponse(SnapshotRestore):
                    expires_at=expires_at,
                    finished_at=finished_at,
                    links=links,
-                   snapshot_timestamp=snapshot_timestamp)
+                   snapshot_timestamp=snapshot_timestamp,
+                   target_deployment_item_name=target_deployment_item_name,
+                   delivery_url=delivery_url)
 
 
 class CloudBackupRequest(object):

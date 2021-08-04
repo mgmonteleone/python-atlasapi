@@ -13,9 +13,9 @@
 # limitations under the License.
 
 """
-Cloud Backups Modile
+Cloud Backups Module
 
-Provides access to Cloud Backups and Cloudbackup restore endpoints
+Provides access to Cloud Backups and Cloud backup restore endpoints
 """
 
 from enum import Enum
@@ -38,6 +38,15 @@ def try_date(str_in: str) -> Optional[datetime]:
     return datetime_out
 
 
+def try_bool(str_in: str) -> bool:
+    try:
+        bool_out = bool(str_in.lower())
+    except (ValueError, TypeError, AttributeError):
+        logger.debug(f'Could not parse a bool from : {str_in}')
+        bool_out = False
+    return bool_out
+
+
 class SnapshotType(Enum):
     ONDEMAND = "On Demand"
     SCHEDULED = "Scheduled"
@@ -50,28 +59,77 @@ class SnapshotStatus(Enum):
     FAILED = "Failed"
 
 
-test_data = {
-    "cloudProvider": "AWS",
-    "createdAt": "2021-07-31T02:02:25Z",
-    "expiresAt": "2021-08-28T02:03:22Z",
-    "id": "6104a8c6c1b4ef7788b5d8f0",
-    "links": [
-        {
-            "href": "https://cloud.mongodb.com/api/atlas/v1.0/groups/5b1e92c13b34b93b0230e6e1/clusters/pyAtlasTestCluster/backup/snapshots/6104a8c6c1b4ef7788b5d8f0",
-            "rel": "self"
-        },
-        {
-            "href": "https://cloud.mongodb.com/api/atlas/v1.0/groups/5b1e92c13b34b93b0230e6e1/clusters/pyAtlasTestCluster",
-            "rel": "http://cloud.mongodb.com/cluster"
-        }
-    ],
-    "mongodVersion": "4.2.15",
-    "replicaSetName": "pyAtlasTestCluster",
-    "snapshotType": "scheduled",
-    "status": "completed",
-    "storageSizeBytes": 14380134400,
-    "type": "replicaSet"
-}
+class DeliveryType(enum):
+    automated = "Automated restore to Atlas cluster"
+    download = "manual download of archived data directory"
+    pointInTime = "Automated point in time restore to Atlas Cluster"
+
+
+class SnapshotRestore(object):
+    def __init__(self, delivery_type: DeliveryType,
+                 snapshot_id: str,
+                 target_cluster_name: str = None,
+                 target_group_id: str = None_):
+        self.deliveryType = delivery_type
+        self.snapshot_id = snapshot_id
+        self.target_cluster_name = target_cluster_name
+        self.target_group_id = target_group_id
+
+    def as_dict(self):
+        return dict(
+            deliveryType=self.deliveryType.name,
+            snapshotId=self.snapshot_id,
+            targetClusterName=self.target_cluster_name,
+            targetGroupId=self.target_group_id
+        )
+
+
+class SnapshotRestoreResponse(SnapshotRestore):
+    def __init__(self, restore_id: str, delivery_type: DeliveryType, snapshot_id: str, target_cluster_name: str,
+                 target_group_id: str, cancelled: bool = False,
+                 created_at: datetime = None, expired: bool = False, expires_at: datetime = None,
+                 finished_at: datetime = None, links: list = None, snapshot_timestamp: datetime = None):
+        super().__init__(delivery_type, snapshot_id, target_cluster_name, target_group_id)
+        self.snapshot_timestamp = snapshot_timestamp
+        self.links = links
+        self.finished_at = finished_at
+        self.expires_at = expires_at
+        self.expired = expired
+        self.created_at = created_at
+        self.cancelled = cancelled
+        self.restore_id = restore_id
+
+    @classmethod
+    def from_dict(cls, data_dict):
+        restore_id = data_dict.get('id')
+        snapshot_id = data_dict.get('snapshotId')
+        try:
+            delivery_type = DeliveryType[data_dict.get('deliveryType')]
+        except KeyError:
+            logger.warning(f'Got an unmapped deliveryType : {data_dict.get("deliveryType")}.')
+            delivery_type = None
+        target_cluster_name = data_dict.get('targetClusterName')
+        target_group_id = data_dict.get('targetGroupId')
+        cancelled = try_bool(data_dict.get('cancelled'))
+        created_at = try_date(data_dict.get('createdAt'))
+        expired = try_bool(data_dict.get('expired'))
+        expires_at = try_date(data_dict.get('expiresAt'))
+        finished_at = try_date(data_dict.get('finishedAt'))
+        links = data_dict.get('links')
+        snapshot_timestamp = try_date(data_dict.get('timestamp'))
+
+        return cls(restore_id=restore_id,
+                   delivery_type=delivery_type,
+                   snapshot_id=snapshot_id,
+                   target_cluster_name=target_cluster_name,
+                   target_group_id=target_group_id,
+                   cancelled=cancelled,
+                   created_at=created_at,
+                   expired=expired,
+                   expires_at=expires_at,
+                   finished_at=finished_at,
+                   links=links,
+                   snapshot_timestamp=snapshot_timestamp)
 
 
 class CloudBackupRequest(object):
@@ -106,7 +164,8 @@ class CloudBackupSnapshot(object):
 
         Args:
             id: Unique identifier of the snapshot.
-            cloud_provider: Cloud provider that stores this snapshot. Atlas returns this parameter when "type": "replicaSet".
+            cloud_provider: Cloud provider that stores this snapshot. Atlas returns this parameter
+            when "type": "replicaSet".
             created_at:
             description: Description of the snapshot. Atlas returns this parameter when "status": "onDemand".
             expires_at:
@@ -183,8 +242,3 @@ class CloudBackupSnapshot(object):
                    mongod_version=mongod_version,
                    snapshot_ids=snapshot_ids
                    )
-
-
-test = CloudBackupSnapshot.from_dict(test_data)
-
-pprint(test.__dict__)

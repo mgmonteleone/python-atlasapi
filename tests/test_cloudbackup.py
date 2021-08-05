@@ -6,7 +6,7 @@ Unit tests for Maintenance Windows
 from pprint import pprint
 from os import environ, getenv
 from atlasapi.atlas import Atlas
-from cloud_backup import CloudBackupSnapshot, DeliveryType, SnapshotRestoreResponse
+from atlasapi.cloud_backup import CloudBackupSnapshot, DeliveryType, SnapshotRestoreResponse
 from json import dumps
 from tests import BaseTests
 import logging

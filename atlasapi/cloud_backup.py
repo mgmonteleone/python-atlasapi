@@ -24,6 +24,7 @@ from datetime import datetime
 from atlasapi.lib import ProviderName, ClusterType
 from dateutil.parser import parse
 from pprint import pprint
+from distutils.util import strtobool
 import logging
 
 logger = logging.getLogger(name='Atlas_cloud_backup')
@@ -39,11 +40,14 @@ def try_date(str_in: str) -> Optional[datetime]:
 
 
 def try_bool(str_in: str) -> bool:
-    try:
-        bool_out = bool(str_in.lower())
-    except (ValueError, TypeError, AttributeError):
-        logger.debug(f'Could not parse a bool from : {str_in}')
-        bool_out = False
+    if type(str_in) != bool:
+        try:
+            bool_out = strtobool(str_in)
+        except (ValueError, TypeError, AttributeError):
+            logger.debug(f'Could not parse a bool from : {str_in}')
+            bool_out = False
+    else:
+        bool_out = str_in
     return bool_out
 
 

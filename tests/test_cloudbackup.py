@@ -105,3 +105,36 @@ class CloudBackupTests(BaseTests):
                                                                     delivery_type=DeliveryType.automated)
 
     test_06_restore_snapshot_to_atlas_bad_same_cluster.basic = True
+
+    def test_07_get_restore_job_for_cluster(self):
+        cluster_name = 'pyAtlasTestCluster'
+        restores: List[SnapshotRestoreResponse] = self.a.CloudBackups.get_snapshot_restore_requests(
+            cluster_name=cluster_name)
+        count = 0
+        for each in restores:
+            count += 1
+            pprint(each)
+
+            self.assertEquals(type(each), SnapshotRestoreResponse)
+        print(f'The number of snapshots restore jobs returned = {count}')
+        self.assertGreaterEqual(count,1)
+
+    test_07_get_restore_job_for_cluster.basic = True
+
+    def test_08_get_one_restore_job(self):
+        cluster_name = 'pyAtlasTestCluster'
+        restores: List[SnapshotRestoreResponse] = self.a.CloudBackups.get_snapshot_restore_requests(
+            cluster_name=cluster_name)
+        count = 0
+        restore_id = list(restores)[0].restore_id
+
+        print(f'The restore_id to be tested is {restore_id}')
+
+        restore_jobs = self.a.CloudBackups.get_snapshot_restore_requests(cluster_name=cluster_name,
+                                                                        restore_id=restore_id)
+
+        restore_job = list(restore_jobs)[0]
+
+        self.assertEquals(type(restore_job),SnapshotRestoreResponse)
+
+    test_08_get_one_restore_job.basic = True

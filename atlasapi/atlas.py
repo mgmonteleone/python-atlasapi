@@ -1501,6 +1501,38 @@ class Atlas:
                 raise e
             return response_obj
 
+        # Get all Cloud Backup restore jobs by cluster
+        def get_snapshot_restore_requests(self, cluster_name: str, restore_id: str = None, as_obj: bool = True):
+
+            if not restore_id:
+                uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Get all Cloud Backup restore jobs by cluster"] \
+                    .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name)
+            else:
+                logger.warning('Getting by snapshotid')
+                uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Get Cloud Backup restore job by cluster"] \
+                    .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name, JOB_ID=restore_id)
+
+            logger.warning(f"The restore job uri used is {Settings.BASE_URL}{uri}")
+
+            response = self.atlas.network.get(Settings.BASE_URL + uri)
+
+            try:
+                response_results: List[dict] = response['results']
+            except KeyError:
+                return_list = list()
+                return_list.append(response)
+                response_results: List[dict] = return_list
+
+            if not as_obj:
+                if restore_id:
+                    return list(response_results)
+                else:
+                    for entry in response_results:
+                        yield entry
+            if as_obj:
+                for entry in response_results:
+                    logger.warning(f'This is the {entry}')
+                    yield SnapshotRestoreResponse.from_dict(entry)
 
 class AtlasPagination:
     """Atlas Pagination Generic Implementation

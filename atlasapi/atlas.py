@@ -40,7 +40,7 @@ from atlasapi.whitelist import WhitelistEntry
 from atlasapi.maintenance_window import MaintenanceWindow, Weekdays
 from atlasapi.lib import AtlasLogNames, LogLine, ProviderName, MongoDBMajorVersion, AtlasPeriods, AtlasGranularities, \
     AtlasUnits
-from cloud_backup import CloudBackupSnapshot, CloudBackupRequest, SnapshotRestore, SnapshotRestoreResponse, \
+from atlasapi.cloud_backup import CloudBackupSnapshot, CloudBackupRequest, SnapshotRestore, SnapshotRestoreResponse, \
     DeliveryType
 from requests import get
 import gzip

@@ -116,7 +116,7 @@ class Settings:
                                                                        "{CLUSTER_NAME}/backup/restoreJobs",
             "Get Cloud Backup restore job by cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/"
                                                                   "{CLUSTER_NAME}/backup/restoreJobs/{JOB_ID}",
-            "Restore snapshot by cluster.": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}"
+            "Restore snapshot by cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}"
                                                        "/backup/restoreJobs",
             "Cancels  manual download restore job by job_id": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}"
                                                                          "/backup/restoreJobs/{JOB_ID}"

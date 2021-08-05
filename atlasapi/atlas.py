@@ -1455,7 +1455,7 @@ class Atlas:
         def request_snapshot_restore(self, source_cluster_name: str, snapshot_id: str,
                                      target_cluster_name: str,
                                      delivery_type: DeliveryType = DeliveryType.automated,
-                                     retention_days: int = 30
+                                     allow_same: bool = False
                                      ) -> SnapshotRestoreResponse:
             # Check if the target_cluster_name is valid
             if not self.atlas.Clusters.is_existing_cluster(target_cluster_name):
@@ -1472,8 +1472,18 @@ class Atlas:
             else:
                 logger.info('The snapshot_id is valid')
 
-            uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Cloud Backup Restore Jobs"] \
-                .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name)
+
+            # Check if the source and target clusters are the same, if so raise exception unless override is True
+
+            if source_cluster_name == target_cluster_name and not allow_same:
+                error_text = f'The source and target cluster should not be the same, as this is usually not the intended' \
+                             f'use case, and can lead to production data loss. If you wish to restore a snapshot to the' \
+                             f'same cluster, use the `allow_same` = True parameter.'
+                logger.error(error_text)
+                raise ValueError(error_text)
+
+            uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Restore snapshot by cluster"] \
+                .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=source_cluster_name)
 
             request_obj = SnapshotRestore(delivery_type,snapshot_id,target_cluster_name,self.atlas.group)
 
@@ -1489,11 +1499,7 @@ class Atlas:
                 logger.error('Error encountered parsing response to a SnapshotRestoreResponse')
                 logger.error(e)
                 raise e
-
-
-
-
-
+            return response_obj
 
 
 class AtlasPagination:

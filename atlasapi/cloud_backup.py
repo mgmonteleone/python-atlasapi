@@ -59,7 +59,7 @@ class SnapshotStatus(Enum):
     FAILED = "Failed"
 
 
-class DeliveryType(enum):
+class DeliveryType(Enum):
     automated = "Automated restore to Atlas cluster"
     download = "manual download of archived data directory"
     pointInTime = "Automated point in time restore to Atlas Cluster"
@@ -69,7 +69,7 @@ class SnapshotRestore(object):
     def __init__(self, delivery_type: DeliveryType,
                  snapshot_id: str,
                  target_cluster_name: str = None,
-                 target_group_id: str = None_):
+                 target_group_id: str = None):
         self.deliveryType = delivery_type
         self.snapshot_id = snapshot_id
         self.target_cluster_name = target_cluster_name

@@ -1349,7 +1349,8 @@ class Atlas:
 
         The CloudBackups resource provides access to retrieve the Cloud provider backup snapshots.
 
-        The restore endpoint
+        The restore endpoint enables restoring a snapshot to an Atlas cluster, or preparing it for download
+        to be restored locally.
 
         Args:
             atlas (Atlas): Atlas instance
@@ -1371,7 +1372,7 @@ class Atlas:
                 description (str): Free text description
 
             Returns:
-                Union[CloudBackupSnapshot,dict]:
+                Union[CloudBackupSnapshot,dict]: Either an CloudBackupSnapshot or the raw dict returned from Atlas.
             """
             request_obj = CloudBackupRequest(cluster_name=cluster_name,
                                              retention_days=retention_days,
@@ -1470,6 +1471,24 @@ class Atlas:
                                      delivery_type: DeliveryType = DeliveryType.automated,
                                      allow_same: bool = False
                                      ) -> SnapshotRestoreResponse:
+            """
+            Request a snapshot to be restored either directly on Atlas or prepare it for download.
+
+            Validation is run to ensure the source, destination clusters as well as the snapshot_id exists.
+
+            Args:
+                source_cluster_name (str):  The name of the cluster from which the snapshot was taken.
+                snapshot_id (str): The snapshot_id to be restored.
+                target_cluster_name (str): The name of the cluster onto which the snapshot should be restored.
+                delivery_type (DeliveryType): Where the snapshot will be restored, either automatically on Atlas or
+                as a download
+                allow_same (bool): By default an error will be raised if the source and target clusters are the same. Setting
+                this Arg to True allows this dangerous usage.
+
+            Returns:
+                SnapshotRestoreResponse: Object Representing the data returned for for a successfull request.
+
+            """
             # Check if the target_cluster_name is valid
             if not self.atlas.Clusters.is_existing_cluster(target_cluster_name):
                 logger.error(f'The passed target cluster {target_cluster_name}, does not exist in this project.')
@@ -1514,8 +1533,25 @@ class Atlas:
             return response_obj
 
         # Get all Cloud Backup restore jobs by cluster
-        def get_snapshot_restore_requests(self, cluster_name: str, restore_id: str = None, as_obj: bool = True):
+        def get_snapshot_restore_requests(self, cluster_name: str, restore_id: str = None, as_obj: bool = True) \
+                                                            -> Iterable[Optional[SnapshotRestoreResponse, dict]]:
+            """
+            Retrieves existing snopshot restore requests for a specified cluster.
 
+            IF a restore_id is specified will only return the specified restore, otherwise all restores for the source
+            cluster will be listed.
+
+
+            Args:
+                cluster_name (str):
+                restore_id (str):
+                as_obj (bool): If true will return a  `SnapshotRestoreResponse` object, otherwise a raw dict.
+
+            Returns:
+               Iterable[Optional[SnapshotRestoreResponse, dict]] : Iterable list of either `SnapshotRestoreResponse` or
+               raw dicts. If a single restore_id is returned it will be in a list.
+
+            """
             if not restore_id:
                 uri = Settings.api_resources["Cloud Backup Restore Jobs"][
                     "Get all Cloud Backup restore jobs by cluster"] \

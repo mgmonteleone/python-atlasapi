@@ -1534,7 +1534,7 @@ class Atlas:
 
         # Get all Cloud Backup restore jobs by cluster
         def get_snapshot_restore_requests(self, cluster_name: str, restore_id: str = None, as_obj: bool = True) \
-                                                            -> Iterable[Optional[SnapshotRestoreResponse, dict]]:
+                                                            -> Iterable[Union[SnapshotRestoreResponse, dict]]:
             """
             Retrieves existing snopshot restore requests for a specified cluster.
 
@@ -1548,7 +1548,7 @@ class Atlas:
                 as_obj (bool): If true will return a  `SnapshotRestoreResponse` object, otherwise a raw dict.
 
             Returns:
-               Iterable[Optional[SnapshotRestoreResponse, dict]] : Iterable list of either `SnapshotRestoreResponse` or
+               Iterable[Union[SnapshotRestoreResponse, dict]] : Iterable list of either `SnapshotRestoreResponse` or
                raw dicts. If a single restore_id is returned it will be in a list.
 
             """

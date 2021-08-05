@@ -9,7 +9,7 @@ from atlasapi.atlas import Atlas
 from atlasapi.lib import AtlasPeriods, AtlasUnits, AtlasGranularities
 from json import dumps
 from atlasapi.clusters import AtlasBasicReplicaSet, ClusterConfig
-from lib import MongoDBMajorVersion as mdb_version
+from atlasapi.lib import MongoDBMajorVersion as mdb_version
 from atlasapi.clusters import ClusterConfig, ProviderSettings, ReplicationSpecs, InstanceSizeName
 from atlasapi.clusters import RegionConfig, AdvancedOptions, TLSProtocols
 from tests import BaseTests

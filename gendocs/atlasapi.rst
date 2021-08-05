@@ -99,6 +99,14 @@ atlasapi\.maintenance_window module
     :undoc-members:
     :show-inheritance:
 
+atlasapi\.cloud_backup module
+------------------------------------
+
+.. automodule:: atlasapi.cloud_backup
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 atlasapi\.lib module
 --------------------
 

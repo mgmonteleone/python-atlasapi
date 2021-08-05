@@ -60,3 +60,11 @@ Atlas._Whitelist
     :members:
     :undoc-members:
     :show-inheritance:
+
+Atlas._CloudBackups
+----------------
+
+.. autoclass:: atlasapi.atlas::Atlas._CloudBackups
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1362,10 +1362,13 @@ class Atlas:
             Creates and on demand snapshot for the passed cluster
 
             Args:
-                as_obj:
-                cluster_name:
-                retention_days:
-                description:
+                as_obj (bool): return the data as a class instead of a
+                cluster_name (str): The name of the cluster to create the snopshot on.
+                retention_days (int): How many days to retain the snapshot
+                description (str): Free text description
+
+            Returns:
+                Union[CloudBackupSnapshot,dict]:
             """
             request_obj = CloudBackupRequest(cluster_name=cluster_name,
                                              retention_days=retention_days,

@@ -27,19 +27,21 @@ from .specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, Datab
 from typing import Union, Iterator, List, Optional
 from .atlas_types import OptionalInt, OptionalBool, ListofDict
 from .clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
-    MongoDBMajorVersion, InstanceSizeName, ProviderName, AdvancedOptions, TLSProtocols
-from .lib import AtlasPeriods, AtlasGranularities, AtlasUnits
+    InstanceSizeName, AdvancedOptions, TLSProtocols
 from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement, \
     OptionalAtlasMeasurement
 from atlasapi.events import atlas_event_factory, ListOfEvents
 import logging
 from typing import Union, Iterable, Set, BinaryIO, Generator, Iterator
-from atlasapi.errors import ErrAtlasUnauthorized
+from atlasapi.errors import ErrAtlasUnauthorized, ErrAtlasBadRequest
 from atlasapi.alerts import Alert
 from time import time
 from atlasapi.whitelist import WhitelistEntry
 from atlasapi.maintenance_window import MaintenanceWindow, Weekdays
-from atlasapi.lib import AtlasLogNames, LogLine
+from atlasapi.lib import AtlasLogNames, LogLine, ProviderName, MongoDBMajorVersion, AtlasPeriods, AtlasGranularities, \
+    AtlasUnits
+from atlasapi.cloud_backup import CloudBackupSnapshot, CloudBackupRequest, SnapshotRestore, SnapshotRestoreResponse, \
+    DeliveryType
 from requests import get
 import gzip
 
@@ -71,6 +73,7 @@ class Atlas:
         self.Alerts = Atlas._Alerts(self)
         self.Whitelist = Atlas._Whitelist(self)
         self.MaintenanceWindows = Atlas._MaintenanceWindows(self)
+        self.CloudBackups = Atlas._CloudBackups(self)
 
     class _Clusters:
         """Clusters API
@@ -86,7 +89,7 @@ class Atlas:
         def __init__(self, atlas):
             self.atlas = atlas
 
-        def is_existing_cluster(self, cluster):
+        def is_existing_cluster(self, cluster) -> bool:
             """Check if the cluster exists
 
             Not part of Atlas api but provided to simplify some code
@@ -869,7 +872,7 @@ class Atlas:
 
             if since_datetime:
                 uri = Settings.api_resources["Events"]["Get Project Events Since Date"].format(
-                    min_date = since_datetime.isoformat(),
+                    min_date=since_datetime.isoformat(),
                     group_id=self.atlas.group,
                     page_num=pageNum,
                     items_per_page=itemsPerPage)
@@ -885,7 +888,6 @@ class Atlas:
                 return_val = self.atlas.network.get(Settings.BASE_URL + uri)
             return return_val
 
-
         @property
         def all(self) -> ListOfEvents:
             """
@@ -897,15 +899,14 @@ class Atlas:
             """
             return self._get_all_project_events(iterable=True)
 
-        def since(self,since_datetime: datetime) -> ListOfEvents:
+        def since(self, since_datetime: datetime) -> ListOfEvents:
             """
             Returns all events since the passed datetime. (UTC)
 
             Returns:
                 ListOfEvents:
             """
-            return self._get_all_project_events(iterable=True,since_datetime=since_datetime)
-
+            return self._get_all_project_events(iterable=True, since_datetime=since_datetime)
 
     class _DatabaseUsers:
         """Database Users API
@@ -1341,6 +1342,197 @@ class Atlas:
             output: bool = self._update_maint_window(new_config=new_config)
             return output
 
+    class _CloudBackups:
+        """Cloud Backup  API
+
+        see: https://docs.atlas.mongodb.com/reference/api/cloud-backup/backup/backups/
+
+        The CloudBackups resource provides access to retrieve the Cloud provider backup snapshots.
+
+        Args:
+            atlas (Atlas): Atlas instance
+        """
+
+        def __init__(self, atlas):
+            self.atlas = atlas
+
+        def create_snapshot_for_cluster(self, cluster_name: str, retention_days: int = 7,
+                                        description: str = None, as_obj: bool = True) -> Union[CloudBackupSnapshot,dict]:
+            """
+            Creates and on demand snapshot for the passed cluster
+
+            Args:
+                as_obj:
+                cluster_name:
+                retention_days:
+                description:
+            """
+            request_obj = CloudBackupRequest(cluster_name=cluster_name,
+                                             retention_days=retention_days,
+                                             description=description)
+
+            uri = Settings.api_resources["Cloud Backup"]["Take an on-demand snapshot"] \
+                .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name)
+
+            try:
+                response = self.atlas.network.post(uri=Settings.BASE_URL + uri,payload=request_obj.as_dict)
+            except ErrAtlasBadRequest as e:
+                logger.warning('Received an Atlas bad request on Snapshot creation. Could be due to overlap')
+                raise IOError("Got a bad request error back from Atlas, this may be due to submitting"
+                              "a snapshot request before a previous request has "
+                              "completed.")
+            logger.warning(f'Create response: {response}')
+            if as_obj:
+                logger.warning(f'Create response: {response}')
+                return CloudBackupSnapshot(response)
+
+            if not as_obj:
+                return response
+
+        def get_backup_snapshots_for_cluster(self, cluster_name: str,
+                                             snapshot_id: Optional[str] = None, as_obj: bool = True) -> Union[
+            Iterable[CloudBackupSnapshot], Iterable[dict]]:
+            """Get  backup snapshots for a cluster.
+
+            If not snapshot_id is provided, then all snapshots are retrieved.
+
+            If a snopshot id is provided, only one snapshot is returned.
+
+            Retrieves
+            url: https://docs.atlas.mongodb.com/reference/api/cloud-backup/backup/backups/
+
+            Keyword Args:
+                cluster_name (str) : The cluster name to fetch
+                pageNum (int): Page number
+                itemsPerPage (int): Number of Users per Page
+                iterable (bool): To return an iterable high level object instead of a low level API response
+
+            Returns:
+                AtlasPagination or dict: Iterable object representing this function OR Response payload
+
+            Raises:
+                ErrPaginationLimits: Out of limits
+            """
+            if not snapshot_id:
+                uri = Settings.api_resources["Cloud Backup"]["Get all Cloud Backups for cluster"] \
+                    .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name)
+            if snapshot_id:
+                logger.warning('Getting by snapshotid')
+                uri = Settings.api_resources["Cloud Backup"]["Get snapshot by SNAPSHOT-ID"] \
+                    .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name, SNAPSHOT_ID=snapshot_id)
+
+            logger.warning(f"The cloudbackup uri used is {Settings.BASE_URL}{uri}")
+
+            response = self.atlas.network.get(Settings.BASE_URL + uri)
+            try:
+                response_results: List[dict] = response['results']
+
+            except KeyError:
+                return_list = list()
+                return_list.append(response)
+                response_results: List[dict] = return_list
+
+            logger.warning(f'Response results: {response_results}')
+
+            if not as_obj:
+                if snapshot_id:
+                    return list(response_results)
+                else:
+                    for entry in response_results:
+                        yield entry
+            if as_obj:
+                for entry in response_results:
+                    logger.warning(f'This is the {entry}')
+                    yield CloudBackupSnapshot.from_dict(entry)
+
+        def is_existing_snapshot(self, cluster_name: str, snapshot_id: str) -> bool:
+            try:
+                self.atlas.CloudBackups.get_backup_snapshots_for_cluster(cluster_name, snapshot_id)
+                return True
+            except ErrAtlasNotFound:
+                return False
+
+        def request_snapshot_restore(self, source_cluster_name: str, snapshot_id: str,
+                                     target_cluster_name: str,
+                                     delivery_type: DeliveryType = DeliveryType.automated,
+                                     allow_same: bool = False
+                                     ) -> SnapshotRestoreResponse:
+            # Check if the target_cluster_name is valid
+            if not self.atlas.Clusters.is_existing_cluster(target_cluster_name):
+                logger.error(f'The passed target cluster {target_cluster_name}, does not exist in this project.')
+                raise ValueError(f'The passed target cluster {target_cluster_name}, does not exist in this project.')
+            else:
+                logger.info('The target cluster exists.')
+            # Check if the snapshot_id is valid
+            if not self.atlas.CloudBackups.is_existing_snapshot(source_cluster_name, snapshot_id):
+                error_text = f'The passed snapshot_id ({snapshot_id} ' \
+                             f'is not valid for the source cluster {source_cluster_name})'
+                logger.error(error_text)
+                raise ValueError(error_text)
+            else:
+                logger.info('The snapshot_id is valid')
+
+
+            # Check if the source and target clusters are the same, if so raise exception unless override is True
+
+            if source_cluster_name == target_cluster_name and not allow_same:
+                error_text = f'The source and target cluster should not be the same, as this is usually not the intended' \
+                             f'use case, and can lead to production data loss. If you wish to restore a snapshot to the' \
+                             f'same cluster, use the `allow_same` = True parameter.'
+                logger.error(error_text)
+                raise ValueError(error_text)
+
+            uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Restore snapshot by cluster"] \
+                .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=source_cluster_name)
+
+            request_obj = SnapshotRestore(delivery_type,snapshot_id,target_cluster_name,self.atlas.group)
+
+            try:
+                response = self.atlas.network.post(uri=Settings.BASE_URL + uri,payload=request_obj.as_dict)
+            except ErrAtlasBadRequest as e:
+                logger.warning('Received an Atlas bad request on Snapshot restore request.')
+                raise IOError("Received an Atlas bad request on Snapshot restore request.")
+
+            try:
+                response_obj = SnapshotRestoreResponse.from_dict(response)
+            except KeyError as e:
+                logger.error('Error encountered parsing response to a SnapshotRestoreResponse')
+                logger.error(e)
+                raise e
+            return response_obj
+
+        # Get all Cloud Backup restore jobs by cluster
+        def get_snapshot_restore_requests(self, cluster_name: str, restore_id: str = None, as_obj: bool = True):
+
+            if not restore_id:
+                uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Get all Cloud Backup restore jobs by cluster"] \
+                    .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name)
+            else:
+                logger.warning('Getting by snapshotid')
+                uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Get Cloud Backup restore job by cluster"] \
+                    .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name, JOB_ID=restore_id)
+
+            logger.warning(f"The restore job uri used is {Settings.BASE_URL}{uri}")
+
+            response = self.atlas.network.get(Settings.BASE_URL + uri)
+
+            try:
+                response_results: List[dict] = response['results']
+            except KeyError:
+                return_list = list()
+                return_list.append(response)
+                response_results: List[dict] = return_list
+
+            if not as_obj:
+                if restore_id:
+                    return list(response_results)
+                else:
+                    for entry in response_results:
+                        yield entry
+            if as_obj:
+                for entry in response_results:
+                    logger.warning(f'This is the {entry}')
+                    yield SnapshotRestoreResponse.from_dict(entry)
 
 class AtlasPagination:
     """Atlas Pagination Generic Implementation
@@ -1470,3 +1662,10 @@ class WhitelistGetAll(AtlasPagination):
 
     def __init__(self, atlas, pageNum, itemsPerPage):
         super().__init__(atlas, atlas.Whitelist.get_all_whitelist_entries, pageNum, itemsPerPage)
+
+
+class CloudBackupSnapshotsGetAll(AtlasPagination):
+    """Pagination for Database User : Get All"""
+
+    def __init__(self, atlas, pageNum, itemsPerPage):
+        super().__init__(atlas, atlas.CloudBackups.get_all_backup_snapshots, pageNum, itemsPerPage)

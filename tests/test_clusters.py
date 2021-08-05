@@ -8,7 +8,8 @@ from os import environ, getenv
 from atlasapi.atlas import Atlas
 from atlasapi.lib import AtlasPeriods, AtlasUnits, AtlasGranularities
 from json import dumps
-from atlasapi.clusters import AtlasBasicReplicaSet, MongoDBMajorVersion as mdb_version, ClusterConfig
+from atlasapi.clusters import AtlasBasicReplicaSet, ClusterConfig
+from atlasapi.lib import MongoDBMajorVersion as mdb_version
 from atlasapi.clusters import ClusterConfig, ProviderSettings, ReplicationSpecs, InstanceSizeName
 from atlasapi.clusters import RegionConfig, AdvancedOptions, TLSProtocols
 from tests import BaseTests
@@ -53,7 +54,7 @@ class ClusterTests(BaseTests):
         myoutput = self.a.Clusters.create_basic_rs(name=self.TEST_CLUSTER2_NAME_UNIQUE, version=mdb_version.v4_2,
                                                    size=InstanceSizeName.M10)
         self.assertEqual(type(myoutput), AtlasBasicReplicaSet)
-        pprint(myoutput.config.as_dict())
+        pprint(myoutput.config.as_dict)
         print('-------------------Waiting a bit to allow the cluster to be created......-------------')
         sleep(30)
         print('-----------------------------------Done Sleeping -------------------------------------')

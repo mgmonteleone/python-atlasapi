@@ -7,11 +7,12 @@ Enums are used in order to minimize invalid configuration values.
 
 """
 from enum import Enum
-from typing import List, NewType, Optional
+from typing import List, Optional
 from datetime import datetime
 import pytz
 import uuid
-import copy
+
+from atlasapi.lib import ProviderName, MongoDBMajorVersion, ClusterType
 
 FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
@@ -37,18 +38,6 @@ class ClusterStates(Enum):
     DELETED = 'Deleted'
     REPAIRING = 'Repairing'
     UNKNOWN = 'Unknown'
-
-
-class ClusterType(Enum):
-    """
-    The types of clusteres available in Atlas.
-
-    GEOSHARDED is a Global write cluster sharded by geo information.
-
-    """
-    REPLICASET = 'Replica Set'
-    SHARDED = 'Sharded Cluster'
-    GEOSHARDED = 'Global Cluster'
 
 
 class InstanceSizeName(Enum):
@@ -90,22 +79,6 @@ class InstanceSizeName(Enum):
     R700 = 'R700'
 
 
-class ProviderName(Enum):
-    AWS = 'Amazon Web Services'
-    GCP = 'Google Cloud Platform'
-    AZURE = 'Microsoft Azure'
-    TENANT = 'Shared Tier'
-
-
-class MongoDBMajorVersion(Enum):
-    v3_4 = '3.4'
-    v3_6 = '3.6'
-    v4_0 = '4.0'
-    v4_2 = '4.2'
-    v4_4 = '4.4'
-    vX_x = 'Unknown'
-
-
 class TLSProtocols(Enum):
     TLS1_0 = 'TLS1_0'
     TLS1_1 = 'TLS1_1'
@@ -131,7 +104,11 @@ class RegionConfig(object):
                  priority: int = 7,
                  read_only_node_count: int = 0,
                  analytics_node_count: int = 0):
+        """
 
+        Args:
+            read_only_node_count (int):
+        """
         self.analyticsNodes = analytics_node_count
         self.electableNodes = electable_node_count
         self.priority = priority
@@ -511,7 +488,7 @@ class ShardedClusterConfig(ClusterConfig):
         try:
             return_dict['replicationSpecs'] = [self.replication_specs[0].as_dict()]
         except AttributeError:
-            return_dict['replicationSpecs'] = [self.replication_specs[0][0].as_dict()]
+            return_dict['replicationSpecs'] = [self.replication_specs[0][0].as_dict]
         return_dict.__delitem__('replication_specs')
         try:
             return_dict['stateName'] = self.state_name.name
@@ -589,13 +566,20 @@ class AdvancedOptions(object):
     """Container for Atlas Cluster Advanced options
 
             Args:
-                failIndexKeyTooLong: When true, documents can only be updated or inserted if, for all indexed fields on the target collection, the corresponding index entries do not exceed 1024 bytes.When false, mongod writes documents that breach the limit but does not index them.
-                javascriptEnabled:  When true, the cluster allows execution of operations that perform server-side executions of JavaScript. When false, the cluster disables execution of those operations.
-                minimumEnabledTlsProtocol: The minimum Transport Layer Security (TLS) version the cluster accepts for incoming connections.
-                noTableScan: When true, the cluster disables the execution of any query that requires a collection scan to return results. When false, the cluster allows the execution of those operations.
-                oplogSizeMB: The custom oplog size of the cluster. A value of null indicates that the cluster uses the default oplog size calculated by Atlas.
+                failIndexKeyTooLong: When true, documents can only be updated or inserted if, for all indexed fields on
+                    the target collection, the corresponding index entries do not exceed 1024 bytes.When false, mongod writes
+                    documents that breach the limit but does not index them.
+                javascriptEnabled:  When true, the cluster allows execution of operations that perform server-side
+                    executions of JavaScript. When false, the cluster disables execution of those operations.
+                minimumEnabledTlsProtocol: The minimum Transport Layer Security (TLS) version the cluster accepts for
+                    incoming connections.
+                noTableScan: When true, the cluster disables the execution of any query that requires a collection scan
+                    to return results. When false, the cluster allows the execution of those operations.
+                oplogSizeMB: The custom oplog size of the cluster. A value of null indicates that the cluster uses the
+                    default oplog size calculated by Atlas.
                 sampleSizeBIConnector: Number of documents per database to sample when gathering schema information.
-                sampleRefreshIntervalBIConnector: Interval in seconds at which the mongosqld process re-samples data to create its relational schema.
+                sampleRefreshIntervalBIConnector: Interval in seconds at which the mongosqld process re-samples data to
+                    create its relational schema.
             """
     def __init__(self,
                  failIndexKeyTooLong: Optional[bool]  = None,

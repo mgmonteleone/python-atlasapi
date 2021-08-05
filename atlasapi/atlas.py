@@ -1349,6 +1349,8 @@ class Atlas:
 
         The CloudBackups resource provides access to retrieve the Cloud provider backup snapshots.
 
+        The restore endpoint
+
         Args:
             atlas (Atlas): Atlas instance
         """
@@ -1357,12 +1359,13 @@ class Atlas:
             self.atlas = atlas
 
         def create_snapshot_for_cluster(self, cluster_name: str, retention_days: int = 7,
-                                        description: str = None, as_obj: bool = True) -> Union[CloudBackupSnapshot,dict]:
+                                        description: str = None, as_obj: bool = True) -> Union[
+            CloudBackupSnapshot, dict]:
             """
-            Creates and on demand snapshot for the passed cluster
+            Creates an on demand snapshot for the passed cluster.
 
-            Args:
-                as_obj (bool): return the data as a class instead of a
+            Keyword Args:
+                as_obj (bool): return the data as a class instead of a raw dict
                 cluster_name (str): The name of the cluster to create the snopshot on.
                 retention_days (int): How many days to retain the snapshot
                 description (str): Free text description
@@ -1378,7 +1381,7 @@ class Atlas:
                 .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name)
 
             try:
-                response = self.atlas.network.post(uri=Settings.BASE_URL + uri,payload=request_obj.as_dict)
+                response = self.atlas.network.post(uri=Settings.BASE_URL + uri, payload=request_obj.as_dict)
             except ErrAtlasBadRequest as e:
                 logger.warning('Received an Atlas bad request on Snapshot creation. Could be due to overlap')
                 raise IOError("Got a bad request error back from Atlas, this may be due to submitting"
@@ -1394,10 +1397,10 @@ class Atlas:
 
         def get_backup_snapshots_for_cluster(self, cluster_name: str,
                                              snapshot_id: Optional[str] = None, as_obj: bool = True) -> Union[
-            Iterable[CloudBackupSnapshot], Iterable[dict]]:
+                                                                    Iterable[CloudBackupSnapshot], Iterable[dict]]:
             """Get  backup snapshots for a cluster.
 
-            If not snapshot_id is provided, then all snapshots are retrieved.
+            If no snapshot_id is provided, then all snapshots are retrieved.
 
             If a snopshot id is provided, only one snapshot is returned.
 
@@ -1405,16 +1408,13 @@ class Atlas:
             url: https://docs.atlas.mongodb.com/reference/api/cloud-backup/backup/backups/
 
             Keyword Args:
-                cluster_name (str) : The cluster name to fetch
-                pageNum (int): Page number
-                itemsPerPage (int): Number of Users per Page
-                iterable (bool): To return an iterable high level object instead of a low level API response
+                as_obj (bool): return the data as a class instead of a raw dict
+                snapshot_id (str): The atlas id of the snapshot
+                cluster_name (str): The cluster name to fetch
 
             Returns:
-                AtlasPagination or dict: Iterable object representing this function OR Response payload
+                Iterable[CloudBackupSnapshot] or dict: Iterable containing  CloudBackupSnapshots or Response payload
 
-            Raises:
-                ErrPaginationLimits: Out of limits
             """
             if not snapshot_id:
                 uri = Settings.api_resources["Cloud Backup"]["Get all Cloud Backups for cluster"] \
@@ -1449,6 +1449,16 @@ class Atlas:
                     yield CloudBackupSnapshot.from_dict(entry)
 
         def is_existing_snapshot(self, cluster_name: str, snapshot_id: str) -> bool:
+            """
+            Checks if the passed snapshot_id actually exists for the passed `cluster_name`.
+
+            Args:
+                cluster_name:
+                snapshot_id:
+
+            Returns:
+                bool:
+            """
             try:
                 self.atlas.CloudBackups.get_backup_snapshots_for_cluster(cluster_name, snapshot_id)
                 return True
@@ -1475,7 +1485,6 @@ class Atlas:
             else:
                 logger.info('The snapshot_id is valid')
 
-
             # Check if the source and target clusters are the same, if so raise exception unless override is True
 
             if source_cluster_name == target_cluster_name and not allow_same:
@@ -1488,10 +1497,10 @@ class Atlas:
             uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Restore snapshot by cluster"] \
                 .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=source_cluster_name)
 
-            request_obj = SnapshotRestore(delivery_type,snapshot_id,target_cluster_name,self.atlas.group)
+            request_obj = SnapshotRestore(delivery_type, snapshot_id, target_cluster_name, self.atlas.group)
 
             try:
-                response = self.atlas.network.post(uri=Settings.BASE_URL + uri,payload=request_obj.as_dict)
+                response = self.atlas.network.post(uri=Settings.BASE_URL + uri, payload=request_obj.as_dict)
             except ErrAtlasBadRequest as e:
                 logger.warning('Received an Atlas bad request on Snapshot restore request.')
                 raise IOError("Received an Atlas bad request on Snapshot restore request.")
@@ -1508,7 +1517,8 @@ class Atlas:
         def get_snapshot_restore_requests(self, cluster_name: str, restore_id: str = None, as_obj: bool = True):
 
             if not restore_id:
-                uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Get all Cloud Backup restore jobs by cluster"] \
+                uri = Settings.api_resources["Cloud Backup Restore Jobs"][
+                    "Get all Cloud Backup restore jobs by cluster"] \
                     .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name)
             else:
                 logger.warning('Getting by snapshotid')
@@ -1536,6 +1546,7 @@ class Atlas:
                 for entry in response_results:
                     logger.warning(f'This is the {entry}')
                     yield SnapshotRestoreResponse.from_dict(entry)
+
 
 class AtlasPagination:
     """Atlas Pagination Generic Implementation

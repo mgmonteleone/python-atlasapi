@@ -290,14 +290,14 @@ class Atlas:
                 raise ValueError('Could not find existing cluster {}'.format(cluster))
 
             if type(cluster_config) in (ShardedClusterConfig, ClusterConfig):
-                logger.warning("We received a full cluster_config, converting to dict")
+                logger.debug("We received a full cluster_config, converting to dict")
                 try:
                     new_config = cluster_config.as_modify_dict()
                 except Exception as e:
                     logger.error('Error while trying to parse the new configuration')
                     raise e
             else:
-                logger.warning("We received a simple dict for cluster config, sending without converting.")
+                logger.debug("We received a simple dict for cluster config, sending without converting.")
                 new_config = cluster_config
             value_returned = self.atlas.network.patch(uri=Settings.BASE_URL + uri, payload=new_config)
             return value_returned
@@ -1421,7 +1421,7 @@ class Atlas:
                 uri = Settings.api_resources["Cloud Backup"]["Get snapshot by SNAPSHOT-ID"] \
                     .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name, SNAPSHOT_ID=snapshot_id)
 
-            logger.warning(f"The cloudbackup uri used is {Settings.BASE_URL}{uri}")
+            logger.debug(f"The cloudbackup uri used is {Settings.BASE_URL}{uri}")
 
             response = self.atlas.network.get(Settings.BASE_URL + uri)
             try:
@@ -1431,8 +1431,6 @@ class Atlas:
                 return_list = list()
                 return_list.append(response)
                 response_results: List[dict] = return_list
-
-            logger.warning(f'Response results: {response_results}')
 
             if not as_obj:
                 if snapshot_id:
@@ -1512,7 +1510,7 @@ class Atlas:
                 uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Get Cloud Backup restore job by cluster"] \
                     .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name, JOB_ID=restore_id)
 
-            logger.warning(f"The restore job uri used is {Settings.BASE_URL}{uri}")
+            logger.info(f"The restore job uri used is {Settings.BASE_URL}{uri}")
 
             response = self.atlas.network.get(Settings.BASE_URL + uri)
 
@@ -1531,7 +1529,7 @@ class Atlas:
                         yield entry
             if as_obj:
                 for entry in response_results:
-                    logger.warning(f'This is the {entry}')
+                    logger.debug(f'This is the {entry}')
                     yield SnapshotRestoreResponse.from_dict(entry)
 
 class AtlasPagination:

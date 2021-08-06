@@ -1442,7 +1442,7 @@ class Atlas:
                         yield entry
             if as_obj:
                 for entry in response_results:
-                    logger.warning(f'This is the {entry}')
+                    logger.debug(f'This is the cloud backup {entry}')
                     yield CloudBackupSnapshot.from_dict(entry)
 
         def is_existing_snapshot(self, cluster_name: str, snapshot_id: str) -> bool:

@@ -74,11 +74,12 @@ class CloudBackupTests(BaseTests):
         source_cluster_name = 'pyAtlasTestCluster'
         target_cluster_name = 'restoreTest'
         snapshot_id = '6104a8c6c1b4ef7788b5d8f0-322'
-        with self.assertRaises(IOError) as ex:
+        with self.assertRaises(ValueError) as ex:
             response_obj = self.a.CloudBackups.request_snapshot_restore(source_cluster_name=source_cluster_name,
                                                                     snapshot_id=snapshot_id,
                                                                     target_cluster_name=target_cluster_name,
                                                                     delivery_type=DeliveryType.automated)
+            pprint(response_obj)
 
     test_04_restore_snapshot_to_atlas_bad_snapshot_id.basic = True
 
@@ -138,3 +139,24 @@ class CloudBackupTests(BaseTests):
         self.assertEquals(type(restore_job),SnapshotRestoreResponse)
 
     test_08_get_one_restore_job.basic = True
+
+
+    def test_09_is_valid_snapshot_false(self):
+        cluster_name = 'pyAtlasTestCluster'
+        response = self.a.CloudBackups.is_existing_snapshot(cluster_name=cluster_name,snapshot_id='sdasdasd')
+        self.assertEquals(response, False)
+
+    test_09_is_valid_snapshot_false.basic = True
+
+    def test_10_is_valid_snapshot_true(self):
+        cluster_name = 'pyAtlasTestCluster'
+        snapshots: List[CloudBackupSnapshot] = self.a.CloudBackups.get_backup_snapshots_for_cluster(
+            cluster_name=cluster_name)
+
+        snapshot_id = list(snapshots)[0].id
+        print(f'The tested snapshot_id is {snapshot_id}')
+        response = self.a.CloudBackups.is_existing_snapshot(cluster_name=cluster_name,snapshot_id=snapshot_id)
+
+        self.assertEquals(response, True)
+
+    test_10_is_valid_snapshot_true.basic = True

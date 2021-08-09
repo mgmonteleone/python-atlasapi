@@ -1465,9 +1465,11 @@ class Atlas:
 
         def is_existing_snapshot(self, cluster_name: str, snapshot_id: str) -> bool:
             try:
-                self.atlas.CloudBackups.get_backup_snapshot_for_cluster(cluster_name, snapshot_id)
+                out = self.atlas.CloudBackups.get_backup_snapshot_for_cluster(cluster_name, snapshot_id)
+                for each in out:
+                    assert each
                 return True
-            except ErrAtlasNotFound:
+            except (ErrAtlasNotFound, ErrAtlasBadRequest):
                 return False
 
         def request_snapshot_restore(self, source_cluster_name: str, snapshot_id: str,
@@ -1526,7 +1528,7 @@ class Atlas:
                     "Get all Cloud Backup restore jobs by cluster"] \
                     .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name)
             else:
-                logger.warning('Getting by snapshotid')
+                logger.warning('Getting by restore_id')
                 uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Get Cloud Backup restore job by cluster"] \
                     .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name, JOB_ID=restore_id)
 

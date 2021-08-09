@@ -40,7 +40,7 @@ class CloudBackupTests(BaseTests):
 
         snapshot_id =list(snapshots)[0].id
         print(f'The tested snapshot_id is {snapshot_id}')
-        snapshot = self.a.CloudBackups.get_backup_snapshots_for_cluster(cluster_name=cluster_name,snapshot_id=snapshot_id)
+        snapshot = self.a.CloudBackups.get_backup_snapshot_for_cluster(cluster_name=cluster_name,snapshot_id=snapshot_id)
         count = 0
         for each in snapshot:
             # pprint(each)

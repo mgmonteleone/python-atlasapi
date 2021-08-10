@@ -17,7 +17,7 @@ from dateutil.parser import parse
 import logging
 from datetime import datetime
 
-from events_event_types import AtlasEventTypes
+from atlasapi.events_event_types import AtlasEventTypes
 import ipaddress
 from copy import copy
 

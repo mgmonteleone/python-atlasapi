@@ -46,7 +46,8 @@ class EventsTests(BaseTests):
         for each in out:
             self.assertIsInstance(each, events._AtlasBaseEvent)
 
-    test_01_get_project_events_since.basic = False
+    test_01_get_project_events_since.basic = True
+
 
     def test_02_since(self):
         test_datetime = datetime.utcnow() - timedelta(hours=12)
@@ -57,7 +58,7 @@ class EventsTests(BaseTests):
         for each in out:
             self.assertIsInstance(each, events._AtlasBaseEvent)
 
-    test_02_since.basic = False
+    test_02_since.basic = True
 
     def test_03_atlas(self):
         self.assertIsInstance(self.a, Atlas)
@@ -70,4 +71,5 @@ class EventsTests(BaseTests):
         self.assertIsInstance(out, list)
         for each in out:
             if type(each) == events.AtlasCPSEvent:
-                self.assertIsInstance(events.AtlasCPSEvent)
+                self.assertIsInstance(each,events.AtlasCPSEvent)
+    test_04_CPS.basic = True

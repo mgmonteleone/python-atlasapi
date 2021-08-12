@@ -1509,8 +1509,13 @@ class Atlas:
             try:
                 response = self.atlas.network.post(uri=Settings.BASE_URL + uri, payload=request_obj.as_dict)
             except ErrAtlasBadRequest as e:
-                logger.warning('Received an Atlas bad request on Snapshot restore request.')
-                raise IOError("Received an Atlas bad request on Snapshot restore request.")
+                if e.details.get('errorCode') == 'CLUSTER_RESTORE_IN_PROGRESS_CANNOT_UPDATE':
+                    logger.error(e.details)
+                    raise ErrAtlasRestoreConflictError(c=400,details=e.details)
+                else:
+                    logger.error('Received an Atlas bad request on Snapshot restore request.')
+                    logger.error(e.details)
+                    raise IOError("Received an Atlas bad request on Snapshot restore request.")
 
             try:
                 response_obj = SnapshotRestoreResponse.from_dict(response)

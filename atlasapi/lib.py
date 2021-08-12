@@ -148,4 +148,5 @@ class ClusterType(Enum):
     """
     REPLICASET = 'Replica Set'
     SHARDED = 'Sharded Cluster'
+    SHARDEDCLUSTER = 'Sharded Cluster'
     GEOSHARDED = 'Global Cluster'

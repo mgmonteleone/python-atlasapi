@@ -36,9 +36,9 @@ class ErrPagination(Exception):
 
 class ErrPaginationLimits(Exception):
     """Out of limit on 'pageNum' or 'itemsPerPage' parameters
-    
+
     Constructor
-    
+
     Args:
         error_code (int): ERR_PAGE_NUM or ERR_ITEMS_PER_PAGE
     """
@@ -56,14 +56,14 @@ class ErrPaginationLimits(Exception):
 
     def checkAndRaise(pageNum, itemsPerPage):
         """Check and Raise an Exception if needed
-        
+
         Args:
             pageNum (int): Page number
             itemsPerPage (int): Number of items per Page
-            
+
         Raises:
             ErrPaginationLimits: If we are out of limits
-        
+
         """
         if pageNum < 1:
             raise ErrPaginationLimits(ErrPaginationLimits.ERR_PAGE_NUM)
@@ -74,9 +74,9 @@ class ErrPaginationLimits(Exception):
 
 class ErrAtlasGeneric(Exception):
     """Atlas Generic Exception
-    
+
     Constructor
-    
+
     Args:
         msg (str): Short description of the error
         c (int): HTTP code
@@ -90,10 +90,10 @@ class ErrAtlasGeneric(Exception):
 
     def getAtlasResponse(self):
         """Get details about the Atlas response
-            
+
         Returns:
             int, str: HTTP code, Response payload
-        
+
         """
         return self.code, self.details
 
@@ -146,9 +146,9 @@ class ErrAtlasDuplicateClusterName(ErrAtlasGeneric):
 
 class ErrAtlasUnauthorized(ErrAtlasGeneric):
     """Atlas : Unauthorized
-    
+
     Constructor
-    
+
     Args:
         c (int): HTTP code
         details (dict): Response payload
@@ -160,9 +160,9 @@ class ErrAtlasUnauthorized(ErrAtlasGeneric):
 
 class ErrAtlasForbidden(ErrAtlasGeneric):
     """Atlas : Forbidden
-    
+
     Constructor
-    
+
     Args:
         c (int): HTTP code
         details (dict): Response payload
@@ -191,9 +191,9 @@ class ErrAtlasForbiddenWL(ErrAtlasGeneric):
 
 class ErrAtlasNotFound(ErrAtlasGeneric):
     """Atlas : Not Found
-    
+
     Constructor
-    
+
     Args:
         c (int): HTTP code
         details (dict): Response payload
@@ -205,9 +205,9 @@ class ErrAtlasNotFound(ErrAtlasGeneric):
 
 class ErrAtlasMethodNotAllowed(ErrAtlasGeneric):
     """Atlas : Method Not Allowed
-    
+
     Constructor
-    
+
     Args:
         c (int): HTTP code
         details (dict): Response payload
@@ -219,9 +219,9 @@ class ErrAtlasMethodNotAllowed(ErrAtlasGeneric):
 
 class ErrAtlasConflict(ErrAtlasGeneric):
     """Atlas : Conflict
-    
+
     Constructor
-    
+
     Args:
         c (int): HTTP code
         details (dict): Response payload
@@ -234,11 +234,27 @@ class ErrAtlasConflict(ErrAtlasGeneric):
             c, details)
 
 
+class ErrAtlasRestoreConflictError(ErrAtlasGeneric):
+    """Atlas : RestoreConflictError
+
+    Constructor
+
+    Args:
+        c (int): HTTP code
+        details (dict): Response payload
+    """
+
+    def __init__(self, c, details):
+        super().__init__(
+            "This is an error when there are issues with cluster state during restore which prevents API actions",
+            c, details)
+
+
 class ErrAtlasServerErrors(ErrAtlasGeneric):
     """Atlas : Server Errors
-    
+
     Constructor
-    
+
     Args:
         c (int): HTTP code
         details (dict): Response payload
@@ -246,13 +262,14 @@ class ErrAtlasServerErrors(ErrAtlasGeneric):
 
     def __init__(self, c, details):
         super().__init__("Something unexpected went wrong.", c, details)
+        pprint(details)
 
 
 class ErrConfirmationRequested(Exception):
     """No Confirmation provided
-    
+
     Constructor
-    
+
     Args:
         msg (str): Short description of the error
     """

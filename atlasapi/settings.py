@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Matthew G. Monteleone
+# Copyright (c) 2021 Matthew G. Monteleone
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,11 +17,12 @@ Settings module
 
 Provides few constants, APIs endpoints.
 """
+from os import getenv
 
 
 class Settings:
     # Atlas APIs
-    BASE_URL = 'https://cloud.mongodb.com'
+    BASE_URL = getenv('BASE_URL','https://cloud.mongodb.com')
     URI_STUB = '/api/atlas/v1.0'
 
     api_resources = {

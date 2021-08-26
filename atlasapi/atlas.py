@@ -43,6 +43,7 @@ from atlasapi.lib import AtlasLogNames, LogLine, ProviderName, MongoDBMajorVersi
 from atlasapi.cloud_backup import CloudBackupSnapshot, CloudBackupRequest, SnapshotRestore, SnapshotRestoreResponse, \
     DeliveryType
 from requests import get
+from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 import gzip
 
 logger = logging.getLogger('Atlas')
@@ -56,13 +57,15 @@ class Atlas:
         user (str): Atlas user
         password (str): Atlas password
         group (str): Atlas group
+        auth_method (Union[HTTPBasicAuth,HTTPDigestAuth]) : Athentication method to use, defaults to digest, but you
+        can override to Basic if needed for use with a Proxy.
     """
 
-    def __init__(self, user, password, group):
+    def __init__(self, user, password, group, auth_method: Union[HTTPBasicAuth, HTTPDigestAuth] = HTTPDigestAuth):
         self.group = group
 
         # Network calls which will handled user/password for auth
-        self.network = Network(user, password)
+        self.network = Network(user, password, auth_method)
 
         # APIs
         self.DatabaseUsers = Atlas._DatabaseUsers(self)
@@ -1511,7 +1514,7 @@ class Atlas:
             except ErrAtlasBadRequest as e:
                 if e.details.get('errorCode') == 'CLUSTER_RESTORE_IN_PROGRESS_CANNOT_UPDATE':
                     logger.error(e.details)
-                    raise ErrAtlasRestoreConflictError(c=400,details=e.details)
+                    raise ErrAtlasRestoreConflictError(c=400, details=e.details)
                 else:
                     logger.error('Received an Atlas bad request on Snapshot restore request.')
                     logger.error(e.details)

@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Matthew G. Monteleone
+# Copyright (c) 2021 Matthew G. Monteleone
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ Module which handles the basic network operations with the Atlas API>
 """
 
 import requests
-from requests.auth import HTTPDigestAuth
+from requests.auth import HTTPDigestAuth, HTTPBasicAuth
 from .settings import Settings
 from .errors import *
 import logging
@@ -27,7 +27,6 @@ from json import dumps
 from io import BytesIO
 from typing import Union
 logger = logging.getLogger('network')
-
 logger.setLevel(logging.WARNING)
 
 
@@ -38,9 +37,10 @@ class Network:
         user (str): user
         password (str): password
     """
-    def __init__(self, user, password):
-        self.user = user
-        self.password = password
+    def __init__(self, user, password, AuthMethod: Union[HTTPDigestAuth,HTTPBasicAuth] = HTTPDigestAuth):
+        self.user: str = user
+        self.password: str = password
+        self.auth_method: Union[HTTPDigestAuth,HTTPBasicAuth] =  AuthMethod
 
     def answer(self, c, details: Union[dict,BytesIO]):
         """Answer will provide all necessary feedback for the caller
@@ -101,7 +101,7 @@ class Network:
                              stream = True,
                              timeout=Settings.file_request_timeout,
                              headers={},
-                             auth=HTTPDigestAuth(self.user, self.password))
+                             auth=self.auth_method(self.user, self.password))
             logger.debug("Auth information = {} {}".format(self.user, self.password))
 
             for chunk in r.iter_content(chunk_size=1024):
@@ -140,7 +140,7 @@ class Network:
                              allow_redirects=True,
                              timeout=Settings.requests_timeout,
                              headers={},
-                             auth=HTTPDigestAuth(self.user, self.password))
+                             auth=self.auth_method(self.user, self.password))
             logger.debug("Auth information = {} {}".format(self.user, self.password))
 
             return self.answer(r.status_code, r.json())
@@ -174,7 +174,7 @@ class Network:
                               allow_redirects=True,
                               timeout=Settings.requests_timeout,
                               headers={"Content-Type" : "application/json"},
-                              auth=HTTPDigestAuth(self.user, self.password))
+                              auth=self.auth_method(self.user, self.password))
             return self.answer(r.status_code, r.json())
         except:
             raise
@@ -202,7 +202,7 @@ class Network:
                                allow_redirects=True,
                                timeout=Settings.requests_timeout,
                                headers={"Content-Type" : "application/json"},
-                               auth=HTTPDigestAuth(self.user, self.password))
+                               auth=self.auth_method(self.user, self.password))
 
             try:
                 output = r.json()
@@ -237,7 +237,7 @@ class Network:
                                 allow_redirects=True,
                                 timeout=Settings.requests_timeout,
                                 headers={},
-                                auth=HTTPDigestAuth(self.user, self.password))
+                                auth=self.auth_method(self.user, self.password))
             return self.answer(r.status_code, {"deleted": True})
         except Exception as e:
             raise e

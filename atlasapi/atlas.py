@@ -1444,7 +1444,7 @@ class Atlas:
                 AtlasPagination or dict: Iterable object representing this function OR Response payload
 
             """
-            logger.warning('Getting by snapshotid')
+            logger.info('Getting by snapshotid')
             uri = Settings.api_resources["Cloud Backup"]["Get snapshot by SNAPSHOT-ID"] \
                 .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name, SNAPSHOT_ID=snapshot_id)
 
@@ -1536,7 +1536,7 @@ class Atlas:
                     "Get all Cloud Backup restore jobs by cluster"] \
                     .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name)
             else:
-                logger.warning('Getting by restore_id')
+                logger.info('Getting by restore_id')
                 uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Get Cloud Backup restore job by cluster"] \
                     .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name, JOB_ID=restore_id)
 

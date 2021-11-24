@@ -1529,7 +1529,8 @@ class Atlas:
             return response_obj
 
         # Get all Cloud Backup restore jobs by cluster
-        def get_snapshot_restore_requests(self, cluster_name: str, restore_id: str = None, as_obj: bool = True):
+        def get_snapshot_restore_requests(self, cluster_name: str, restore_id: str = None, as_obj: bool = True) \
+                -> Union[List [Union[dict,SnapshotRestoreResponse]], SnapshotRestoreResponse, dict]:
 
             if not restore_id:
                 uri = Settings.api_resources["Cloud Backup Restore Jobs"][
@@ -1562,6 +1563,40 @@ class Atlas:
                     logger.debug(f'This is the {entry}')
                     yield SnapshotRestoreResponse.from_dict(entry)
 
+        def cancel_snapshot_restore_request(self, cluster_name: str, restore_id: str):
+            """
+            Cancels a current backup restore request by restore_id.
+
+            Calls:
+            https://docs.atlas.mongodb.com/reference/api/cloud-backup/restore/delete-one-restore-job/
+
+            Args:
+                cluster_name: The name of the source cluster.
+                restore_id:  The id of the (jobId) of the restore job.
+            """
+            # First Check if the restore_id is valid
+            restore_info_result: SnapshotRestoreResponse = \
+                self.get_snapshot_restore_requests(cluster_name=cluster_name,restore_id=restore_id,as_obj=True)
+            restore_info = list(restore_info_result)[0]
+            if not restore_info:
+                raise ErrAtlasNotFound(404,{"error": f"The passed restore_id {restore_id} was not found"})
+
+            elif restore_info.finished_at:
+                raise ErrAtlasBadRequest(500,{"error": f"The passed restore_id ({restore_id} has already been completed"
+                                                       f"and can not be canceled"})
+            elif restore_info.cancelled is True:
+                raise ErrAtlasConflict(500,
+                                         {"error": f"The passed restore_id ({restore_id} has already been canceled"})
+
+            else:
+                uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Cancel manual download restore job by job_id"] \
+                    .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name, JOB_ID=restore_id)
+                logger.info(f'Preparing to cancel snapshot {restore_info.snapshot_id}, on'
+                            f' {restore_info.target_cluster_name} with restore_id {restore_id}.')
+
+                response = self.atlas.network.delete(Settings.BASE_URL + uri)
+
+                return response
 
 class AtlasPagination:
     """Atlas Pagination Generic Implementation

@@ -1,5 +1,5 @@
 """
-Unit tests for Maintenance Windows
+Unit tests for Cloud Backup
 
 
 """
@@ -59,7 +59,7 @@ class CloudBackupTests(BaseTests):
 
     def test_03_restore_snapshot_to_atlas(self):
         source_cluster_name = 'pyAtlasTestCluster'
-        target_cluster_name = 'restoreTest'
+        target_cluster_name = 'pyAtlasTestRestore'
         snapshot_id = '6104a8c6c1b4ef7788b5d8f0'
         response_obj = self.a.CloudBackups.request_snapshot_restore(source_cluster_name=source_cluster_name,
                                                                     snapshot_id=snapshot_id,
@@ -72,7 +72,7 @@ class CloudBackupTests(BaseTests):
 
     def test_04_restore_snapshot_to_atlas_bad_snapshot_id(self):
         source_cluster_name = 'pyAtlasTestCluster'
-        target_cluster_name = 'restoreTest'
+        target_cluster_name = 'pyAtlasTestRestore'
         snapshot_id = '6104a8c6c1b4ef7788b5d8f0-322'
         with self.assertRaises(ValueError) as ex:
             response_obj = self.a.CloudBackups.request_snapshot_restore(source_cluster_name=source_cluster_name,
@@ -160,3 +160,43 @@ class CloudBackupTests(BaseTests):
         self.assertEquals(response, True)
 
     test_10_is_valid_snapshot_true.basic = True
+
+#    def test_11_cancel_valid_restore_job(self):
+#        source_cluster_name = 'pyAtlasTestCluster'
+#        target_cluster_name = 'pyAtlasTestRestore'
+#        snapshot_id = '619d5e979977cf1a6a9adfbf'
+#        response_obj = self.a.CloudBackups.request_snapshot_restore(source_cluster_name=source_cluster_name,
+#                                                                    snapshot_id=snapshot_id,
+#                                                                    target_cluster_name=target_cluster_name,
+#                                                                    delivery_type=DeliveryType.automated)
+#
+#        print(f"The restore_id of this test restore is {response_obj.restore_id}")
+#        print(f"The canceled status is ({response_obj.cancelled})")
+#        print(f"The completed date is {response_obj.finished_at}")
+#
+#        print("Now lets cancel this puppy")
+#        out = self.a.CloudBackups.cancel_snapshot_restore_request(cluster_name=source_cluster_name,
+#                                                                  restore_id=response_obj.restore_id)
+#        pprint(f"({out})")
+#
+#    test_11_cancel_valid_restore_job.basic = True
+
+#   def test_11a_cancel_valid_restore_job(self):
+#     source_cluster_name = 'pyAtlasTestCluster'
+#     target_cluster_name = 'pyAtlasTestRestore'
+#     snapshot_id = '619d5e979977cf1a6a9adfbf'
+#     response_obj = self.a.CloudBackups.request_snapshot_restore(source_cluster_name=source_cluster_name,
+#                                                                 snapshot_id=snapshot_id,
+#                                                                 target_cluster_name=target_cluster_name,
+#                                                                 delivery_type=DeliveryType.automated)
+#
+#     print(f"The restore_id of this test restore is {response_obj.restore_id}")
+#     print(f"The canceled status is ({response_obj.cancelled})")
+#     print(f"The completed date is {response_obj.finished_at}")
+#
+#     print("Now lets cancel this puppy")
+#     out = self.a.CloudBackups.cancel_snapshot_restore_request(cluster_name=source_cluster_name,
+#                                                               restore_id="619d87217547a804f47a07e7")
+#
+#
+#   test_11a_cancel_valid_restore_job.basic = True

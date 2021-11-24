@@ -109,10 +109,13 @@ class ErrAtlasBadRequest(ErrAtlasGeneric):
     """
 
     def __init__(self, c, details):
-        if details['errorCode'] == 'DUPLICATE_CLUSTER_NAME':
+
+        if details.get('errorCode', None) == 'DUPLICATE_CLUSTER_NAME':
             raise (ErrAtlasDuplicateClusterName(c, details))
-        if details['errorCode'] == 'RESOURCE_NOT_FOUND_FOR_JOB':
+        if details.get('errorCode', None) == 'RESOURCE_NOT_FOUND_FOR_JOB':
             raise (ErrAtlasJobError(c, details))
+        if details.get('errorCode', None) == 'CANNOT_CANCEL_AUTOMATED_RESTORE':
+            raise (ErrAtlasBackupError(c,details))
         super().__init__("Something was wrong with the client request.", c, details)
 
 
@@ -143,6 +146,19 @@ class ErrAtlasDuplicateClusterName(ErrAtlasGeneric):
     def __init__(self, c, details):
         super().__init__(details.get('detail', 'Duplicate Error'), c, details)
 
+
+class ErrAtlasBackupError(ErrAtlasGeneric):
+    """Atlas : Atlas Backup
+
+    Constructor
+
+    Args:
+        c (int): HTTP code
+        details (dict): Response payload
+    """
+
+    def __init__(self, c, details):
+        super().__init__(details.get('detail', 'Atlas Backup error'), c, details)
 
 class ErrAtlasUnauthorized(ErrAtlasGeneric):
     """Atlas : Unauthorized

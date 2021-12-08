@@ -54,6 +54,7 @@ def try_bool(str_in: str) -> bool:
 class SnapshotType(Enum):
     ONDEMAND = "On Demand"
     SCHEDULED = "Scheduled"
+    FALLBACK = "Fallback"
 
 
 class SnapshotStatus(Enum):

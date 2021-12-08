@@ -140,7 +140,6 @@ class CloudBackupTests(BaseTests):
 
     test_08_get_one_restore_job.basic = True
 
-
     def test_09_is_valid_snapshot_false(self):
         cluster_name = 'pyAtlasTestCluster'
         response = self.a.CloudBackups.is_existing_snapshot(cluster_name=cluster_name,snapshot_id='sdasdasd')

@@ -253,9 +253,10 @@ class DatabaseUsersPermissionsSpecs:
         databaseName (str): Auth Database Name
     """
 
-    def __init__(self, username: str, password: str, databaseName=Settings.databaseName) -> None:
+    def __init__(self, username: str, password: str = None, aws_iam_type: str = None, databaseName=Settings.databaseName) -> None:
         self.username = username
         self.password = password
+        self.aws_iam_type = aws_iam_type
         self.databaseName = databaseName
         self.roles = []
 
@@ -269,8 +270,13 @@ class DatabaseUsersPermissionsSpecs:
             "databaseName": self.databaseName,
             "roles": self.roles,
             "username": self.username,
-            "password": self.password
         }
+        if self.password:
+            content["password"] = self.password
+            content["awsIAMType"] = "NONE"
+        elif self.aws_iam_type:
+            content["awsIAMType"] = self.aws_iam_type
+            content["databaseName"] = r"$external"
 
         return content
 

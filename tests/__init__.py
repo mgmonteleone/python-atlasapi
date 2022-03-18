@@ -1,6 +1,9 @@
 import unittest
 from os import getenv, environ
-from atlasapi.atlas import Atlas
+try:
+    from atlasapi.atlas import Atlas
+except NameError:
+    from atlas import Atlas
 from datetime import datetime
 import coolname
 

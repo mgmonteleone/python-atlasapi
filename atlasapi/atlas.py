@@ -1529,7 +1529,7 @@ class Atlas:
 
         def request_snapshot_restore_to_group(self, source_cluster_name: str, snapshot_id: str,
                                               target_cluster_name: str,
-                                              target_group_obj: Atlas,
+                                              target_group_obj,
                                               delivery_type: DeliveryType = DeliveryType.automated
 
                                               ) -> SnapshotRestoreResponse:

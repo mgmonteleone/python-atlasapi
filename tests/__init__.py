@@ -22,7 +22,9 @@ class BaseTests(unittest.TestCase):
         self.USER = getenv('ATLAS_USER', None)
         self.API_KEY = getenv('ATLAS_KEY', None)
         self.GROUP_ID = getenv('ATLAS_GROUP', None)
-
+        self.OTHER_GROUP_ID = getenv('ATLAS_OTHER_GROUP', None)
+        self.OTHER_USER = getenv('ATLAS_OTHER_USER', None)
+        self.OTHER_API_KEY = getenv('ATLAS_OTHER_KEY', None)
         #print("env var is".format(getenv('ATLAS_USER', None)))
 
         self.TEST_CLUSTER_NAME = TEST_CLUSTER_NAME
@@ -36,6 +38,7 @@ class BaseTests(unittest.TestCase):
             raise EnvironmentError('In order to run this smoke test you need ATLAS_USER, AND ATLAS_KEY env variables'
                                    'your env variables are {}'.format(environ.__str__()))
         self.a = Atlas(self.USER, self.API_KEY, self.GROUP_ID)
+        self.a_other = Atlas(self.OTHER_USER, self.OTHER_API_KEY, self.OTHER_GROUP_ID)
 
     # executed after each test
 

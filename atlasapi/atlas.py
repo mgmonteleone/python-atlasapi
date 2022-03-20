@@ -1552,14 +1552,14 @@ class Atlas:
 
             """
             # Check if the source and target groups are actually the same....
-            if target_group_obj.atlas.group == self.atlas.group:
+            if target_group_obj.group == self.atlas.group:
                 txt = f"The source and target groups are the same ({self.atlas.group}). this method should only " \
                       f"be used if the restore is to anothe group than the target."
                 logger.error(txt)
                 raise AttributeError(txt)
 
             # Check if the target_cluster_name is valid
-            if not target_group_obj.atlas.Clusters.is_existing_cluster(target_cluster_name):
+            if not target_group_obj.Clusters.is_existing_cluster(target_cluster_name):
                 logger.error(f'The passed target cluster {target_cluster_name}, does not exist in this project.)')
                 raise ValueError(f'The passed target cluster {target_cluster_name}, does not exist in this project.')
             else:
@@ -1576,7 +1576,7 @@ class Atlas:
             uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Restore snapshot by cluster"] \
                 .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=source_cluster_name)
 
-            request_obj = SnapshotRestore(delivery_type, snapshot_id, target_cluster_name, target_group_obj.atlas.group)
+            request_obj = SnapshotRestore(delivery_type, snapshot_id, target_cluster_name, target_group_obj.group)
 
             try:
                 response = self.atlas.network.post(uri=Settings.BASE_URL + uri, payload=request_obj.as_dict)
@@ -1588,6 +1588,7 @@ class Atlas:
                     logger.error('Received an Atlas bad request on Snapshot restore request.')
                     logger.error(e.details)
                     raise IOError("Received an Atlas bad request on Snapshot restore request.")
+
 
             try:
                 response_obj = SnapshotRestoreResponse.from_dict(response)

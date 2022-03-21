@@ -47,6 +47,11 @@ logger = logging.getLogger('Atlas.specs')
 
 # etc., as needed
 
+class IAMType(Enum):
+    NONE = 'None' # The user does not use AWS IAM credentials.
+    USER = 'USER' # New database user has AWS IAM user credentials.
+    ROEL = 'ROLE' # New database user has credentials associated with an AWS IAM role.
+
 class ReplicaSetTypes(Enum):
     REPLICA_PRIMARY = 'ReplicaSet primary'
     REPLICA_SECONDARY = 'ReplicaSet secondary'
@@ -248,15 +253,18 @@ class DatabaseUsersPermissionsSpecs:
     Args:
         username (str): Username of the DB
         password (str): Password for the username
+        aws_iam_type (IAMType): AWS IAM method by which the database applies IAM credentials to authenticates the database
+         user. Atlas defaults to NONE. (optional)
 
     Keyword Args:
         databaseName (str): Auth Database Name
     """
 
-    def __init__(self, username: str, password: str = None, aws_iam_type: str = None, databaseName=Settings.databaseName) -> None:
+    def __init__(self, username: str, password: str = None,
+                 aws_iam_type: Optional[IAMType] = None, databaseName=Settings.databaseName) -> None:
         self.username = username
         self.password = password
-        self.aws_iam_type = aws_iam_type
+        self.aws_iam_type = aws_iam_type.value
         self.databaseName = databaseName
         self.roles = []
 

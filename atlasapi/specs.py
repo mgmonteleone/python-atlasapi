@@ -50,7 +50,7 @@ logger = logging.getLogger('Atlas.specs')
 class IAMType(Enum):
     NONE = 'None' # The user does not use AWS IAM credentials.
     USER = 'USER' # New database user has AWS IAM user credentials.
-    ROEL = 'ROLE' # New database user has credentials associated with an AWS IAM role.
+    ROLE = 'ROLE' # New database user has credentials associated with an AWS IAM role.
 
 class ReplicaSetTypes(Enum):
     REPLICA_PRIMARY = 'ReplicaSet primary'

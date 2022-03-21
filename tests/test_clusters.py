@@ -130,11 +130,11 @@ class ClusterTests(BaseTests):
     test_12_get_advanced_options.basic = True
 
     def test_13_set_advanced_options(self):
-        set_1 = AdvancedOptions(failIndexKeyTooLong=True)
-        out_set_1 = self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,
-                                                                    advanced_options=set_1)
-        self.assertEqual(set_1.failIndexKeyTooLong, out_set_1.failIndexKeyTooLong,
-                         msg='in = {}: out= {}'.format(set_1.__dict__, out_set_1.__dict__))
+        # Removed this test, since it is now failing due to this option no longer supported in 4.2 +.
+        # Will need to remove the
+        # set_1 = AdvancedOptions(failIndexKeyTooLong=True)
+        # out_set_1 = self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,
+        #                                                            advanced_options=set_1)
 
         set_2 = AdvancedOptions(javascriptEnabled=True)
         out_set_2 = self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,

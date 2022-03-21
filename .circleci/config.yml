@@ -29,6 +29,9 @@ jobs:
           command: |
             nose2 -s tests/ --verbose --config tests/unitest.cfg -A basic
           name: Test
+      - store_test_results:
+          path: nose2-junit.xml
+
   docs:
     executor: python/default
     steps:

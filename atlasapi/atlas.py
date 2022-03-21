@@ -66,7 +66,6 @@ class Atlas:
 
         # Network calls which will handled user/password for auth
         self.network = Network(user, password, auth_method)
-
         # APIs
         self.DatabaseUsers = Atlas._DatabaseUsers(self)
         self.Clusters = Atlas._Clusters(self)
@@ -1528,9 +1527,80 @@ class Atlas:
                 raise e
             return response_obj
 
+        def request_snapshot_restore_to_group(self, source_cluster_name: str, snapshot_id: str,
+                                              target_cluster_name: str,
+                                              target_group_obj,
+                                              delivery_type: DeliveryType = DeliveryType.automated
+
+                                              ) -> SnapshotRestoreResponse:
+            """Requests a snapshot restore to another group/project.
+
+            Uses the passed target_group_obj, which is an Atlas object, to restore a snapshot from one group/project
+            to another.
+
+            This method does not check if the source and destination clusters have the same name, since this would
+            not be dangerous when these are in two groups.
+
+            Args:
+                source_cluster_name: the text name of the source cluster
+                snapshot_id: the uuid id of the snapshot to be restored
+                target_cluster_name: the txt name of the destination cluster
+                target_group_obj: Atlas: An Atlas object connected to the destination group.
+                delivery_type: DeliveryType: IF you want to download, or automatically restore on Atlas.
+
+            Returns:
+
+            """
+            # Check if the source and target groups are actually the same....
+            if target_group_obj.group == self.atlas.group:
+                txt = f"The source and target groups are the same ({self.atlas.group}). this method should only " \
+                      f"be used if the restore is to anothe group than the target."
+                logger.error(txt)
+                raise AttributeError(txt)
+
+            # Check if the target_cluster_name is valid
+            if not target_group_obj.Clusters.is_existing_cluster(target_cluster_name):
+                logger.error(f'The passed target cluster {target_cluster_name}, does not exist in this project.)')
+                raise ValueError(f'The passed target cluster {target_cluster_name}, does not exist in this project.')
+            else:
+                logger.info('The target cluster exists in the other target group.')
+            # Check if the snapshot_id is valid
+            if not self.atlas.CloudBackups.is_existing_snapshot(source_cluster_name, snapshot_id):
+                error_text = f'The passed snapshot_id ({snapshot_id} ' \
+                             f'is not valid for the source cluster {source_cluster_name})'
+                logger.error(error_text)
+                raise ValueError(error_text)
+            else:
+                logger.info('The snapshot_id is valid')
+
+            uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Restore snapshot by cluster"] \
+                .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=source_cluster_name)
+
+            request_obj = SnapshotRestore(delivery_type, snapshot_id, target_cluster_name, target_group_obj.group)
+
+            try:
+                response = self.atlas.network.post(uri=Settings.BASE_URL + uri, payload=request_obj.as_dict)
+            except ErrAtlasBadRequest as e:
+                if e.details.get('errorCode') == 'CLUSTER_RESTORE_IN_PROGRESS_CANNOT_UPDATE':
+                    logger.error(e.details)
+                    raise ErrAtlasRestoreConflictError(c=400, details=e.details)
+                else:
+                    logger.error('Received an Atlas bad request on Snapshot restore request.')
+                    logger.error(e.details)
+                    raise IOError("Received an Atlas bad request on Snapshot restore request.")
+
+
+            try:
+                response_obj = SnapshotRestoreResponse.from_dict(response)
+            except KeyError as e:
+                logger.error('Error encountered parsing response to a SnapshotRestoreResponse')
+                logger.error(e)
+                raise e
+            return response_obj
+
         # Get all Cloud Backup restore jobs by cluster
         def get_snapshot_restore_requests(self, cluster_name: str, restore_id: str = None, as_obj: bool = True) \
-                -> Union[List [Union[dict,SnapshotRestoreResponse]], SnapshotRestoreResponse, dict]:
+                -> Union[List[Union[dict, SnapshotRestoreResponse]], SnapshotRestoreResponse, dict]:
 
             if not restore_id:
                 uri = Settings.api_resources["Cloud Backup Restore Jobs"][
@@ -1576,20 +1646,22 @@ class Atlas:
             """
             # First Check if the restore_id is valid
             restore_info_result: SnapshotRestoreResponse = \
-                self.get_snapshot_restore_requests(cluster_name=cluster_name,restore_id=restore_id,as_obj=True)
+                self.get_snapshot_restore_requests(cluster_name=cluster_name, restore_id=restore_id, as_obj=True)
             restore_info = list(restore_info_result)[0]
             if not restore_info:
-                raise ErrAtlasNotFound(404,{"error": f"The passed restore_id {restore_id} was not found"})
+                raise ErrAtlasNotFound(404, {"error": f"The passed restore_id {restore_id} was not found"})
 
             elif restore_info.finished_at:
-                raise ErrAtlasBadRequest(500,{"error": f"The passed restore_id ({restore_id} has already been completed"
-                                                       f"and can not be canceled"})
+                raise ErrAtlasBadRequest(500,
+                                         {"error": f"The passed restore_id ({restore_id} has already been completed"
+                                                   f"and can not be canceled"})
             elif restore_info.cancelled is True:
                 raise ErrAtlasConflict(500,
-                                         {"error": f"The passed restore_id ({restore_id} has already been canceled"})
+                                       {"error": f"The passed restore_id ({restore_id} has already been canceled"})
 
             else:
-                uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Cancel manual download restore job by job_id"] \
+                uri = Settings.api_resources["Cloud Backup Restore Jobs"][
+                    "Cancel manual download restore job by job_id"] \
                     .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name, JOB_ID=restore_id)
                 logger.info(f'Preparing to cancel snapshot {restore_info.snapshot_id}, on'
                             f' {restore_info.target_cluster_name} with restore_id {restore_id}.')
@@ -1597,6 +1669,7 @@ class Atlas:
                 response = self.atlas.network.delete(Settings.BASE_URL + uri)
 
                 return response
+
 
 class AtlasPagination:
     """Atlas Pagination Generic Implementation

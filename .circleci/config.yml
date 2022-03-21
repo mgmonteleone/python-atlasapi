@@ -16,7 +16,7 @@ workflows:
               ignore: /.*/
 jobs:
   build:
-    executor: cimg/python:3.9.11
+    executor: python/default
     steps:
       - checkout
       - python/load-cache
@@ -29,7 +29,7 @@ jobs:
             nose2 -s tests/ --verbose --plugin nose2.plugins.attrib -A basic
           name: Test
   docs:
-    executor: cimg/python:3.9.11
+    executor: python/default
     steps:
       - checkout
       - run:
@@ -39,7 +39,7 @@ jobs:
             rsync -crv --delete --exclude=README.rst gendocs/_build/html/ docs/
 
   deploy:
-    executor: cimg/python:3.9.11
+    executor: python/default
     steps:
       - checkout
       - python/load-cache
@@ -53,5 +53,5 @@ jobs:
             pipenv run twine upload dist/*
 
 orbs:
-  python: circleci/python@0.1
+  python: cimg/python
   pylint: qventus/python-lint@0.0.6

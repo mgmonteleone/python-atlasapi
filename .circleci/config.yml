@@ -38,19 +38,19 @@ jobs:
             cd gendocs && make clean && make html && cd ..
             rsync -crv --delete --exclude=README.rst gendocs/_build/html/ docs/
 
-  deploy:
-    executor: cimg/python:3.9.11
-    steps:
-      - checkout
-      - python/load-cache
-      - python/install-deps
-      - python/save-cache
-      - run:
-          command: |  # create whl, install twine and publish to PyPI
-            python setup.py sdist bdist_wheel
-            sudo pip install pipenv
-            pipenv install twine
-            pipenv run twine upload dist/*
+  #deploy:
+  #  executor: cimg/python:3.9.11
+  #  steps:
+  #    - checkout
+  #    - python/load-cache
+  #    - python/install-deps
+  #    - python/save-cache
+  #    - run:
+  #        command: |  # create whl, install twine and publish to PyPI
+  #          python setup.py sdist bdist_wheel
+  #          sudo pip install pipenv
+  #          pipenv install twine
+  #          pipenv run twine upload dist/*
 
 orbs:
   python: circleci/python@0.1

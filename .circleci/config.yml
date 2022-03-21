@@ -19,9 +19,8 @@ jobs:
     executor: python/default
     steps:
       - checkout
-      - python/load-cache
-      - python/install-deps
-      - python/save-cache
+      - python/install-packages:
+          pkg-manager: pip
       - python/install-packages:
           args: nose2
           pkg-manager: pip

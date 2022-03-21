@@ -27,7 +27,7 @@ jobs:
           pypi-cache: true
       - run:
           command: |
-            nose2 -s tests/ --verbose --config unitest.cfg -A basic
+            nose2 -s tests/ --verbose --config tests/unitest.cfg -A basic
           name: Test
   docs:
     executor: python/default

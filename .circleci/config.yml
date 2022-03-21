@@ -19,8 +19,9 @@ jobs:
     executor: python/default
     steps:
       - checkout
-      - python/pypi-cache
-      - python/install-packages
+      - python/load-cache
+      - python/install-deps
+      - python/save-cache
       - run:
           command: |
             # pytest would be a dep in requirements.txt
@@ -45,13 +46,12 @@ jobs:
       - python/install-deps
       - python/save-cache
       - run:
-          name: Build package
-          command: |  # create whl, install twine and publish to Test PyPI
+          command: |  # create whl, install twine and publish to PyPI
             python setup.py sdist bdist_wheel
             sudo pip install pipenv
             pipenv install twine
-            pipenv run twine upload --repository testpypi dist/*
+            pipenv run twine upload dist/*
 
 orbs:
-  python: circleci/python@2.0.3
+  python: circleci/python@0.1
   pylint: qventus/python-lint@0.0.6

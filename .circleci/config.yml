@@ -39,18 +39,19 @@ jobs:
             rsync -crv --delete --exclude=README.rst gendocs/_build/html/ docs/
 
   deploy:
-    executor: python/default
+    executor: cimg/python:3.9.11
     steps:
       - checkout
       - python/load-cache
       - python/install-deps
       - python/save-cache
       - run:
-          command: |  # create whl, install twine and publish to PyPI
+          name: Build package
+          command: |  # create whl, install twine and publish to Test PyPI
             python setup.py sdist bdist_wheel
             sudo pip install pipenv
             pipenv install twine
-            pipenv run twine upload dist/*
+            pipenv run twine upload --repository testpypi dist/*
 
 orbs:
   python: circleci/python@2.0.3

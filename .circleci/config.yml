@@ -1,19 +1,19 @@
 version: 2.1
 workflows:
-  build_and_deploy:
+  build_and_test:
     jobs:
       - build:
           filters:
             tags:
               only: /.*/
-      - deploy:
-          requires:
-            - build
-          filters:
-            tags:
-              only: /^v.*/
-            branches:
-              ignore: /.*/
+#      - deploy:
+#          requires:
+#            - build
+#          filters:
+#            tags:
+#              only: /^v.*/
+#            branches:
+#              ignore: /.*/
 jobs:
   build:
     executor: python/default
@@ -39,30 +39,30 @@ jobs:
             cd gendocs && make clean && make html && cd ..
             rsync -crv --delete --exclude=README.rst gendocs/_build/html/ docs/
 
-  deploy:
-    executor: python/default
-    steps:
-      - checkout
-      - python/load-cache
-      - python/install-deps
-      - python/save-cache
-      - run:
-          name: init .pypirc
-          command: |
-            echo -e "[pypi]" >> ~/.pypirc
-            echo -e "username = levlaz" >> ~/.pypirc
-            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
-      - run:
-          name: Build package
-          command: |
-            python3 setup.py clean
-            python3 setup.py sdist
-            python3 setup.py bdist_wheel
-      - run:
-          name: upload to pypi
-          command: |
-            . venv/bin/activate
-            twine upload dist/*
+#  deploy:
+#    executor: python/default
+#    steps:
+#      - checkout
+#      - python/load-cache
+#      - python/install-deps
+#      - python/save-cache
+#      - run:
+#          name: init .pypirc
+#          command: |
+#            echo -e "[pypi]" >> ~/.pypirc
+#            echo -e "username = levlaz" >> ~/.pypirc
+#            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
+#      - run:
+#          name: Build package
+#          command: |
+#            python3 setup.py clean
+#            python3 setup.py sdist
+#            python3 setup.py bdist_wheel
+#      - run:
+#          name: upload to pypi
+#          command: |
+#            . venv/bin/activate
+#            twine upload dist/*
 orbs:
   python: circleci/python@2.0.3
   pylint: qventus/python-lint@0.0.6

@@ -22,10 +22,12 @@ jobs:
       - python/load-cache
       - python/install-deps
       - python/save-cache
+      - python/install-packages:
+          args: nose2
+          pkg-manager: pip
+          pypi-cache: true
       - run:
           command: |
-            # pytest would be a dep in requirements.txt
-            sudo pip install nose2
             nose2 -s tests/ --verbose --config unitest.cfg -A basic
           name: Test
   docs:
@@ -63,5 +65,5 @@ jobs:
             . venv/bin/activate
             twine upload dist/*
 orbs:
-  python: circleci/python@0.1
+  python: circleci/python@2.0.3
   pylint: qventus/python-lint@0.0.6

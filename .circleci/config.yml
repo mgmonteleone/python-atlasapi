@@ -53,5 +53,5 @@ jobs:
             pipenv run twine upload dist/*
 
 orbs:
-  python: cimg/python
+  python: circleci/python@2.0.3
   pylint: qventus/python-lint@0.0.6

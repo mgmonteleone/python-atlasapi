@@ -151,13 +151,13 @@ Clusters
         print(cluster["name"])
     
     # Get a Single Cluster
-    details = a.Clusters.get_a_single_cluster("cluster-dev")
+    details = a.Clusters.get_single_cluster("cluster-dev")
     
     # Delete a Cluster (dry run, raise ErrConfirmationRequested)
-    details = a.Clusters.delete_a_cluster("cluster-dev")
+    details = a.Clusters.delete_cluster("cluster-dev")
     
     # Delete a Cluster (approved)
-    details = a.Clusters.delete_a_cluster("cluster-dev", areYouSure=True)
+    details = a.Clusters.delete_cluster("cluster-dev", areYouSure=True)
 
     # Create a Simple Replica Set Cluster
 
@@ -173,14 +173,14 @@ Clusters
                                providerSettings=provider_settings,
                                replication_specs=replication_specs)
 
-    output = a.Clusters.create_a_cluster(cluster_config)
+    output = a.Clusters.create_cluster(cluster_config)
 
 
     # Modify a cluster
-    existing_config = a.Clusters.get_a_single_cluster_as_obj(cluster=TEST_CLUSTER_NAME)
+    existing_config = a.Clusters.get_single_cluster_as_obj(cluster=TEST_CLUSTER_NAME)
     out.providerSettings.instance_size_name = InstanceSizeName.M10
     out.disk_size_gb = 13
-    new_config = a.Clusters.modify_a_cluster('pyAtlasAPIClustersTest', out)
+    new_config = a.Clusters.modify_cluster('pyAtlasAPIClustersTest', out)
     pprint(new_config)
 
     # Modify cluster instance size

@@ -266,7 +266,7 @@ class Atlas:
                 return self.atlas.network.delete(Settings.BASE_URL + uri)
             else:
                 raise ErrConfirmationRequested(
-                    "Please set areYouSure=True on delete_a_cluster call if you really want to delete [%s]" % cluster)
+                    "Please set areYouSure=True on delete_cluster call if you really want to delete [%s]" % cluster)
 
         def modify_cluster(self, cluster: str, cluster_config: Union[ClusterConfig, dict]) -> dict:
             """Modify a Cluster

@@ -1,6 +1,6 @@
 version: 2.1
 workflows:
-  build:
+  build_and_test:
     jobs:
       - build:
           filters:
@@ -19,15 +19,19 @@ jobs:
     executor: python/default
     steps:
       - checkout
-      - python/load-cache
-      - python/install-deps
-      - python/save-cache
+      - python/install-packages:
+          pkg-manager: pip
+      - python/install-packages:
+          args: nose2
+          pkg-manager: pip
+          pypi-cache: true
       - run:
           command: |
-            # pytest would be a dep in requirements.txt
-            sudo pip install nose2
-            nose2 -s tests/ --verbose --plugin nose2.plugins.attrib -A basic
+            nose2 -s tests/ --verbose --config tests/unitest.cfg -A basic
           name: Test
+      - store_test_results:
+          path: nose2-junit.xml
+
   docs:
     executor: python/default
     steps:
@@ -38,20 +42,30 @@ jobs:
             cd gendocs && make clean && make html && cd ..
             rsync -crv --delete --exclude=README.rst gendocs/_build/html/ docs/
 
-  #deploy:
-  #  executor: cimg/python:3.9.11
-  #  steps:
-  #    - checkout
-  #    - python/load-cache
-  #    - python/install-deps
-  #    - python/save-cache
-  #    - run:
-  #        command: |  # create whl, install twine and publish to PyPI
-  #          python setup.py sdist bdist_wheel
-  #          sudo pip install pipenv
-  #          pipenv install twine
-  #          pipenv run twine upload dist/*
-
+#  deploy:
+#    executor: python/default
+#    steps:
+#      - checkout
+#      - python/load-cache
+#      - python/install-deps
+#      - python/save-cache
+#      - run:
+#          name: init .pypirc
+#          command: |
+#            echo -e "[pypi]" >> ~/.pypirc
+#            echo -e "username = levlaz" >> ~/.pypirc
+#            echo -e "password = $PYPI_PASSWORD" >> ~/.pypirc
+#      - run:
+#          name: Build package
+#          command: |
+#            python3 setup.py clean
+#            python3 setup.py sdist
+#            python3 setup.py bdist_wheel
+#      - run:
+#          name: upload to pypi
+#          command: |
+#            . venv/bin/activate
+#            twine upload dist/*
 orbs:
   python: circleci/python@2.0.3
   pylint: qventus/python-lint@0.0.6

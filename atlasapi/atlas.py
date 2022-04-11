@@ -42,6 +42,8 @@ from atlasapi.lib import AtlasLogNames, LogLine, ProviderName, MongoDBMajorVersi
     AtlasUnits
 from atlasapi.cloud_backup import CloudBackupSnapshot, CloudBackupRequest, SnapshotRestore, SnapshotRestoreResponse, \
     DeliveryType
+from atlasapi.projects import Project
+from atlasapi.teams import Team
 from requests import get
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 import gzip
@@ -57,11 +59,11 @@ class Atlas:
         user (str): Atlas user
         password (str): Atlas password
         group (str): Atlas group
-        auth_method (Union[HTTPBasicAuth,HTTPDigestAuth]) : Athentication method to use, defaults to digest, but you
+        auth_method (Union[HTTPBasicAuth,HTTPDigestAuth]) : Authentication method to use, defaults to digest, but you
         can override to Basic if needed for use with a Proxy.
     """
 
-    def __init__(self, user, password, group, auth_method: Union[HTTPBasicAuth, HTTPDigestAuth] = HTTPDigestAuth):
+    def __init__(self, user: str, password: str, group : str = None, auth_method: Union[HTTPBasicAuth, HTTPDigestAuth] = HTTPDigestAuth):
         self.group = group
 
         # Network calls which will handled user/password for auth
@@ -76,6 +78,10 @@ class Atlas:
         self.Whitelist = Atlas._Whitelist(self)
         self.MaintenanceWindows = Atlas._MaintenanceWindows(self)
         self.CloudBackups = Atlas._CloudBackups(self)
+        self.Projects = Atlas._Projects(self)
+        if not self.group:
+            self.logger.warning("Note! The Atlas client has been initialized without a Group/Project, some endpoints"
+                                "will not function without a Group or project.")
 
     class _Clusters:
         """Clusters API
@@ -1669,6 +1675,43 @@ class Atlas:
                 response = self.atlas.network.delete(Settings.BASE_URL + uri)
 
                 return response
+
+    class _Projects:
+        """Atlas Projects
+
+        see: https://www.mongodb.com/docs/atlas/reference/api/projects/
+
+        The groups resource provides access to retrieve or create Atlas projects.
+
+        Args:
+            atlas (Atlas): Atlas instance
+        """
+
+        def __init__(self, atlas):
+            self.atlas = atlas
+
+        def get_projects(self ) -> Iterable[Project]:
+            """Retrieves projects
+
+            - All accessible by the authed user (can be more orgs!)
+            - All accessible by group_id
+            - All accessible by project name
+
+            """
+
+            uri = Settings.api_resources["Projects"]["Projects that the authenticated user can access"]
+
+            try:
+                response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
+            except Exception as e:
+                raise e
+            result_list = response["results"]
+
+            for each in result_list:
+                yield Project.from_dict(each)
+
+
+
 
 
 class AtlasPagination:

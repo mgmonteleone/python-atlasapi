@@ -20,7 +20,7 @@ class Team:
         self.name: str = name
 
     @classmethod
-    def for_create(cls, org_id: str, name: str, usernames: List[str]) -> Team:
+    def for_create(cls, org_id: str, name: str, usernames: List[str]):
         """
         Creates a Team object in the format needed to create in the Atlas API
         Args:

@@ -22,7 +22,7 @@ from os import getenv
 
 class Settings:
     # Atlas APIs
-    BASE_URL = getenv('BASE_URL','https://cloud.mongodb.com')
+    BASE_URL = getenv('BASE_URL', 'https://cloud.mongodb.com')
     URI_STUB = '/api/atlas/v1.0'
 
     api_resources = {
@@ -118,9 +118,25 @@ class Settings:
             "Get Cloud Backup restore job by cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/"
                                                                   "{CLUSTER_NAME}/backup/restoreJobs/{JOB_ID}",
             "Restore snapshot by cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}"
-                                                       "/backup/restoreJobs",
+                                                      "/backup/restoreJobs",
             "Cancel manual download restore job by job_id": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}"
-                                                                         "/backup/restoreJobs/{JOB_ID}"
+                                                                       "/backup/restoreJobs/{JOB_ID}"
+
+        }
+        ,
+        "Projects": {
+            "All projects that the authenticated user can access": URI_STUB + "/groups/",
+            "Project by group_id": URI_STUB + "/groups/{GROUP_ID}",
+            "Project by group name": URI_STUB + "/groups/byName/{GROUP_NAME}",
+            "Teams assigned to the project associated with group_ud": URI_STUB + "/groups/{GROUP_ID}/teams/",
+            "Remove the specified Atlas team from the specified project.": URI_STUB + "/groups/{GROUP_ID}/"
+                                                                                      "teams/{TEAM_ID}",
+            "Atlas Users assigned to project": URI_STUB + "/groups/{GROUP_ID}/users/",
+            "Remove Atlas Users assigned to project": URI_STUB + "/groups/{GROUP_ID}/users/{USER_ID}",
+            "Pending invitations to the project associated ": URI_STUB + "/groups/{GROUP_ID}/invites",
+            "One Pending invitation to the project associated": URI_STUB + "/groups/{GROUP_ID}/"
+                                                                           "invites{INVITATION_ID}",
+            "Settings for the project identified": URI_STUB + "/groups/{GROUP-ID}/settings",
 
         }
 

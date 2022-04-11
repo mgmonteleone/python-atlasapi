@@ -75,6 +75,7 @@ class Project:
         """
         return dict(name=self.name, orgId = self.org_id, withDefaultAlertsSettings=self.with_default_alert_settings)
 
+"""
 test_dict = {
     "clusterCount": 2,
     "created": "2016-07-14T14:19:33Z",
@@ -85,3 +86,4 @@ test_dict = {
 }
 
 print(Project.for_create(org_id='34', name='test_project').as_create_dict)
+"""

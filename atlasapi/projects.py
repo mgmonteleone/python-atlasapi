@@ -76,7 +76,25 @@ class Project:
         return dict(name=self.name, orgId = self.org_id, withDefaultAlertsSettings=self.with_default_alert_settings)
 
 
+class ProjectSettings:
+    def __init__(self, is_collect_db_stats: Optional[bool] = None, is_data_explorer: Optional[bool] = None,
+                 is_performance_advisor: Optional[bool] = None, is_realtime_perf: Optional[bool] = None,
+                 is_schema_advisor: Optional[bool] = None):
+        self.is_schema_advisor: Optional[bool] = is_schema_advisor
+        self.is_realtime_perf: Optional[bool] = is_realtime_perf
+        self.is_performance_advisor: Optional[bool] = is_performance_advisor
+        self.is_data_explorer: Optional[bool] = is_data_explorer
+        self.is_collect_db_stats: Optional[bool] = is_collect_db_stats
 
+    @classmethod
+    def from_dict(cls,data_dict: dict):
+        return cls(
+            bool(data_dict.get("isCollectDatabaseSpecificsStatisticsEnabled", False)),
+            bool(data_dict.get("isDataExplorerEnabled", False)),
+            bool(data_dict.get("isPerformanceAdvisorEnabled", False)),
+            bool(data_dict.get("isRealtimePerformancePanelEnabled", False)),
+            bool(data_dict.get("isSchemaAdvisorEnabled", False)),
+        )
 
 
 """

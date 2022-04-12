@@ -6,7 +6,7 @@ Nose2 Unit Tests for the clusters module.
 from pprint import pprint
 from os import environ, getenv
 from atlasapi.atlas import Atlas
-from atlasapi.projects import Project
+from atlasapi.projects import Project, ProjectSettings
 from atlasapi.teams import TeamRoles
 from atlasapi.atlas_users import AtlasUser
 from json import dumps
@@ -115,9 +115,16 @@ class ProjectTests(BaseTests):
 
 
     def test_09_get_project_user_count(self):
-        out = self.a.Projects.get_project_user_count()
+        out = self.a.Projects.user_count()
         pprint(f"👍 The count is {out}")
         self.assertIsInstance(out, int, "The count should be a in integer!")
         self.assertGreaterEqual(out, 1, "Should have more than one user!")
 
     test_09_get_project_user_count.basic = True
+
+    def test_10_get_project_settings(self):
+        out = self.a.Projects.settings
+        #pprint(f"👍 The settings are {out.__dict__}")
+        self.assertIsInstance(out, ProjectSettings, "The response must be a ProjectSettings obj")
+
+    test_10_get_project_settings.basic = True

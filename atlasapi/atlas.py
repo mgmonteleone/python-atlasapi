@@ -42,7 +42,7 @@ from atlasapi.lib import AtlasLogNames, LogLine, ProviderName, MongoDBMajorVersi
     AtlasUnits
 from atlasapi.cloud_backup import CloudBackupSnapshot, CloudBackupRequest, SnapshotRestore, SnapshotRestoreResponse, \
     DeliveryType
-from atlasapi.projects import Project
+from atlasapi.projects import Project, ProjectSettings
 from atlasapi.teams import Team, TeamRoles
 from atlasapi.atlas_users import AtlasUser
 from requests import get
@@ -1832,9 +1832,9 @@ class Atlas:
             for each in result_list:
                 yield AtlasUser.from_dict(each)
 
-        def get_project_user_count(self, group_id: str = None, flatten_teams: Optional[bool] = None,
-                                   include_org_users: Optional[bool] = None,
-                                   ) -> int:
+        def user_count(self, group_id: str = None, flatten_teams: Optional[bool] = None,
+                       include_org_users: Optional[bool] = None,
+                       ) -> int:
             """Returns count of users added to this project
 
             Args:
@@ -1857,6 +1857,17 @@ class Atlas:
             user_count: int = response["totalCount"]
             logger.info(f"The user count is {user_count}")
             return user_count
+
+        @property
+        def settings(self) -> ProjectSettings:
+            group_id = self.atlas.group
+            uri = Settings.api_resources["Projects"]["Settings for project"].format(GROUP_ID=group_id)
+
+            try:
+                response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
+            except Exception as e:
+                raise e
+            return ProjectSettings.from_dict(response)
 
 
 class AtlasPagination:

@@ -136,7 +136,7 @@ class Settings:
             "Pending invitations to the project associated ": URI_STUB + "/groups/{GROUP_ID}/invites",
             "One Pending invitation to the project associated": URI_STUB + "/groups/{GROUP_ID}/"
                                                                            "invites{INVITATION_ID}",
-            "Settings for the project identified": URI_STUB + "/groups/{GROUP-ID}/settings",
+            "Settings for project": URI_STUB + "/groups/{GROUP_ID}/settings",
 
         }
 

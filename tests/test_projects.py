@@ -8,6 +8,7 @@ from os import environ, getenv
 from atlasapi.atlas import Atlas
 from atlasapi.projects import Project
 from atlasapi.teams import TeamRoles
+from atlasapi.atlas_users import AtlasUser
 from json import dumps
 from tests import BaseTests
 import logging
@@ -79,7 +80,7 @@ class ProjectTests(BaseTests):
             self.assertIsInstance(each.roles,list,"Roles should be a list of strings")
             for each_role in each.roles:
                 self.assertIsInstance(each_role,str, "Each listed role should be a string.")
-            pprint(each.__dict__)
+            #pprint(each.__dict__)
 
     test_05_get_project_teams_basic.basic = True
 
@@ -90,6 +91,33 @@ class ProjectTests(BaseTests):
             self.assertIsInstance(each.roles,list,"Roles should be a list of strings")
             for each_role in each.roles:
                 self.assertIsInstance(each_role,str, "Each listed role should be a string.")
-            pprint(each.__dict__)
+            #pprint(each.__dict__)
 
     test_06_get_project_teams_pass_id.basic = True
+
+    def test_07_get_project_users_fail_noGroup(self):
+        with self.assertRaises(ValueError):
+            pprint(f"👍Supplying no group yielded exception")
+            out = self.a_owner.Projects.get_project_users()
+            for each in out:
+                self.assertIsInstance(each, AtlasUser)
+                #pprint(each.__dict__)
+
+    test_07_get_project_users_fail_noGroup.basic = True
+
+    def test_08_get_project_users(self):
+        out = self.a.Projects.get_project_users()
+        for each in out:
+            self.assertIsInstance(each, AtlasUser)
+            #pprint(each.__dict__)
+
+    test_08_get_project_users.basic = True
+
+
+    def test_09_get_project_user_count(self):
+        out = self.a.Projects.get_project_user_count()
+        pprint(f"👍 The count is {out}")
+        self.assertIsInstance(out, int, "The count should be a in integer!")
+        self.assertGreaterEqual(out, 1, "Should have more than one user!")
+
+    test_09_get_project_user_count.basic = True

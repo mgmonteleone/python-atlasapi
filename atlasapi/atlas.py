@@ -44,6 +44,7 @@ from atlasapi.cloud_backup import CloudBackupSnapshot, CloudBackupRequest, Snaps
     DeliveryType
 from atlasapi.projects import Project
 from atlasapi.teams import Team, TeamRoles
+from atlasapi.atlas_users import AtlasUser
 from requests import get
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 import gzip
@@ -1741,18 +1742,18 @@ class Atlas:
 
             return Project.from_dict(response)
 
-        def get_project_teams(self, group_id: str = None) -> Iterable[TeamRoles]:
-            """Retrieves all teams assigned to the passed project/group
+        def _group_id_select(self, group_id: str = None) -> str:
+            """Returns either the passed group_id or the instantiated group_id.
 
-            Returns each team assigned to the project, along with the roles which are assigned.
+            Args:
+                group_id (str):
 
-
-            Returns (Iterable[Project]): Yields Project Objects.
+            Returns (str): The correct group_id to use.
             """
             if not group_id:
                 if not self.atlas.group:
                     raise ValueError(
-                        "You either pass a group_id when calling get_project_teams, or intantiate the atlas"
+                        "You either pass a group_id when calling get_project_teams, or instantiate the atlas"
                         "instance with a group_id, you have neither.")
                 else:
                     group_id = self.atlas.group
@@ -1761,8 +1762,19 @@ class Atlas:
                     logger.warning(f"You have over-ridden the instantiated group_id {self.atlas.group} with the passed"
                                    f"group_id {group_id}. This is allowed but may yield unexpected results!")
                 else:
-                    logger.info("You have passed a ovveride group which is the same as the instantiated atlast group,"
+                    logger.info("You have passed a override group which is the same as the instantiated atlast group,"
                                 "this will have no effect")
+            return group_id
+
+        def get_project_teams(self, group_id: str = None) -> Iterable[TeamRoles]:
+            """Retrieves all teams assigned to the passed project/group
+
+            Returns each team assigned to the project, along with the roles which are assigned.
+
+
+            Returns (Iterable[Project]): Yields Project Objects.
+            """
+            group_id = self._group_id_select(group_id)
 
             uri = Settings.api_resources["Projects"]["Project teams by group_id"].format(GROUP_ID=group_id)
 
@@ -1774,6 +1786,77 @@ class Atlas:
 
             for each in result_list:
                 yield TeamRoles(each.get("teamId"), each.get("roleNames"))
+
+        @staticmethod
+        def _process_user_options(uri: str, flatten_teams: bool, include_org_users: bool) -> str:
+            """Helper method to append user options to uri.
+
+            Args:
+                uri:
+                flatten_teams:
+                include_org_users:
+
+            Returns (str): The processed uri string.
+            """
+            if flatten_teams and include_org_users:
+                uri = uri + f"?flattenTeams={flatten_teams}&includeOrgUsers={include_org_users}"
+            elif flatten_teams:
+                uri = uri + f"?flattenTeams={flatten_teams}"
+            elif include_org_users:
+                uri = uri + f"?includeOrgUsers={include_org_users}"
+            return uri
+
+        def get_project_users(self, group_id: str = None, flatten_teams: Optional[bool] = None,
+                              include_org_users: Optional[bool] = None) -> Iterable[AtlasUser]:
+            """Yields all users (AtlasUser objects) associated with the group_id.
+
+            Args:
+                group_id (str): The group id to search, will use the configured group for the Atlas instance if instantiated in this way.
+                flatten_teams (bool): Flag that indicates whether the returned list should include users who belong to a team that is assigned a role in this project. You might not have assigned the individual users a role in this project.
+                include_org_users (bool): Flag that indicates whether the returned list should include users with implicit access to the project through the Organization Owner or Organization Read Only role. You might not have assigned the individual users a role in this project.
+
+
+            Returns (Iterable[AtlasUser]: An iterable of AtlasUser objects.
+            """
+            group_id = self._group_id_select(group_id)
+            uri = Settings.api_resources["Projects"]["Atlas Users assigned to project"].format(GROUP_ID=group_id)
+            uri = self._process_user_options(uri, flatten_teams, include_org_users)
+
+            try:
+                response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
+            except Exception as e:
+                raise e
+            user_count: int = response["totalCount"]
+            logger.error(f"The user count is {user_count}")
+            result_list: List[dict] = response["results"]
+            for each in result_list:
+                yield AtlasUser.from_dict(each)
+
+        def get_project_user_count(self, group_id: str = None, flatten_teams: Optional[bool] = None,
+                                   include_org_users: Optional[bool] = None,
+                                   ) -> int:
+            """Returns count of users added to this project
+
+            Args:
+                group_id (str): The group id to search, will use the configured group for the Atlas instance if instantiated in this way.
+                flatten_teams (bool): Flag that indicates whether the returned list should include users who belong to a team that is assigned a role in this project. You might not have assigned the individual users a role in this project.
+                include_org_users (bool): Flag that indicates whether the returned list should include users with implicit access to the project through the Organization Owner or Organization Read Only role. You might not have assigned the individual users a role in this project.
+
+
+            Returns (int): Count of users.
+
+            """
+            group_id = self._group_id_select(group_id)
+            uri = Settings.api_resources["Projects"]["Atlas Users assigned to project"].format(GROUP_ID=group_id)
+            uri = self._process_user_options(uri, flatten_teams, include_org_users)
+
+            try:
+                response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
+            except Exception as e:
+                raise e
+            user_count: int = response["totalCount"]
+            logger.info(f"The user count is {user_count}")
+            return user_count
 
 
 class AtlasPagination:

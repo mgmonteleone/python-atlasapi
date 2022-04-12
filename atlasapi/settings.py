@@ -128,7 +128,7 @@ class Settings:
             "Projects that the authenticated user can access": URI_STUB + "/groups/",
             "Project by group_id": URI_STUB + "/groups/{GROUP_ID}",
             "Project by group name": URI_STUB + "/groups/byName/{GROUP_NAME}",
-            "Teams assigned to the project associated with group_ud": URI_STUB + "/groups/{GROUP_ID}/teams/",
+            "Project teams by group_id": URI_STUB + "/groups/{GROUP_ID}/teams/",
             "Remove the specified Atlas team from the specified project.": URI_STUB + "/groups/{GROUP_ID}/"
                                                                                       "teams/{TEAM_ID}",
             "Atlas Users assigned to project": URI_STUB + "/groups/{GROUP_ID}/users/",

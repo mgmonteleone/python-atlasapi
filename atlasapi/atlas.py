@@ -43,7 +43,7 @@ from atlasapi.lib import AtlasLogNames, LogLine, ProviderName, MongoDBMajorVersi
 from atlasapi.cloud_backup import CloudBackupSnapshot, CloudBackupRequest, SnapshotRestore, SnapshotRestoreResponse, \
     DeliveryType
 from atlasapi.projects import Project
-from atlasapi.teams import Team
+from atlasapi.teams import Team, TeamRoles
 from requests import get
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 import gzip
@@ -63,7 +63,8 @@ class Atlas:
         can override to Basic if needed for use with a Proxy.
     """
 
-    def __init__(self, user: str, password: str, group : str = None, auth_method: Union[HTTPBasicAuth, HTTPDigestAuth] = HTTPDigestAuth):
+    def __init__(self, user: str, password: str, group: str = None,
+                 auth_method: Union[HTTPBasicAuth, HTTPDigestAuth] = HTTPDigestAuth):
         self.group = group
 
         # Network calls which will handled user/password for auth
@@ -1595,7 +1596,6 @@ class Atlas:
                     logger.error(e.details)
                     raise IOError("Received an Atlas bad request on Snapshot restore request.")
 
-
             try:
                 response_obj = SnapshotRestoreResponse.from_dict(response)
             except KeyError as e:
@@ -1693,10 +1693,10 @@ class Atlas:
         def get_projects(self) -> Iterable[Project]:
             """Retrieves projects
 
-            - All accessible by the authed user (can be more orgs!)
-            - All accessible by group_id
-            - All accessible by project name
+            Gets all projects for which the authed key has access.
 
+
+            Returns (Iterable[Project]): Yields Project Objects.
             """
 
             uri = Settings.api_resources["Projects"]["Projects that the authenticated user can access"]
@@ -1710,8 +1710,17 @@ class Atlas:
             for each in result_list:
                 yield Project.from_dict(each)
 
-
         def get_project(self, group_id: str = None, group_name: str = None) -> Project:
+            """Returns a single Project
+            Gets a single project, either by sending a group_id or a group name.
+
+            Args:
+                group_id (str): The unique identifier for the project.
+                group_name (str): The user defined name for the project.
+
+            Returns (Project): A Project Object.
+
+            """
             if group_id and group_name:
                 logger.error("Please pass either a group_id or a group_name, not both.")
                 raise ValueError("Please pass either a group_id or a group_name, not both.")
@@ -1721,7 +1730,7 @@ class Atlas:
                 uri = Settings.api_resources["Projects"]["Project by group name"].format(GROUP_NAME=group_name)
 
             else:
-                err_str =f"Please pass either a group_id or a group_name, you did not pass either. . ."
+                err_str = f"Please pass either a group_id or a group_name, you did not pass either. . ."
                 logger.error(err_str)
                 raise ValueError(err_str)
 
@@ -1731,6 +1740,41 @@ class Atlas:
                 raise e
 
             return Project.from_dict(response)
+
+        def get_project_teams(self, group_id: str = None) -> Iterable[TeamRoles]:
+            """Retrieves all teams assigned to the passed project/group
+
+            Returns each team assigned to the project, along with the roles which are assigned.
+
+
+            Returns (Iterable[Project]): Yields Project Objects.
+            """
+            if not group_id:
+                if not self.atlas.group:
+                    raise ValueError(
+                        "You either pass a group_id when calling get_project_teams, or intantiate the atlas"
+                        "instance with a group_id, you have neither.")
+                else:
+                    group_id = self.atlas.group
+            else:
+                if self.atlas.group != group_id:
+                    logger.warning(f"You have over-ridden the instantiated group_id {self.atlas.group} with the passed"
+                                   f"group_id {group_id}. This is allowed but may yield unexpected results!")
+                else:
+                    logger.info("You have passed a ovveride group which is the same as the instantiated atlast group,"
+                                "this will have no effect")
+
+            uri = Settings.api_resources["Projects"]["Project teams by group_id"].format(GROUP_ID=group_id)
+
+            try:
+                response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
+            except Exception as e:
+                raise e
+            result_list = response["results"]
+
+            for each in result_list:
+                yield TeamRoles(each.get("teamId"), each.get("roleNames"))
+
 
 class AtlasPagination:
     """Atlas Pagination Generic Implementation

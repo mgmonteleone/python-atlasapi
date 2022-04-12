@@ -7,6 +7,7 @@ from pprint import pprint
 from os import environ, getenv
 from atlasapi.atlas import Atlas
 from atlasapi.projects import Project
+from atlasapi.teams import TeamRoles
 from json import dumps
 from tests import BaseTests
 import logging
@@ -70,3 +71,25 @@ class ProjectTests(BaseTests):
             out = self.a.Projects.get_project(group_name="bad bad", group_id='anid')
 
     test_04_get_project_by_both_fail.basic = True
+
+    def test_05_get_project_teams_basic(self):
+        out = self.a.Projects.get_project_teams()
+        for each in out:
+            self.assertIsInstance(each, TeamRoles)
+            self.assertIsInstance(each.roles,list,"Roles should be a list of strings")
+            for each_role in each.roles:
+                self.assertIsInstance(each_role,str, "Each listed role should be a string.")
+            pprint(each.__dict__)
+
+    test_05_get_project_teams_basic.basic = True
+
+    def test_06_get_project_teams_pass_id(self):
+        out = self.a_owner.Projects.get_project_teams(group_id=self.a.group)
+        for each in out:
+            self.assertIsInstance(each, TeamRoles)
+            self.assertIsInstance(each.roles,list,"Roles should be a list of strings")
+            for each_role in each.roles:
+                self.assertIsInstance(each_role,str, "Each listed role should be a string.")
+            pprint(each.__dict__)
+
+    test_06_get_project_teams_pass_id.basic = True

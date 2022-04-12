@@ -1,6 +1,18 @@
 from typing import Optional, List
 
 
+class TeamRoles:
+    def __init__(self, team_id: str, roles: List[str]):
+        """Contains a team_id and its associated atlas access roles.
+
+        Args:
+            team_id (str):
+            roles (List[str]): A list of Atlas access roles.
+        """
+        self.team_id = team_id
+        self.roles = roles
+
+
 class Team:
     def __init__(self, name: str, id: str = None, usernames: Optional[List[str]] = None, org_id: Optional[str] = None,
                  links: Optional[list] = None):
@@ -42,3 +54,9 @@ class Team:
 
         """
         return dict(name=self.name, usernames=self.usernames)
+
+
+class TeamRoles:
+    def __init__(self, team_id: str, roles: List[str]):
+        self.team_id = team_id
+        self.roles = roles

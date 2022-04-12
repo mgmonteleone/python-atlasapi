@@ -42,6 +42,9 @@ from atlasapi.lib import AtlasLogNames, LogLine, ProviderName, MongoDBMajorVersi
     AtlasUnits
 from atlasapi.cloud_backup import CloudBackupSnapshot, CloudBackupRequest, SnapshotRestore, SnapshotRestoreResponse, \
     DeliveryType
+from atlasapi.projects import Project, ProjectSettings
+from atlasapi.teams import Team, TeamRoles
+from atlasapi.atlas_users import AtlasUser
 from requests import get
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 import gzip
@@ -57,11 +60,12 @@ class Atlas:
         user (str): Atlas user
         password (str): Atlas password
         group (str): Atlas group
-        auth_method (Union[HTTPBasicAuth,HTTPDigestAuth]) : Athentication method to use, defaults to digest, but you
+        auth_method (Union[HTTPBasicAuth,HTTPDigestAuth]) : Authentication method to use, defaults to digest, but you
         can override to Basic if needed for use with a Proxy.
     """
 
-    def __init__(self, user, password, group, auth_method: Union[HTTPBasicAuth, HTTPDigestAuth] = HTTPDigestAuth):
+    def __init__(self, user: str, password: str, group: str = None,
+                 auth_method: Union[HTTPBasicAuth, HTTPDigestAuth] = HTTPDigestAuth):
         self.group = group
 
         # Network calls which will handled user/password for auth
@@ -76,6 +80,10 @@ class Atlas:
         self.Whitelist = Atlas._Whitelist(self)
         self.MaintenanceWindows = Atlas._MaintenanceWindows(self)
         self.CloudBackups = Atlas._CloudBackups(self)
+        self.Projects = Atlas._Projects(self)
+        if not self.group:
+            self.logger.warning("Note! The Atlas client has been initialized without a Group/Project, some endpoints"
+                                "will not function without a Group or project.")
 
     class _Clusters:
         """Clusters API
@@ -266,7 +274,7 @@ class Atlas:
                 return self.atlas.network.delete(Settings.BASE_URL + uri)
             else:
                 raise ErrConfirmationRequested(
-                    "Please set areYouSure=True on delete_a_cluster call if you really want to delete [%s]" % cluster)
+                    "Please set areYouSure=True on delete_cluster call if you really want to delete [%s]" % cluster)
 
         def modify_cluster(self, cluster: str, cluster_config: Union[ClusterConfig, dict]) -> dict:
             """Modify a Cluster
@@ -1589,7 +1597,6 @@ class Atlas:
                     logger.error(e.details)
                     raise IOError("Received an Atlas bad request on Snapshot restore request.")
 
-
             try:
                 response_obj = SnapshotRestoreResponse.from_dict(response)
             except KeyError as e:
@@ -1669,6 +1676,198 @@ class Atlas:
                 response = self.atlas.network.delete(Settings.BASE_URL + uri)
 
                 return response
+
+    class _Projects:
+        """Atlas Projects
+
+        see: https://www.mongodb.com/docs/atlas/reference/api/projects/
+
+        The groups resource provides access to retrieve or create Atlas projects.
+
+        Args:
+            atlas (Atlas): Atlas instance
+        """
+
+        def __init__(self, atlas):
+            self.atlas = atlas
+
+        def get_projects(self) -> Iterable[Project]:
+            """Retrieves projects
+
+            Gets all projects for which the authed key has access.
+
+
+            Returns (Iterable[Project]): Yields Project Objects.
+            """
+
+            uri = Settings.api_resources["Projects"]["Projects that the authenticated user can access"]
+
+            try:
+                response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
+            except Exception as e:
+                raise e
+            result_list = response["results"]
+
+            for each in result_list:
+                yield Project.from_dict(each)
+
+        def get_project(self, group_id: str = None, group_name: str = None) -> Project:
+            """Returns a single Project
+            Gets a single project, either by sending a group_id or a group name.
+
+            Args:
+                group_id (str): The unique identifier for the project.
+                group_name (str): The user defined name for the project.
+
+            Returns (Project): A Project Object.
+
+            """
+            if group_id and group_name:
+                logger.error("Please pass either a group_id or a group_name, not both.")
+                raise ValueError("Please pass either a group_id or a group_name, not both.")
+            elif group_id:
+                uri = Settings.api_resources["Projects"]["Project by group_id"].format(GROUP_ID=group_id)
+            elif group_name:
+                uri = Settings.api_resources["Projects"]["Project by group name"].format(GROUP_NAME=group_name)
+
+            else:
+                err_str = f"Please pass either a group_id or a group_name, you did not pass either. . ."
+                logger.error(err_str)
+                raise ValueError(err_str)
+
+            try:
+                response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
+            except Exception as e:
+                raise e
+
+            return Project.from_dict(response)
+
+        def _group_id_select(self, group_id: str = None) -> str:
+            """Returns either the passed group_id or the instantiated group_id.
+
+            Args:
+                group_id (str):
+
+            Returns (str): The correct group_id to use.
+            """
+            if not group_id:
+                if not self.atlas.group:
+                    raise ValueError(
+                        "You either pass a group_id when calling get_project_teams, or instantiate the atlas"
+                        "instance with a group_id, you have neither.")
+                else:
+                    group_id = self.atlas.group
+            else:
+                if self.atlas.group != group_id:
+                    logger.warning(f"You have over-ridden the instantiated group_id {self.atlas.group} with the passed"
+                                   f"group_id {group_id}. This is allowed but may yield unexpected results!")
+                else:
+                    logger.info("You have passed a override group which is the same as the instantiated atlast group,"
+                                "this will have no effect")
+            return group_id
+
+        def get_project_teams(self, group_id: str = None) -> Iterable[TeamRoles]:
+            """Retrieves all teams assigned to the passed project/group
+
+            Returns each team assigned to the project, along with the roles which are assigned.
+
+
+            Returns (Iterable[Project]): Yields Project Objects.
+            """
+            group_id = self._group_id_select(group_id)
+
+            uri = Settings.api_resources["Projects"]["Project teams by group_id"].format(GROUP_ID=group_id)
+
+            try:
+                response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
+            except Exception as e:
+                raise e
+            result_list = response["results"]
+
+            for each in result_list:
+                yield TeamRoles(each.get("teamId"), each.get("roleNames"))
+
+        @staticmethod
+        def _process_user_options(uri: str, flatten_teams: bool, include_org_users: bool) -> str:
+            """Helper method to append user options to uri.
+
+            Args:
+                uri:
+                flatten_teams:
+                include_org_users:
+
+            Returns (str): The processed uri string.
+            """
+            if flatten_teams and include_org_users:
+                uri = uri + f"?flattenTeams={flatten_teams}&includeOrgUsers={include_org_users}"
+            elif flatten_teams:
+                uri = uri + f"?flattenTeams={flatten_teams}"
+            elif include_org_users:
+                uri = uri + f"?includeOrgUsers={include_org_users}"
+            return uri
+
+        def get_project_users(self, group_id: str = None, flatten_teams: Optional[bool] = None,
+                              include_org_users: Optional[bool] = None) -> Iterable[AtlasUser]:
+            """Yields all users (AtlasUser objects) associated with the group_id.
+
+            Args:
+                group_id (str): The group id to search, will use the configured group for the Atlas instance if instantiated in this way.
+                flatten_teams (bool): Flag that indicates whether the returned list should include users who belong to a team that is assigned a role in this project. You might not have assigned the individual users a role in this project.
+                include_org_users (bool): Flag that indicates whether the returned list should include users with implicit access to the project through the Organization Owner or Organization Read Only role. You might not have assigned the individual users a role in this project.
+
+
+            Returns (Iterable[AtlasUser]: An iterable of AtlasUser objects.
+            """
+            group_id = self._group_id_select(group_id)
+            uri = Settings.api_resources["Projects"]["Atlas Users assigned to project"].format(GROUP_ID=group_id)
+            uri = self._process_user_options(uri, flatten_teams, include_org_users)
+
+            try:
+                response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
+            except Exception as e:
+                raise e
+            user_count: int = response["totalCount"]
+            logger.error(f"The user count is {user_count}")
+            result_list: List[dict] = response["results"]
+            for each in result_list:
+                yield AtlasUser.from_dict(each)
+
+        def user_count(self, group_id: str = None, flatten_teams: Optional[bool] = None,
+                       include_org_users: Optional[bool] = None,
+                       ) -> int:
+            """Returns count of users added to this project
+
+            Args:
+                group_id (str): The group id to search, will use the configured group for the Atlas instance if instantiated in this way.
+                flatten_teams (bool): Flag that indicates whether the returned list should include users who belong to a team that is assigned a role in this project. You might not have assigned the individual users a role in this project.
+                include_org_users (bool): Flag that indicates whether the returned list should include users with implicit access to the project through the Organization Owner or Organization Read Only role. You might not have assigned the individual users a role in this project.
+
+
+            Returns (int): Count of users.
+
+            """
+            group_id = self._group_id_select(group_id)
+            uri = Settings.api_resources["Projects"]["Atlas Users assigned to project"].format(GROUP_ID=group_id)
+            uri = self._process_user_options(uri, flatten_teams, include_org_users)
+
+            try:
+                response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
+            except Exception as e:
+                raise e
+            user_count: int = response["totalCount"]
+            logger.info(f"The user count is {user_count}")
+            return user_count
+
+        @property
+        def settings(self) -> ProjectSettings:
+            group_id = self.atlas.group
+            uri = Settings.api_resources["Projects"]["Settings for project"].format(GROUP_ID=group_id)
+
+            try:
+                response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
+            except Exception as e:
+                raise e
+            return ProjectSettings.from_dict(response)
 
 
 class AtlasPagination:

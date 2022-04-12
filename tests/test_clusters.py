@@ -73,13 +73,13 @@ class ClusterTests(BaseTests):
         sleep(20)
         print('-----------------------------------Done Sleeping -------------------------------------')
 
-    def test_06_delete_a_cluster(self):
+    def test_06_delete_cluster(self):
         myoutput = self.a.Clusters.delete_cluster(cluster=self.TEST_CLUSTER2_NAME_UNIQUE, areYouSure=True)
         print('Successfully Deleted {}, output was '.format(self.TEST_CLUSTER2_NAME_UNIQUE, myoutput))
 
-    test_06_delete_a_cluster.advanced = True
+    test_06_delete_cluster.advanced = True
 
-    def test_07_create_a_cluster(self):
+    def test_07_create_cluster(self):
         provider_settings: ProviderSettings = ProviderSettings()
         regions_config = RegionConfig()
         replication_specs = ReplicationSpecs(regions_config={provider_settings.region_name: regions_config.__dict__})
@@ -90,7 +90,7 @@ class ClusterTests(BaseTests):
         output = self.a.Clusters.create_cluster(cluster_config)
         pprint(output)
 
-    test_07_create_a_cluster.advanced = True
+    test_07_create_cluster.advanced = True
 
     def test_08_resize_a_cluster(self):
         self.a.Clusters.modify_cluster_instance_size(cluster=self.TEST_CLUSTER3_NAME_UNIQUE,

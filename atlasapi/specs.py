@@ -48,9 +48,10 @@ logger = logging.getLogger('Atlas.specs')
 # etc., as needed
 
 class IAMType(Enum):
-    NONE = 'None' # The user does not use AWS IAM credentials.
-    USER = 'USER' # New database user has AWS IAM user credentials.
-    ROLE = 'ROLE' # New database user has credentials associated with an AWS IAM role.
+    NONE = 'None'  # The user does not use AWS IAM credentials.
+    USER = 'USER'  # New database user has AWS IAM user credentials.
+    ROLE = 'ROLE'  # New database user has credentials associated with an AWS IAM role.
+
 
 class ReplicaSetTypes(Enum):
     REPLICA_PRIMARY = 'ReplicaSet primary'
@@ -67,7 +68,7 @@ class ReplicaSetTypes(Enum):
 
 
 class HostLogFile(object):
-    def __init__(self, log_name: AtlasLogNames = None, log_file_binary: BinaryIO = None ):
+    def __init__(self, log_name: AtlasLogNames = None, log_file_binary: BinaryIO = None):
         """Container for Atlas log files for a host instance
 
         Args:
@@ -100,6 +101,7 @@ class Host(object):
             log_files (Optional[List[HostLogFile]]): Holds list of log files when requested.
 
     """
+
     def __init__(self, data):
         if type(data) != dict:
             raise NotADirectoryError('The data parameter must be ann dict, you sent a {}'.format(type(data)))

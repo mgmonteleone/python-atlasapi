@@ -1690,7 +1690,7 @@ class Atlas:
         def __init__(self, atlas):
             self.atlas = atlas
 
-        def get_projects(self ) -> Iterable[Project]:
+        def get_projects(self) -> Iterable[Project]:
             """Retrieves projects
 
             - All accessible by the authed user (can be more orgs!)
@@ -1711,8 +1711,26 @@ class Atlas:
                 yield Project.from_dict(each)
 
 
+        def get_project(self, group_id: str = None, group_name: str = None) -> Project:
+            if group_id and group_name:
+                logger.error("Please pass either a group_id or a group_name, not both.")
+                raise ValueError("Please pass either a group_id or a group_name, not both.")
+            elif group_id:
+                uri = Settings.api_resources["Projects"]["Project by group_id"].format(GROUP_ID=group_id)
+            elif group_name:
+                uri = Settings.api_resources["Projects"]["Project by group name"].format(GROUP_NAME=group_name)
 
+            else:
+                err_str =f"Please pass either a group_id or a group_name, you did not pass either. . ."
+                logger.error(err_str)
+                raise ValueError(err_str)
 
+            try:
+                response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
+            except Exception as e:
+                raise e
+
+            return Project.from_dict(response)
 
 class AtlasPagination:
     """Atlas Pagination Generic Implementation

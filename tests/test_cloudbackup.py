@@ -123,7 +123,7 @@ class CloudBackupTests(BaseTests):
         print(f'The number of snapshots restore jobs returned = {count}')
         self.assertGreaterEqual(count, 1)
 
-    test_07_get_restore_job_for_cluster.basic = True
+    test_07_get_restore_job_for_cluster.basic = False
 
     def test_08_get_one_restore_job(self):
         cluster_name = 'pyAtlasTestCluster'
@@ -141,7 +141,7 @@ class CloudBackupTests(BaseTests):
 
         self.assertEquals(type(restore_job), SnapshotRestoreResponse)
 
-    test_08_get_one_restore_job.basic = True
+    test_08_get_one_restore_job.basic = False
 
     def test_09_is_valid_snapshot_false(self):
         cluster_name = 'pyAtlasTestCluster'

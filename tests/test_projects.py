@@ -30,7 +30,7 @@ class ProjectTests(BaseTests):
     def test_01_get_projects_all_for_proj_key(self):
         count = 0
         for each in self.a.Projects.get_projects():
-            # pprint(each.__dict__)
+            pprint(each.__dict__)
             self.assertIsInstance(each, Project, "An Atlas <Project should be returned>")
             count += 1
         self.assertEqual(count, 1, "There should be exactly 1 projects returned when for this test Project")

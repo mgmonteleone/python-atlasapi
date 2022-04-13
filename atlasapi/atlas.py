@@ -1368,7 +1368,7 @@ class Atlas:
 
         def create_snapshot_for_cluster(self, cluster_name: str, retention_days: int = 7,
                                         description: str = None, as_obj: bool = True) -> Union[
-            CloudBackupSnapshot, dict]:
+                                            CloudBackupSnapshot, dict]:
             """
             Creates and on demand snapshot for the passed cluster
 
@@ -1401,7 +1401,7 @@ class Atlas:
                 return response
 
         def get_backup_snapshots_for_cluster(self, cluster_name: str, as_obj: bool = True) -> Union[
-            Iterable[CloudBackupSnapshot], Iterable[dict]]:
+                                                Iterable[CloudBackupSnapshot], Iterable[dict]]:
             """Get  backup snapshots for a cluster.
 
 
@@ -1505,9 +1505,9 @@ class Atlas:
             # Check if the source and target clusters are the same, if so raise exception unless override is True
 
             if source_cluster_name == target_cluster_name and not allow_same:
-                error_text = f'The source and target cluster should not be the same, as this is usually not the intended' \
-                             f'use case, and can lead to production data loss. If you wish to restore a snapshot to the' \
-                             f'same cluster, use the `allow_same` = True parameter.'
+                error_text = f'The source and target cluster should not be the same, as this is usually not the ' \
+                             f'intended use case, and can lead to production data loss. If you wish to restore a ' \
+                             f' snapshot to the same cluster, use the `allow_same` = True parameter.'
                 logger.error(error_text)
                 raise ValueError(error_text)
 
@@ -1691,13 +1691,14 @@ class Atlas:
         def __init__(self, atlas):
             self.atlas = atlas
 
-        def get_projects(self) -> Iterable[Project]:
-            """Retrieves projects
-
+        @property
+        def projects(self) -> Iterable[Project]:
+            """All Projects accessible by the current authed user/key
             Gets all projects for which the authed key has access.
 
 
             Returns (Iterable[Project]): Yields Project Objects.
+
             """
 
             uri = Settings.api_resources["Projects"]["Projects that the authenticated user can access"]
@@ -1711,7 +1712,7 @@ class Atlas:
             for each in result_list:
                 yield Project.from_dict(each)
 
-        def get_project(self, group_id: str = None, group_name: str = None) -> Project:
+        def _get_project(self, group_id: str = None, group_name: str = None) -> Project:
             """Returns a single Project
             Gets a single project, either by sending a group_id or a group name.
 
@@ -1741,6 +1742,28 @@ class Atlas:
                 raise e
 
             return Project.from_dict(response)
+
+        def project_by_name(self, project_name: str) -> Project:
+            """Return project by name
+
+            Args:
+                project_name (str): The project name to return
+
+            Returns (Project): A single Project
+
+            """
+            return self._get_project(group_name=project_name)
+
+        def project_by_id(self, project_id: str) -> Project:
+            """Return project by name
+
+            Args:
+                project_id (str): The project id (group_id) to return
+
+            Returns (Project): A single Project
+
+            """
+            return self._get_project(group_id=project_id)
 
         def _group_id_select(self, group_id: str = None) -> str:
             """Returns either the passed group_id or the instantiated group_id.
@@ -1772,7 +1795,7 @@ class Atlas:
             Returns each team assigned to the project, along with the roles which are assigned.
 
 
-            Returns (Iterable[Project]): Yields Project Objects.
+            Returns (Iterable[TeamRoles]): Yields TeamRole Objects.
             """
             group_id = self._group_id_select(group_id)
 
@@ -1838,9 +1861,14 @@ class Atlas:
             """Returns count of users added to this project
 
             Args:
-                group_id (str): The group id to search, will use the configured group for the Atlas instance if instantiated in this way.
-                flatten_teams (bool): Flag that indicates whether the returned list should include users who belong to a team that is assigned a role in this project. You might not have assigned the individual users a role in this project.
-                include_org_users (bool): Flag that indicates whether the returned list should include users with implicit access to the project through the Organization Owner or Organization Read Only role. You might not have assigned the individual users a role in this project.
+                group_id (str): The group id to search, will use the configured group for the Atlas instance if
+                instantiated in this way.
+                flatten_teams (bool): Flag that indicates whether the returned list should include users who belong to a
+                 team that is assigned a role in this project. You might not have assigned the individual users a role
+                 in this project.
+                include_org_users (bool): Flag that indicates whether the returned list should include users with
+                 implicit access to the project through the Organization Owner or Organization Read Only role. You
+                  might not have assigned the individual users a role in this project.
 
 
             Returns (int): Count of users.

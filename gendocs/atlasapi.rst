@@ -108,9 +108,17 @@ atlasapi\.cloud_backup module
     :show-inheritance:
 
 atlasapi\.lib module
---------------------
+---------------------
 
 .. automodule:: atlasapi.lib
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+atlasapi\.projects module
+-------------------------
+
+.. automodule:: atlasapi.projects
     :members:
     :undoc-members:
     :show-inheritance:

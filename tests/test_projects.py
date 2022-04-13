@@ -21,7 +21,7 @@ class ProjectTests(BaseTests):
 
     def test_00_get_projects_all_for_org_key(self):
         count = 0
-        for each in self.a_owner.Projects.get_projects():
+        for each in self.a_owner.Projects.projects:
             # pprint(each.__dict__)
             self.assertIsInstance(each, Project, "An Atlas <Project should be returned>")
             count += 1
@@ -31,7 +31,7 @@ class ProjectTests(BaseTests):
 
     def test_01_get_projects_all_for_proj_key(self):
         count = 0
-        for each in self.a.Projects.get_projects():
+        for each in self.a.Projects.projects:
             # pprint(each.__dict__)
             self.assertIsInstance(each, Project, "An Atlas <Project should be returned>")
             count += 1
@@ -40,26 +40,26 @@ class ProjectTests(BaseTests):
     test_01_get_projects_all_for_proj_key.basic = True
 
     def test_02_get_project_by_id(self):
-        for each in self.a.Projects.get_projects():
+        for each in self.a.Projects.projects:
             self.assertIsInstance(each, Project, "An Atlas <Project should be returned>")
             pprint(f"👍The group_id to use is {each.id}")
             group_id = each.id
             self.assertIsInstance(each.org_id, str, "OrgID should be an str")
 
-        out = self.a.Projects.get_project(group_id=group_id)
+        out = self.a.Projects.project_by_id(group_id)
         # pprint(out.__dict__)
         self.assertIsInstance(out, Project, "An Atlas <Project> should be returned")
 
     test_02_get_project_by_id.basic = True
 
     def test_03_get_project_by_name(self):
-        for each in self.a.Projects.get_projects():
+        for each in self.a.Projects.projects:
             self.assertIsInstance(each, Project, "An Atlas <Project should be returned>")
             pprint(f"👍The group_name to use is {each.name}")
             group_name = each.name
             self.assertIsInstance(each.name, str, "OrgID should be an str")
 
-        out = self.a.Projects.get_project(group_name=group_name)
+        out = self.a.Projects.project_by_name(group_name)
         # pprint(out.__dict__)
         self.assertIsInstance(out, Project, "An Atlas <Project> should be returned")
 
@@ -69,7 +69,7 @@ class ProjectTests(BaseTests):
 
         with self.assertRaises(ValueError) as ex:
             pprint(f"👍Supplying both yielded exception")
-            out = self.a.Projects.get_project(group_name="bad bad", group_id='anid')
+            out = self.a.Projects._get_project(group_name="bad bad", group_id='anid')
 
     test_04_get_project_by_both_fail.basic = True
 

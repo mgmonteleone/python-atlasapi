@@ -45,6 +45,7 @@ from atlasapi.cloud_backup import CloudBackupSnapshot, CloudBackupRequest, Snaps
 from atlasapi.projects import Project, ProjectSettings
 from atlasapi.teams import Team, TeamRoles
 from atlasapi.atlas_users import AtlasUser
+from atlasapi.organizations import Organization
 from requests import get
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 import gzip
@@ -81,6 +82,7 @@ class Atlas:
         self.MaintenanceWindows = Atlas._MaintenanceWindows(self)
         self.CloudBackups = Atlas._CloudBackups(self)
         self.Projects = Atlas._Projects(self)
+        self.Organizations = Atlas._Organizations(self)
         if not self.group:
             self.logger.warning("Note! The Atlas client has been initialized without a Group/Project, some endpoints"
                                 "will not function without a Group or project.")
@@ -1368,7 +1370,7 @@ class Atlas:
 
         def create_snapshot_for_cluster(self, cluster_name: str, retention_days: int = 7,
                                         description: str = None, as_obj: bool = True) -> Union[
-                                            CloudBackupSnapshot, dict]:
+            CloudBackupSnapshot, dict]:
             """
             Creates and on demand snapshot for the passed cluster
 
@@ -1401,7 +1403,7 @@ class Atlas:
                 return response
 
         def get_backup_snapshots_for_cluster(self, cluster_name: str, as_obj: bool = True) -> Union[
-                                                Iterable[CloudBackupSnapshot], Iterable[dict]]:
+            Iterable[CloudBackupSnapshot], Iterable[dict]]:
             """Get  backup snapshots for a cluster.
 
 
@@ -1896,6 +1898,104 @@ class Atlas:
             except Exception as e:
                 raise e
             return ProjectSettings.from_dict(response)
+
+    class _Organizations:
+        """Atlas Organizations
+
+               see: https://www.mongodb.com/docs/atlas/reference/api/organizations/
+
+               TThe orgs resource provides access to manage Atlas organizations.
+
+               Args:
+                   atlas (Atlas): Atlas instance
+               """
+
+        def __init__(self, atlas):
+            self.atlas = atlas
+
+        def _get_orgs(self, org_name: str = None, org_id: str = None) -> tuple:
+            """Helper method for returning Org info from the API
+
+            Args:
+                org_name (str):  Organization name with which to filter the returned list. Performs a case-insensitive
+                 search for organizations which exactly match the specified name.
+                org_id (str): Specific org_id to return
+
+            Returns (tuple): A tuple with results(array of dicts) and total count(int)
+
+            """
+            uri = Settings.api_resources["Organizations"]["Orgs the authenticated user can access"]
+            if org_name:
+                uri = uri + f"?name={org_name}"
+            elif org_id:
+                uri = uri + f"{org_id}"
+
+            try:
+                response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
+            except Exception as e:
+                raise e
+
+            if not org_id:
+                result_list = response.get("results", [])
+                total_count = response.get("TotalCount", 0)
+            else:
+                result_list = [response]
+                total_count = 1
+
+            return result_list, total_count
+
+        @property
+        def organizations(self) -> Iterable[Organization]:
+            """All Organizations accessible by the current authed user/key
+            Gets all Organizations for which the authed key has access.
+
+
+            Returns (Iterable[Organization]): Yields Organization Objects.
+
+            """
+            result_list = self._get_orgs()[0]
+            for each in result_list:
+                yield Organization.from_dict(each)
+
+        def organization_by_name(self, org_name: str) -> Organization:
+            """Singe organization searched by name.
+
+            Args:
+                org_name: Organization name with which to filter the returned list. Performs a case-insensitive
+                 search for organizations which exactly match the specified name.
+
+            Returns (Organization): a single Organization object.
+
+            """
+            result = self._get_orgs(org_name=org_name)[0]
+            if isinstance(result, list):
+                return Organization.from_dict(result[0])
+            else:
+                return Organization.from_dict(result)
+
+        def organization_by_id(self, org_id: str) -> Organization:
+            """Single organization searched by org_id.
+
+            Args:
+                org_id (str):
+            Returns (Organization): a single Organization object.
+
+            """
+            result = self._get_orgs(org_id=org_id)
+            if isinstance(result[0], list):
+                logger.error("returning a list?")
+                return Organization.from_dict(result[0][0])
+            else:
+                return Organization.from_dict(result[0])
+
+        @property
+        def count(self) -> int:
+            """ Count of Organizations accessible by the authed user/key.
+
+            Returns (int):
+
+            """
+            return self._get_orgs()[1]
 
 
 class AtlasPagination:

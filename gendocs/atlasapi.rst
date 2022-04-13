@@ -122,3 +122,11 @@ atlasapi\.projects module
     :members:
     :undoc-members:
     :show-inheritance:
+
+atlasapi\.organizations module
+------------------------------
+
+.. automodule:: atlasapi.organizations
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -62,9 +62,18 @@ Atlas._Whitelist
     :show-inheritance:
 
 Atlas._CloudBackups
-----------------
+--------------------
 
 .. autoclass:: atlasapi.atlas::Atlas._CloudBackups
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Atlas._Projects
+----------------
+
+.. autoclass:: atlasapi.atlas::Atlas._Projects
     :members:
     :undoc-members:
     :show-inheritance:

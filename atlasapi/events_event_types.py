@@ -138,7 +138,6 @@ class AtlasEventTypes(Enum):
     DISCOUNT_APPLIED = 'Discount Applied'
     CREDIT_ISSUED = 'Credit Issued'
     GCP_BILLING_ACCOUNT_CREDIT_ISSUED = 'GCP Billing Account Credit Issued'
-    DAILY_USAGE_REPORTED = 'Daily Usage Reported'
     CREDIT_PULLED_FWD = 'Credit Pulled Fwd'
     CREDIT_END_DATE_MODIFIED = 'Credit End Date Modified'
     CREDIT_SFOLID_MODIFIED = 'Credit Sfolid Modified'
@@ -714,4 +713,3 @@ class AtlasEventTypes(Enum):
     ORG_IDP_CERTIFICATE_CURRENT = 'Org Idp Certificate Current'
     SERVERLESS_DEPLOYMENT_CREATED = 'Serverless Deployment Created'
     SERVERLESS_DEPLOYMENT_DELETED = 'Serverless Deployment Deleted'
-    CLUSTER_INSTANCE_ADMIN_BACKUP_SNAPSHOT_REQUESTED = 'Cluster Instance Admin Backup Snapshot Requested'

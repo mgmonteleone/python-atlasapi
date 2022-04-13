@@ -27,6 +27,11 @@ class BaseTests(unittest.TestCase):
         self.OTHER_API_KEY = getenv('ATLAS_OTHER_KEY', None)
         #print("env var is".format(getenv('ATLAS_USER', None)))
 
+
+        self.GROUP_OWNER_USER = getenv('ATLAS_ORG_USER', None)
+        self.GROUP_OWNER_KEY = getenv('ATLAS_ORG_KEY', None)
+
+
         self.TEST_CLUSTER_NAME = TEST_CLUSTER_NAME
         self.TEST_CLUSTER2_NAME = TEST_CLUSTER2_NAME
 
@@ -39,6 +44,7 @@ class BaseTests(unittest.TestCase):
                                    'your env variables are {}'.format(environ.__str__()))
         self.a = Atlas(self.USER, self.API_KEY, self.GROUP_ID)
         self.a_other = Atlas(self.OTHER_USER, self.OTHER_API_KEY, self.OTHER_GROUP_ID)
+        self.a_owner = Atlas(self.GROUP_OWNER_USER, self.GROUP_OWNER_KEY)
 
     # executed after each test
 

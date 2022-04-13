@@ -137,7 +137,14 @@ class Settings:
             "One Pending invitation to the project associated": URI_STUB + "/groups/{GROUP_ID}/"
                                                                            "invites{INVITATION_ID}",
             "Settings for project": URI_STUB + "/groups/{GROUP_ID}/settings",
+        }
 
+        ,
+        "Organizations": {
+            "Orgs the authenticated user can access": URI_STUB + "/orgs/",
+            "Org by org_id": URI_STUB + "/orgs/{ORG_ID}",
+            "Atlas Users associated to Org": URI_STUB + "/orgs/{ORGS_ID}/users/",
+            "Projects associated with the Org": URI_STUB + "/groups/{ORG_ID}/groups"
         }
 
     }

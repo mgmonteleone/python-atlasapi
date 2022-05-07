@@ -80,11 +80,13 @@ class HostLogFile(object):
 
 
 class Host(object):
-    """
-        An Atlas Host
+    def __init__(self, data: dict) -> None:
+        """An Atlas Host
+            Contains all basic information for an Atlas host.
+            Using various methods, enables the retrieval of more advanced data, such as measurements and log files.
 
         Args:
-            data (dict): An Atlas format host data dictionary.
+            data(dict): An Atlas format host data dictionary.
 
         Attributes:
             created (datetime): The datetime the host was created.
@@ -99,10 +101,7 @@ class Host(object):
             measurements (Optional[List[AtlasMeasurement]]: Holds list of host Measurements
             cluster_name (str): The cluster name (taken from the hostname)
             log_files (Optional[List[HostLogFile]]): Holds list of log files when requested.
-
-    """
-
-    def __init__(self, data):
+        """
         if type(data) != dict:
             raise NotADirectoryError('The data parameter must be ann dict, you sent a {}'.format(type(data)))
         else:
@@ -276,11 +275,7 @@ class DatabaseUsersPermissionsSpecs:
         Returns:
             dict: Representation of the object
         """
-        content = {
-            "databaseName": self.databaseName,
-            "roles": self.roles,
-            "username": self.username,
-        }
+        content = dict(databaseName=self.databaseName, roles=self.roles, username=self.username)
         if self.password:
             content["password"] = self.password
             content["awsIAMType"] = "NONE"

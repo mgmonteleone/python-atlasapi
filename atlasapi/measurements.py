@@ -71,7 +71,8 @@ class AtlasMeasurementTypes(_GetAll):
         mapped = 'MEMORY_MAPPED'
 
     class Network(_GetAll):
-        bytes_id = 'NETWORK_BYTES_IN'
+        bytes_id = 'NETWORK_BYTES_IN' #initial typo, kept for backwards compatibility
+        bytes_in = 'NETWORK_BYTES_IN'
         bytes_out = 'NETWORK_BYTES_OUT'
         num_requests = 'NETWORK_NUM_REQUESTS'
 

@@ -71,7 +71,7 @@ class AtlasMeasurementTypes(_GetAll):
         mapped = 'MEMORY_MAPPED'
 
     class Network(_GetAll):
-        bytes_id = 'NETWORK_BYTES_IN' #initial typo, kept for backwards compatibility
+        bytes_id = 'NETWORK_BYTES_IN'  # initial typo, kept for backwards compatibility
         bytes_in = 'NETWORK_BYTES_IN'
         bytes_out = 'NETWORK_BYTES_OUT'
         num_requests = 'NETWORK_NUM_REQUESTS'
@@ -215,6 +215,7 @@ class AtlasMeasurement(object):
                 granularity (AtlasGranularities): The granularity used for the measurement
                 measurements (List[AtlasMeasurementValue]): A list of the actual measurement values
             """
+
     def __init__(self, name, period, granularity, measurements=list()):
         self.name = name
         self.period = period
@@ -290,7 +291,7 @@ class AtlasMeasurement(object):
                     )
 
     def __hash__(self):
-        return hash(self.name+'-'+self.period)
+        return hash(self.name + '-' + self.period)
 
     def __eq__(self, other):
         """
@@ -299,6 +300,7 @@ class AtlasMeasurement(object):
         :return:
         """
         if isinstance(other, AtlasMeasurement):
-            return  ((self.name == other.name) and (self.period == other.period))
+            return ((self.name == other.name) and (self.period == other.period))
+
 
 OptionalAtlasMeasurement = NewType('OptionalAtlasMeasurement', Optional[AtlasMeasurement])

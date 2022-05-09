@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Matthew G. Monteleone
+# Copyright (c) 2022 Matthew G. Monteleone
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ Errors module
 Provides all specific Exceptions
 """
 
-from .settings import Settings
+from atlasapi.settings import Settings
 from pprint import pprint
 
 

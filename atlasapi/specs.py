@@ -28,8 +28,8 @@ from builtins import str
 
 from dateutil.parser import parse
 
-from atlas_types import OptionalFloat
-from lib import AtlasPeriods, AtlasGranularities, logger, _GetAll
+from atlasapi.atlas_types import OptionalFloat
+from atlasapi.lib import AtlasPeriods, AtlasGranularities, logger, _GetAll
 
 from atlasapi.settings import Settings
 from atlasapi.errors import ErrRole

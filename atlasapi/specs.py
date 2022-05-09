@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Matthew G. Monteleone
+# Copyright (c) 2022 Matthew G. Monteleone
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,12 +38,15 @@ from datetime import datetime
 from enum import Enum
 from dateutil import parser
 from atlasapi.atlas_types import *
-from typing import Optional, NewType, List, Any, Union, Iterable, BinaryIO, Tuple
+from typing import Optional, NewType, List, Any, Union, Iterable, BinaryIO, Tuple, Generator
 from datetime import datetime
 import isodate
 from atlasapi.lib import AtlasGranularities, AtlasPeriods, AtlasLogNames
 import logging
 from future import standard_library
+import humanfriendly as hf
+
+from statistics import mean
 
 standard_library.install_aliases()
 logger = logging.getLogger('Atlas.specs')
@@ -81,6 +84,21 @@ class HostLogFile(object):
         """
         self.log_file_binary = log_file_binary
         self.log_name = log_name
+
+
+class StatisticalValues:
+    def __init__(self, data_list: list):
+        self.samples: int = len(data_list)
+        self.mean: float = float(mean(data_list))
+        self.min: float = float(min(data_list))
+        self.max: float = float(max(data_list))
+
+
+class StatisticalValuesFriendly:
+    def __init__(self, data_list: list):
+        self.mean: str = hf.format_size(mean(data_list))
+        self.min: str = hf.format_size(min(data_list))
+        self.max: str = hf.format_size(max(data_list))
 
 class AtlasMeasurementTypes(_GetAll):
     """
@@ -283,7 +301,7 @@ class AtlasMeasurement(object):
         self._measurements: List[AtlasMeasurementValue] = measurements
 
     @property
-    def measurements(self):
+    def measurements(self) -> Iterable[AtlasMeasurementValue]:
         """
         Getter for the measurements.
 
@@ -349,6 +367,22 @@ class AtlasMeasurement(object):
         return dict(measurements=self._measurements, date_start=self.date_start, date_end=self.date_end, name=self.name,
                     period=self.period, granularity=self.granularity, measurements_count=self.measurements_count
                     )
+
+    @property
+    def measurement_stats(self) -> StatisticalValues:
+        """Returns a statistical info for measurement data"""
+        data_list = list()
+        for each_measurement in self.measurements:
+            data_list.append(each_measurement.value_float)
+        return StatisticalValues(data_list=data_list)
+
+    @property
+    def measurement_stats_friendly(self) -> StatisticalValuesFriendly:
+        """Returns a statistical info for measurement data"""
+        data_list = list()
+        for each_measurement in self.measurements:
+            data_list.append(each_measurement.value_float)
+        return StatisticalValuesFriendly(data_list=data_list)
 
     def __hash__(self):
         return hash(self.name + '-' + self.period)

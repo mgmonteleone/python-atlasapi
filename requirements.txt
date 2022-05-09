@@ -6,3 +6,4 @@ pytz
 coolname
 nose
 awspublicranges
+humanfriendly

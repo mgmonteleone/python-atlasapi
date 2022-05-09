@@ -19,7 +19,7 @@ Core module which provides access to MongoDB Atlas Cloud Provider APIs
 """
 from atlasapi.settings import Settings
 from atlasapi.network import Network
-from errors import *
+from atlasapi.errors import *
 
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta

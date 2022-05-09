@@ -17,19 +17,18 @@ Atlas module
 
 Core module which provides access to MongoDB Atlas Cloud Provider APIs
 """
-from .settings import Settings
-from .network import Network
-from .errors import *
+from atlasapi.settings import Settings
+from atlasapi.network import Network
+from errors import *
 
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
-from .specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, DatabaseUsersPermissionsSpecs
+from atlasapi.specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, DatabaseUsersPermissionsSpecs,\
+    OptionalAtlasMeasurement, AtlasMeasurement, AtlasMeasurementValue, AtlasMeasurementTypes
 from typing import Union, Iterator, List, Optional
-from .atlas_types import OptionalInt, OptionalBool, ListofDict
-from .clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
+from atlasapi.atlas_types import OptionalInt, OptionalBool, ListofDict
+from atlasapi.clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
     InstanceSizeName, AdvancedOptions, TLSProtocols
-from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement, \
-    OptionalAtlasMeasurement
 from atlasapi.events import atlas_event_factory, ListOfEvents
 import logging
 from typing import Union, Iterable, Set, BinaryIO, Generator, Iterator
@@ -532,6 +531,7 @@ class Atlas:
 
 
             This is done by parsing the hostnames of the hosts, so any changes to that logic will break this.
+            TODO: This is now broken.
 
             Returns:
                 Set[str}: A set of cluster names
@@ -571,7 +571,7 @@ class Atlas:
         def get_measurement_for_hosts(self, granularity: AtlasGranularities = AtlasGranularities.HOUR,
                                       period: AtlasPeriods = AtlasPeriods.WEEKS_1,
                                       measurement=AtlasMeasurementTypes.Cache.dirty, return_data: bool = False):
-            """Get  measurement(s) for all hosts in the host_list
+            """Get measurement(s) for all hosts in the host_list
 
 
                         Populates all hosts in the host_list with the requested metric.
@@ -589,31 +589,34 @@ class Atlas:
 
 
                             :param return_data:
-                            :rtype: List[AtlasMeasurement]
+                            :rtype: List[specs.AtlasMeasurement]
                             :type period: AtlasPeriods
                             :type granularity: AtlasGranularities
-                            :type measurement: AtlasMeasurementTypes
+                            :type measurement: specs.AtlasMeasurementTypes
                         """
 
             if not self.host_list:
                 raise (ValueError('Before retrieving measurements for hosts, you must retrieve the host list'
                                   ' by using one of the `fill_host_list`.'))
-
+            return_list = list()
             for each_host in self.host_list:
                 logger.info('Pulling measurements for {} hosts'.format(len(self.host_list)))
                 logger.info('Measurement: {}'.format(measurement.__str__()))
                 logger.info('Metric: {}'.format(granularity.__str__()))
                 logger.info('For Period: {}'.format(period.__str__()))
-                return_list = list()
                 try:
                     returned_data = self._get_measurement_for_host(each_host, granularity=granularity,
                                                                    period=period,
                                                                    measurement=measurement)
-                    return_list.append(returned_data)
+                    each_host.measurements = list(returned_data)
                 except Exception as e:
                     logger.error('An error occurred while retrieving metrics for host: {}.'
                                  'The error was {}'.format(each_host.hostname, e))
                     logger.warning('Will continue with next host. . . ')
+                return_list.append(each_host)
+            self.host_list_with_measurements = return_list
+            if return_data:
+                return return_list
 
         def get_log_for_host(self, host_obj: Host,
                              log_name: AtlasLogNames = AtlasLogNames.MONGODB,
@@ -779,14 +782,14 @@ class Atlas:
             Raises:
                 ErrPaginationLimits: Out of limits
 
-                :rtype: List[AtlasMeasurement]
+                :rtype: List[specs.AtlasMeasurement]
                 :type iterable: OptionalBool
                 :type itemsPerPage: OptionalInt
                 :type pageNum: OptionalInt
                 :type period: AtlasPeriods
                 :type granularity: AtlasGranularities
                 :type host_obj: Host
-                :type measurement: AtlasMeasurementTypes
+                :type measurement: specs.AtlasMeasurementTypes
 
             """
 
@@ -2032,8 +2035,8 @@ class AtlasPagination:
             # fetch the API
             try:
                 details = self.fetch(pageNum, self.itemsPerPage)
-            except Exception:
-                raise ErrPagination()
+            except Exception as e:
+                raise ErrPagination(e)
 
             # set the real total
             total = details["totalCount"]

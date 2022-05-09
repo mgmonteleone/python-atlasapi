@@ -20,8 +20,8 @@ Module which handles the basic network operations with the Atlas API>
 
 import requests
 from requests.auth import HTTPDigestAuth, HTTPBasicAuth
-from .settings import Settings
-from .errors import *
+from atlasapi.settings import Settings
+from atlasapi.errors import *
 import logging
 from json import dumps
 from io import BytesIO

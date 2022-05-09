@@ -18,7 +18,7 @@ Errors module
 Provides all specific Exceptions
 """
 
-from .settings import Settings
+from atlasapi.settings import Settings
 from pprint import pprint
 
 

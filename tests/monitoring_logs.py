@@ -18,7 +18,7 @@ USER = getenv('ATLAS_USER', None)
 API_KEY = getenv('ATLAS_KEY', None)
 GROUP_ID = getenv('ATLAS_GROUP', None)
 from atlasapi.lib import AtlasPeriods, AtlasUnits, AtlasGranularities
-from atlasapi.measurements import AtlasMeasurementTypes
+from specs import AtlasMeasurementTypes
 import csv
 if not USER or not API_KEY or not GROUP_ID:
     raise EnvironmentError('In order to run this smoke test you need ATLAS_USER, AND ATLAS_KEY env variables'

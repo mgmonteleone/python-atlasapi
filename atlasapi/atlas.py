@@ -568,9 +568,9 @@ class Atlas:
                     self.host_list[n] = host_obj
             self.logger.info("Added new host item")
 
-        def get_measurement_for_hosts(self, granularity: AtlasGranularities = AtlasGranularities.HOUR,
-                                      period: AtlasPeriods = AtlasPeriods.WEEKS_1,
-                                      measurement=AtlasMeasurementTypes.Cache.dirty, return_data: bool = False):
+        def get_measurement_for_hosts(self, granularity: Optional[AtlasGranularities] =None,
+                                      period: Optional[AtlasPeriods] = None,
+                                      measurement: Optional[AtlasMeasurementTypes] = None, return_data: bool = False):
             """Get measurement(s) for all hosts in the host_list
 
 
@@ -601,10 +601,11 @@ class Atlas:
             return_list = list()
             for each_host in self.host_list:
                 logger.info('Pulling measurements for {} hosts'.format(len(self.host_list)))
-                logger.info('Measurement: {}'.format(measurement.__str__()))
+                logger.info(f'Measurement: {measurement}')
                 logger.info('Metric: {}'.format(granularity.__str__()))
                 logger.info('For Period: {}'.format(period.__str__()))
                 try:
+                    logger.warning(f'The data  type of measurement is is {type(measurement)}')
                     returned_data = self._get_measurement_for_host(each_host, granularity=granularity,
                                                                    period=period,
                                                                    measurement=measurement)
@@ -747,9 +748,10 @@ class Atlas:
                 each_host.add_log_file(name=log_name, file=log_file)
                 yield each_host
 
-        def _get_measurement_for_host(self, host_obj: Host, granularity: AtlasGranularities = AtlasGranularities.HOUR,
-                                      period: AtlasPeriods = AtlasPeriods.WEEKS_1,
-                                      measurement: AtlasMeasurementTypes = AtlasMeasurementTypes.Cache.dirty,
+        def _get_measurement_for_host(self, host_obj: Host,
+                                      granularity: Optional[AtlasGranularities] = None,
+                                      period: Optional[AtlasPeriods] = None,
+                                      measurement: Optional[AtlasMeasurementTypes] = None,
                                       pageNum: int = Settings.pageNum,
                                       itemsPerPage: int = Settings.itemsPerPage,
                                       iterable: bool = True) -> Union[dict, Iterable[AtlasMeasurement]]:
@@ -795,11 +797,19 @@ class Atlas:
 
             # Check limits and raise an Exception if needed
             ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+            if measurement is None:
+                measurement = AtlasMeasurementTypes.Cache.dirty
+            if period is None:
+                period = AtlasPeriods.WEEKS_1
 
+            if granularity is None:
+                granularity = AtlasGranularities.HOUR
             # Check to see if we received a leaf or branch of the measurements
+            logger.warning(f'Measurement is: {measurement}')
+            logger.warning(f'Measurement object type is {type(measurement)}')
             try:
                 parent = super(measurement)
-                self.logger.info('We received a branch, whos parent is {}'.format(parent.__str__()))
+                self.logger.error('We received a branch, whos parent is {}'.format(parent.__str__()))
                 leaves = measurement.get_all()
                 measurement_list = list(leaves)
                 measurement = '&m='.join(measurement_list)
@@ -807,6 +817,17 @@ class Atlas:
                 self.logger.info('We received a leaf')
 
             # Build the URL
+
+            if isinstance(measurement,tuple):
+                logger.warning(f'Somehow got a tuple for measurement {measurement}. Need to get the str')
+                measurement: tuple = measurement[0]
+            if isinstance(granularity,tuple):
+                logger.warning(f'Somehow got a tuple for granularity {granularity}. Need to get the str')
+                granularity: tuple = granularity[0]
+            if isinstance(period, tuple):
+                logger.warning(f'Somehow got a tuple for period {period}. Need to get the str')
+                period: tuple = period[0]
+
             uri = Settings.api_resources["Monitoring and Logs"]["Get measurement for host"].format(
                 group_id=self.atlas.group,
                 host=host_obj.hostname,
@@ -815,6 +836,7 @@ class Atlas:
                 period=period,
                 measurement=measurement
             )
+            logger.warning(f'The URI used will be {uri}')
             # Build the request
             return_val = self.atlas.network.get(Settings.BASE_URL + uri)
 

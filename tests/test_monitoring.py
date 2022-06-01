@@ -77,14 +77,14 @@ class MeasurementTests(BaseTests):
         print(f'For {self.a.Hosts.host_list_with_measurements.__len__()} hosts:')
         for each in self.a.Hosts.host_list_with_measurements[0].measurements:
             print(f'For metric {each.name}')
-            self.assertIsInstance(each.measurement_stats_friendly, atlasapi.specs.StatisticalValuesFriendly)
-            print(f'Value is {each.measurement_stats_friendly.__dict__}')
+            self.assertIsInstance(each.measurement_stats_friendly_number, atlasapi.specs.StatisticalValuesFriendly)
+            print(f'Value is {each.measurement_stats_friendly_number.__dict__}')
             self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
 
-    test_03_measurement_stats.basic = True
+    test_04_measurement_stats_objects.basic = True
 
-    def test_04_measurement_stats_objects(self):
-        measurement = AtlasMeasurementTypes.QueryTargetingScanned.objects_per_returned,
+    def test_05_measurement_stats_objects_returned(self):
+        measurement = AtlasMeasurementTypes.QueryTargetingScanned.per_returned,
         granularity = AtlasGranularities.HOUR,
         period = AtlasPeriods.WEEKS_4
         self.a.Hosts.fill_host_list()
@@ -96,13 +96,13 @@ class MeasurementTests(BaseTests):
             self.assertIsInstance(each.measurement_stats_friendly_number, atlasapi.specs.StatisticalValuesFriendly)
             print(f'Value is {each.measurement_stats_friendly_number.__dict__}')
             print(f'For metric {each.name}')
-            self.assertIsInstance(each.measurement_stats_friendly, atlasapi.specs.StatisticalValuesFriendly)
-            print(f'Value is {each.measurement_stats_friendly.__dict__}')
+            self.assertIsInstance(each.measurement_stats_friendly_number, atlasapi.specs.StatisticalValuesFriendly)
+            print(f'Value is {each.measurement_stats_friendly_number.__dict__}')
             self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
 
-    test_04_measurement_stats_objects.basic = True
+    test_05_measurement_stats_objects_returned.basic = True
 
-    def test_05_measurement_stats_cache_bytes_into(self):
+    def test_06_measurement_stats_cache_bytes_into(self):
         measurement = AtlasMeasurementTypes.Cache.bytes_read,
         granularity = AtlasGranularities.HOUR,
         period = AtlasPeriods.WEEKS_4
@@ -113,12 +113,12 @@ class MeasurementTests(BaseTests):
         for each in self.a.Hosts.host_list_with_measurements[0].measurements:
             print(f'For metric {each.name}')
             self.assertIsInstance(each.measurement_stats_friendly_bytes, atlasapi.specs.StatisticalValuesFriendly)
-            print(f'Value is {each.measurement_stats_friendly_bytes.__dict__}')
+            print(f'👍Value is {each.measurement_stats_friendly_bytes.__dict__}')
             self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
 
-    test_05_measurement_stats_cache_bytes_into.basic = True
+    test_06_measurement_stats_cache_bytes_into.basic = True
 
-    def test_05_measurement_stats_cache_bytes_from(self):
+    def test_07_measurement_stats_cache_bytes_from(self):
         measurement = AtlasMeasurementTypes.Cache.bytes_written,
         granularity = AtlasGranularities.HOUR,
         period = AtlasPeriods.WEEKS_4
@@ -129,12 +129,12 @@ class MeasurementTests(BaseTests):
         for each in self.a.Hosts.host_list_with_measurements[0].measurements:
             print(f'For metric {each.name}')
             self.assertIsInstance(each.measurement_stats_friendly_bytes, atlasapi.specs.StatisticalValuesFriendly)
-            print(f'Value is {each.measurement_stats_friendly_bytes.__dict__}')
+            print(f'👍Value is {each.measurement_stats_friendly_bytes.__dict__}')
             self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
 
-    test_05_measurement_stats_cache_bytes_into.basic = True
+    test_07_measurement_stats_cache_bytes_from.basic = True
 
-    def test_06_measurement_stats_cache_dirty(self):
+    def test_08_measurement_stats_cache_dirty(self):
         measurement = AtlasMeasurementTypes.Cache.dirty,
         granularity = AtlasGranularities.HOUR,
         period = AtlasPeriods.WEEKS_4
@@ -145,12 +145,12 @@ class MeasurementTests(BaseTests):
         for each in self.a.Hosts.host_list_with_measurements[0].measurements:
             print(f'For metric {each.name}')
             self.assertIsInstance(each.measurement_stats_friendly_bytes, atlasapi.specs.StatisticalValuesFriendly)
-            print(f'Value is {each.measurement_stats_friendly_bytes.__dict__}')
+            print(f'👍Value is {each.measurement_stats_friendly_bytes.__dict__}')
             self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
 
-    test_06_measurement_stats_cache_dirty.basic = True
+    test_08_measurement_stats_cache_dirty.basic = True
 
-    def test_07_measurement_stats_cache_used(self):
+    def test_09_measurement_stats_cache_used(self):
         measurement = AtlasMeasurementTypes.Cache.used,
         granularity = AtlasGranularities.HOUR,
         period = AtlasPeriods.WEEKS_4
@@ -161,12 +161,12 @@ class MeasurementTests(BaseTests):
         for each in self.a.Hosts.host_list_with_measurements[0].measurements:
             print(f'For metric {each.name}')
             self.assertIsInstance(each.measurement_stats_friendly_bytes, atlasapi.specs.StatisticalValuesFriendly)
-            print(f'Value is {each.measurement_stats_friendly_bytes.__dict__}')
+            print(f'👍Value is {each.measurement_stats_friendly_bytes.__dict__}')
             self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
 
-    test_07_measurement_stats_cache_used.basic = True
+    test_09_measurement_stats_cache_used.basic = True
 
-    def test_08_measurement_stats_tickets(self):
+    def test_10_measurement_stats_tickets(self):
         measurements = [AtlasMeasurementTypes.TicketsAvailable.reads, AtlasMeasurementTypes.TicketsAvailable.writes]
         granularity = AtlasGranularities.HOUR,
         period = AtlasPeriods.WEEKS_4
@@ -177,12 +177,12 @@ class MeasurementTests(BaseTests):
             for each in self.a.Hosts.host_list_with_measurements[0].measurements:
                 print(f'For metric {each.name}')
                 self.assertIsInstance(each.measurement_stats_friendly_number, atlasapi.specs.StatisticalValuesFriendly)
-                print(f'Value is {each.measurement_stats_friendly_number.__dict__}')
+                print(f'👍Value is {each.measurement_stats_friendly_number.__dict__}')
                 self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
 
-    test_08_measurement_stats_tickets.basic = True
+    test_10_measurement_stats_tickets.basic = True
 
-    def test_09_measurement_stats_connections(self):
+    def test_11_measurement_stats_connections(self):
         measurements = [AtlasMeasurementTypes.connections]
         granularity = AtlasGranularities.HOUR,
         period = AtlasPeriods.WEEKS_4
@@ -193,9 +193,9 @@ class MeasurementTests(BaseTests):
             for each in self.a.Hosts.host_list_with_measurements[0].measurements:
                 print(f'For metric {each.name}')
                 self.assertIsInstance(each.measurement_stats_friendly_number, atlasapi.specs.StatisticalValuesFriendly)
-                print(f'Value is {each.measurement_stats_friendly_number.__dict__}')
+                print(f'👍Value is {each.measurement_stats_friendly_number.__dict__}')
                 self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
 
-    test_09_measurement_stats_connections.basic = True
+    test_11_measurement_stats_connections.basic = True
 
-    test_04_measurement_stats_objects.basic = True
+

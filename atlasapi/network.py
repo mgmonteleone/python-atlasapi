@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Matthew G. Monteleone
+# Copyright (c) 2022 Matthew G. Monteleone
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ Module which handles the basic network operations with the Atlas API>
 
 import requests
 from requests.auth import HTTPDigestAuth, HTTPBasicAuth
-from .settings import Settings
-from .errors import *
+from atlasapi.settings import Settings
+from atlasapi.errors import *
 import logging
 from json import dumps
 from io import BytesIO

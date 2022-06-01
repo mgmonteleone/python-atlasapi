@@ -77,3 +77,12 @@ Atlas._Projects
     :members:
     :undoc-members:
     :show-inheritance:
+
+
+Atlas._Organizations
+----------------
+
+.. autoclass:: atlasapi.atlas::Atlas._Organizations
+    :members:
+    :undoc-members:
+    :show-inheritance:

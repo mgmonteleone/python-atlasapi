@@ -1,4 +1,4 @@
-# Copyright (c) 2019 Matthew G. Monteleone
+# Copyright (c) 2022 Matthew G. Monteleone
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,19 +17,18 @@ Atlas module
 
 Core module which provides access to MongoDB Atlas Cloud Provider APIs
 """
-from .settings import Settings
-from .network import Network
-from .errors import *
+from atlasapi.settings import Settings
+from atlasapi.network import Network
+from atlasapi.errors import *
 
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
-from .specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, DatabaseUsersPermissionsSpecs
+from atlasapi.specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, DatabaseUsersPermissionsSpecs,\
+    OptionalAtlasMeasurement, AtlasMeasurement, AtlasMeasurementValue, AtlasMeasurementTypes
 from typing import Union, Iterator, List, Optional
-from .atlas_types import OptionalInt, OptionalBool, ListofDict
-from .clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
+from atlasapi.atlas_types import OptionalInt, OptionalBool, ListofDict
+from atlasapi.clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
     InstanceSizeName, AdvancedOptions, TLSProtocols
-from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement, \
-    OptionalAtlasMeasurement
 from atlasapi.events import atlas_event_factory, ListOfEvents
 import logging
 from typing import Union, Iterable, Set, BinaryIO, Generator, Iterator
@@ -45,6 +44,7 @@ from atlasapi.cloud_backup import CloudBackupSnapshot, CloudBackupRequest, Snaps
 from atlasapi.projects import Project, ProjectSettings
 from atlasapi.teams import Team, TeamRoles
 from atlasapi.atlas_users import AtlasUser
+from atlasapi.organizations import Organization
 from requests import get
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 import gzip
@@ -81,6 +81,7 @@ class Atlas:
         self.MaintenanceWindows = Atlas._MaintenanceWindows(self)
         self.CloudBackups = Atlas._CloudBackups(self)
         self.Projects = Atlas._Projects(self)
+        self.Organizations = Atlas._Organizations(self)
         if not self.group:
             self.logger.warning("Note! The Atlas client has been initialized without a Group/Project, some endpoints"
                                 "will not function without a Group or project.")
@@ -530,6 +531,7 @@ class Atlas:
 
 
             This is done by parsing the hostnames of the hosts, so any changes to that logic will break this.
+            TODO: This is now broken.
 
             Returns:
                 Set[str}: A set of cluster names
@@ -566,10 +568,10 @@ class Atlas:
                     self.host_list[n] = host_obj
             self.logger.info("Added new host item")
 
-        def get_measurement_for_hosts(self, granularity: AtlasGranularities = AtlasGranularities.HOUR,
-                                      period: AtlasPeriods = AtlasPeriods.WEEKS_1,
-                                      measurement=AtlasMeasurementTypes.Cache.dirty, return_data: bool = False):
-            """Get  measurement(s) for all hosts in the host_list
+        def get_measurement_for_hosts(self, granularity: Optional[AtlasGranularities] =None,
+                                      period: Optional[AtlasPeriods] = None,
+                                      measurement: Optional[AtlasMeasurementTypes] = None, return_data: bool = False):
+            """Get measurement(s) for all hosts in the host_list
 
 
                         Populates all hosts in the host_list with the requested metric.
@@ -587,31 +589,35 @@ class Atlas:
 
 
                             :param return_data:
-                            :rtype: List[AtlasMeasurement]
+                            :rtype: List[specs.AtlasMeasurement]
                             :type period: AtlasPeriods
                             :type granularity: AtlasGranularities
-                            :type measurement: AtlasMeasurementTypes
+                            :type measurement: specs.AtlasMeasurementTypes
                         """
 
             if not self.host_list:
                 raise (ValueError('Before retrieving measurements for hosts, you must retrieve the host list'
                                   ' by using one of the `fill_host_list`.'))
-
+            return_list = list()
             for each_host in self.host_list:
                 logger.info('Pulling measurements for {} hosts'.format(len(self.host_list)))
-                logger.info('Measurement: {}'.format(measurement.__str__()))
+                logger.info(f'Measurement: {measurement}')
                 logger.info('Metric: {}'.format(granularity.__str__()))
                 logger.info('For Period: {}'.format(period.__str__()))
-                return_list = list()
                 try:
+                    logger.warning(f'The data  type of measurement is is {type(measurement)}')
                     returned_data = self._get_measurement_for_host(each_host, granularity=granularity,
                                                                    period=period,
                                                                    measurement=measurement)
-                    return_list.append(returned_data)
+                    each_host.measurements = list(returned_data)
                 except Exception as e:
                     logger.error('An error occurred while retrieving metrics for host: {}.'
                                  'The error was {}'.format(each_host.hostname, e))
                     logger.warning('Will continue with next host. . . ')
+                return_list.append(each_host)
+            self.host_list_with_measurements = return_list
+            if return_data:
+                return return_list
 
         def get_log_for_host(self, host_obj: Host,
                              log_name: AtlasLogNames = AtlasLogNames.MONGODB,
@@ -742,9 +748,10 @@ class Atlas:
                 each_host.add_log_file(name=log_name, file=log_file)
                 yield each_host
 
-        def _get_measurement_for_host(self, host_obj: Host, granularity: AtlasGranularities = AtlasGranularities.HOUR,
-                                      period: AtlasPeriods = AtlasPeriods.WEEKS_1,
-                                      measurement: AtlasMeasurementTypes = AtlasMeasurementTypes.Cache.dirty,
+        def _get_measurement_for_host(self, host_obj: Host,
+                                      granularity: Optional[AtlasGranularities] = None,
+                                      period: Optional[AtlasPeriods] = None,
+                                      measurement: Optional[AtlasMeasurementTypes] = None,
                                       pageNum: int = Settings.pageNum,
                                       itemsPerPage: int = Settings.itemsPerPage,
                                       iterable: bool = True) -> Union[dict, Iterable[AtlasMeasurement]]:
@@ -777,24 +784,32 @@ class Atlas:
             Raises:
                 ErrPaginationLimits: Out of limits
 
-                :rtype: List[AtlasMeasurement]
+                :rtype: List[specs.AtlasMeasurement]
                 :type iterable: OptionalBool
                 :type itemsPerPage: OptionalInt
                 :type pageNum: OptionalInt
                 :type period: AtlasPeriods
                 :type granularity: AtlasGranularities
                 :type host_obj: Host
-                :type measurement: AtlasMeasurementTypes
+                :type measurement: specs.AtlasMeasurementTypes
 
             """
 
             # Check limits and raise an Exception if needed
             ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+            if measurement is None:
+                measurement = AtlasMeasurementTypes.Cache.dirty
+            if period is None:
+                period = AtlasPeriods.WEEKS_1
 
+            if granularity is None:
+                granularity = AtlasGranularities.HOUR
             # Check to see if we received a leaf or branch of the measurements
+            logger.warning(f'Measurement is: {measurement}')
+            logger.warning(f'Measurement object type is {type(measurement)}')
             try:
                 parent = super(measurement)
-                self.logger.info('We received a branch, whos parent is {}'.format(parent.__str__()))
+                self.logger.error('We received a branch, whos parent is {}'.format(parent.__str__()))
                 leaves = measurement.get_all()
                 measurement_list = list(leaves)
                 measurement = '&m='.join(measurement_list)
@@ -802,6 +817,17 @@ class Atlas:
                 self.logger.info('We received a leaf')
 
             # Build the URL
+
+            if isinstance(measurement,tuple):
+                logger.warning(f'Somehow got a tuple for measurement {measurement}. Need to get the str')
+                measurement: tuple = measurement[0]
+            if isinstance(granularity,tuple):
+                logger.warning(f'Somehow got a tuple for granularity {granularity}. Need to get the str')
+                granularity: tuple = granularity[0]
+            if isinstance(period, tuple):
+                logger.warning(f'Somehow got a tuple for period {period}. Need to get the str')
+                period: tuple = period[0]
+
             uri = Settings.api_resources["Monitoring and Logs"]["Get measurement for host"].format(
                 group_id=self.atlas.group,
                 host=host_obj.hostname,
@@ -810,6 +836,7 @@ class Atlas:
                 period=period,
                 measurement=measurement
             )
+            logger.warning(f'The URI used will be {uri}')
             # Build the request
             return_val = self.atlas.network.get(Settings.BASE_URL + uri)
 
@@ -1368,7 +1395,7 @@ class Atlas:
 
         def create_snapshot_for_cluster(self, cluster_name: str, retention_days: int = 7,
                                         description: str = None, as_obj: bool = True) -> Union[
-                                            CloudBackupSnapshot, dict]:
+            CloudBackupSnapshot, dict]:
             """
             Creates and on demand snapshot for the passed cluster
 
@@ -1401,7 +1428,7 @@ class Atlas:
                 return response
 
         def get_backup_snapshots_for_cluster(self, cluster_name: str, as_obj: bool = True) -> Union[
-                                                Iterable[CloudBackupSnapshot], Iterable[dict]]:
+            Iterable[CloudBackupSnapshot], Iterable[dict]]:
             """Get  backup snapshots for a cluster.
 
 
@@ -1897,6 +1924,104 @@ class Atlas:
                 raise e
             return ProjectSettings.from_dict(response)
 
+    class _Organizations:
+        """Atlas Organizations
+
+               see: https://www.mongodb.com/docs/atlas/reference/api/organizations/
+
+               TThe orgs resource provides access to manage Atlas organizations.
+
+               Args:
+                   atlas (Atlas): Atlas instance
+               """
+
+        def __init__(self, atlas):
+            self.atlas = atlas
+
+        def _get_orgs(self, org_name: str = None, org_id: str = None) -> tuple:
+            """Helper method for returning Org info from the API
+
+            Args:
+                org_name (str):  Organization name with which to filter the returned list. Performs a case-insensitive
+                 search for organizations which exactly match the specified name.
+                org_id (str): Specific org_id to return
+
+            Returns (tuple): A tuple with results(array of dicts) and total count(int)
+
+            """
+            uri = Settings.api_resources["Organizations"]["Orgs the authenticated user can access"]
+            if org_name:
+                uri = uri + f"?name={org_name}"
+            elif org_id:
+                uri = uri + f"{org_id}"
+
+            try:
+                response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
+            except Exception as e:
+                raise e
+
+            if not org_id:
+                result_list = response.get("results", [])
+                total_count = response.get("TotalCount", 0)
+            else:
+                result_list = [response]
+                total_count = 1
+
+            return result_list, total_count
+
+        @property
+        def organizations(self) -> Iterable[Organization]:
+            """All Organizations accessible by the current authed user/key
+            Gets all Organizations for which the authed key has access.
+
+
+            Returns (Iterable[Organization]): Yields Organization Objects.
+
+            """
+            result_list = self._get_orgs()[0]
+            for each in result_list:
+                yield Organization.from_dict(each)
+
+        def organization_by_name(self, org_name: str) -> Organization:
+            """Singe organization searched by name.
+
+            Args:
+                org_name: Organization name with which to filter the returned list. Performs a case-insensitive
+                 search for organizations which exactly match the specified name.
+
+            Returns (Organization): a single Organization object.
+
+            """
+            result = self._get_orgs(org_name=org_name)[0]
+            if isinstance(result, list):
+                return Organization.from_dict(result[0])
+            else:
+                return Organization.from_dict(result)
+
+        def organization_by_id(self, org_id: str) -> Organization:
+            """Single organization searched by org_id.
+
+            Args:
+                org_id (str):
+            Returns (Organization): a single Organization object.
+
+            """
+            result = self._get_orgs(org_id=org_id)
+            if isinstance(result[0], list):
+                logger.error("returning a list?")
+                return Organization.from_dict(result[0][0])
+            else:
+                return Organization.from_dict(result[0])
+
+        @property
+        def count(self) -> int:
+            """ Count of Organizations accessible by the authed user/key.
+
+            Returns (int):
+
+            """
+            return self._get_orgs()[1]
+
 
 class AtlasPagination:
     """Atlas Pagination Generic Implementation
@@ -1932,8 +2057,8 @@ class AtlasPagination:
             # fetch the API
             try:
                 details = self.fetch(pageNum, self.itemsPerPage)
-            except Exception:
-                raise ErrPagination()
+            except Exception as e:
+                raise ErrPagination(e)
 
             # set the real total
             total = details["totalCount"]

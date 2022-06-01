@@ -54,6 +54,19 @@ logger = logging.getLogger('Atlas.specs')
 
 # etc., as needed
 
+
+def clean_list(data_list: list) -> list:
+    """Returns a list with any none values removed
+
+    Args:
+        data_list (list): The list to be cleaned
+
+    Returns (list): The list cleaned of None values.
+
+    """
+    return list(filter(None, data_list))
+
+
 class IAMType(Enum):
     NONE = 'None'  # The user does not use AWS IAM credentials.
     USER = 'USER'  # New database user has AWS IAM user credentials.
@@ -88,17 +101,30 @@ class HostLogFile(object):
 
 class StatisticalValues:
     def __init__(self, data_list: list):
-        self.samples: int = len(data_list)
-        self.mean: float = float(mean(data_list))
-        self.min: float = float(min(data_list))
-        self.max: float = float(max(data_list))
+        self.samples: int = len(clean_list(data_list))
+        self.mean: float = float(mean(clean_list(data_list)))
+        self.min: float = float(min(clean_list(data_list)))
+        self.max: float = float(max(clean_list(data_list)))
 
 
 class StatisticalValuesFriendly:
-    def __init__(self, data_list: list):
-        self.mean: str = hf.format_size(mean(data_list))
-        self.min: str = hf.format_size(min(data_list))
-        self.max: str = hf.format_size(max(data_list))
+    def __init__(self, data_list: list, data_type: str = None) -> None:
+        """Returns human readable values for stats
+
+        Args:
+            data_list:
+            data_type: The datatype either bytes or number
+        """
+        if data_type is None:
+            data_type = 'bytes'
+        if data_type == 'bytes':
+            self.mean: str = hf.format_size(mean(clean_list(data_list)))
+            self.min: str = hf.format_size(min(clean_list(data_list)))
+            self.max: str = hf.format_size(max(clean_list(data_list)))
+        else:
+            self.mean: str = hf.format_number(mean(clean_list(data_list)))
+            self.min: str = hf.format_number(min(clean_list(data_list)))
+            self.max: str = hf.format_number(max(clean_list(data_list)))
 
 class AtlasMeasurementTypes(_GetAll):
     """
@@ -377,12 +403,20 @@ class AtlasMeasurement(object):
         return StatisticalValues(data_list=data_list)
 
     @property
-    def measurement_stats_friendly(self) -> StatisticalValuesFriendly:
-        """Returns a statistical info for measurement data"""
+    def measurement_stats_friendly_bytes(self) -> StatisticalValuesFriendly:
+        """Returns  statistical info for measurement data in friendly bytes format"""
         data_list = list()
         for each_measurement in self.measurements:
             data_list.append(each_measurement.value_float)
         return StatisticalValuesFriendly(data_list=data_list)
+
+    @property
+    def measurement_stats_friendly_number(self) -> StatisticalValuesFriendly:
+        """Returns  statistical info for measurement data in friendly bytes format"""
+        data_list = list()
+        for each_measurement in self.measurements:
+            data_list.append(each_measurement.value_float)
+        return StatisticalValuesFriendly(data_list=data_list,data_type='number')
 
     def __hash__(self):
         return hash(self.name + '-' + self.period)

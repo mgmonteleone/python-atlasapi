@@ -605,7 +605,7 @@ class Atlas:
                 logger.info('Metric: {}'.format(granularity.__str__()))
                 logger.info('For Period: {}'.format(period.__str__()))
                 try:
-                    logger.warning(f'The data  type of measurement is is {type(measurement)}')
+                    logger.debug(f'The data type of measurement is is {type(measurement)}')
                     returned_data = self._get_measurement_for_host(each_host, granularity=granularity,
                                                                    period=period,
                                                                    measurement=measurement)
@@ -805,8 +805,8 @@ class Atlas:
             if granularity is None:
                 granularity = AtlasGranularities.HOUR
             # Check to see if we received a leaf or branch of the measurements
-            logger.warning(f'Measurement is: {measurement}')
-            logger.warning(f'Measurement object type is {type(measurement)}')
+            logger.debug(f'Measurement is: {measurement}')
+            logger.debug(f'Measurement object type is {type(measurement)}')
             try:
                 parent = super(measurement)
                 self.logger.error('We received a branch, whos parent is {}'.format(parent.__str__()))
@@ -819,13 +819,13 @@ class Atlas:
             # Build the URL
 
             if isinstance(measurement,tuple):
-                logger.warning(f'Somehow got a tuple for measurement {measurement}. Need to get the str')
+                logger.debug(f'Somehow got a tuple for measurement {measurement}. Need to get the str')
                 measurement: tuple = measurement[0]
             if isinstance(granularity,tuple):
-                logger.warning(f'Somehow got a tuple for granularity {granularity}. Need to get the str')
+                logger.info(f'Somehow got a tuple for granularity {granularity}. Need to get the str')
                 granularity: tuple = granularity[0]
             if isinstance(period, tuple):
-                logger.warning(f'Somehow got a tuple for period {period}. Need to get the str')
+                logger.debug(f'Somehow got a tuple for period {period}. Need to get the str')
                 period: tuple = period[0]
 
             uri = Settings.api_resources["Monitoring and Logs"]["Get measurement for host"].format(
@@ -836,7 +836,7 @@ class Atlas:
                 period=period,
                 measurement=measurement
             )
-            logger.warning(f'The URI used will be {uri}')
+            logger.debug(f'The URI used will be {uri}')
             # Build the request
             return_val = self.atlas.network.get(Settings.BASE_URL + uri)
 

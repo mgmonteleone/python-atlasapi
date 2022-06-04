@@ -45,7 +45,7 @@ from atlasapi.lib import AtlasGranularities, AtlasPeriods, AtlasLogNames
 import logging
 from future import standard_library
 import humanfriendly as hf
-
+from logging import Logger
 from statistics import mean
 
 standard_library.install_aliases()

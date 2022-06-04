@@ -49,7 +49,7 @@ import humanfriendly as hf
 from statistics import mean
 
 standard_library.install_aliases()
-logger = logging.getLogger('Atlas.specs')
+logger: Logger = logging.getLogger('Atlas.specs')
 
 
 # etc., as needed
@@ -125,6 +125,7 @@ class StatisticalValuesFriendly:
             self.mean: str = hf.format_number(mean(clean_list(data_list)))
             self.min: str = hf.format_number(min(clean_list(data_list)))
             self.max: str = hf.format_number(max(clean_list(data_list)))
+
 
 class AtlasMeasurementTypes(_GetAll):
     """
@@ -252,6 +253,7 @@ class AtlasMeasurementTypes(_GetAll):
             guest = 'SYSTEM_NORMALIZED_CPU_GUEST'
             steal = 'SYSTEM_NORMALIZED_CPU_STEAL'
 
+
 class AtlasMeasurementValue(object):
     def __init__(self, value_dict: dict):
         """
@@ -277,6 +279,7 @@ class AtlasMeasurementValue(object):
             logger.info('Value is none.')
             self.value = None
 
+    # noinspection PyBroadException
     @property
     def value_int(self) -> Optional[int]:
         try:
@@ -318,7 +321,7 @@ class AtlasMeasurement(object):
             """
 
     def __init__(self, name: AtlasMeasurementTypes, period: AtlasPeriods,
-                 granularity: AtlasGranularities, measurements: List[AtlasMeasurementValue]=None):
+                 granularity: AtlasGranularities, measurements: List[AtlasMeasurementValue] = None):
         if measurements is None:
             measurements = list()
         self.name: AtlasMeasurementTypes = name
@@ -416,7 +419,7 @@ class AtlasMeasurement(object):
         data_list = list()
         for each_measurement in self.measurements:
             data_list.append(each_measurement.value_float)
-        return StatisticalValuesFriendly(data_list=data_list,data_type='number')
+        return StatisticalValuesFriendly(data_list=data_list, data_type='number')
 
     def __hash__(self):
         return hash(self.name + '-' + self.period)
@@ -429,7 +432,6 @@ class AtlasMeasurement(object):
         """
         if isinstance(other, AtlasMeasurement):
             return ((self.name == other.name) and (self.period == other.period))
-
 
 
 ListOfAtlasMeasurementValues = NewType('ListOfAtlasMeasurementValues', List[Optional[AtlasMeasurementValue]])
@@ -528,12 +530,12 @@ class Host(object):
         # Check to see if we received a leaf or branch of the measurements
         try:
             parent = super(measurement)
-            self.logger.info('We received a branch, whos parent is {}'.format(parent.__str__()))
+            logger.info('We received a branch, whos parent is {}'.format(parent.__str__()))
             leaves = measurement.get_all()
             measurement_list = list(leaves)
             measurement = '&m='.join(measurement_list)
         except TypeError:
-            self.logger.info('We received a leaf')
+            logger.info('We received a leaf')
 
         # Build the URL
         uri = Settings.api_resources["Monitoring and Logs"]["Get measurement for host"].format(
@@ -591,7 +593,6 @@ class Host(object):
 
 
 ListOfHosts = NewType('ListOfHosts', List[Optional[Host]])
-
 
 
 class RoleSpecs:
@@ -682,6 +683,8 @@ class DatabaseUsersPermissionsSpecs:
             :param roleName:
             :param databaseName:
             :type collectionName: str
+
+        TODO: Need to test if this works correctly, looks like their may be a type problem.
         """
         role = {"databaseName": databaseName,
                 "roleName": roleName}
@@ -703,6 +706,7 @@ class DatabaseUsersPermissionsSpecs:
         """Remove multiple roles
 
         Args:
+            collectionName (str):
             databaseName (str): Database Name
             roleNames (list of RoleSpecs): roles
 
@@ -770,8 +774,3 @@ class AlertStatusSpec:
     TRACKING = "TRACKING"
     OPEN = "OPEN"
     CLOSED = "CLOSED"
-
-
-
-
-

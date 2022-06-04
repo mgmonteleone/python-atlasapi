@@ -14,13 +14,21 @@
 
 from isodate import Duration, duration_isoformat, parse_datetime
 from isodate.isoerror import ISO8601Error
-from typing import Iterator
+from typing import Iterator, Union
 import logging
 from enum import Enum
 from datetime import datetime
 
 logger = logging.getLogger('atlasapi.lib')
 
+
+def fix_enums(obj):
+    if isinstance(obj, tuple):
+        logger.debug(f'Somehow got a tuple, need to get the str')
+        return  obj[0]
+    else:
+        logger.debug('We did not receive a tuple')
+        return obj
 
 class AtlasLogNames(Enum):
     """

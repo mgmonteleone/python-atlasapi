@@ -466,11 +466,12 @@ class Host(object):
         if type(data) != dict:
             raise NotADirectoryError('The data parameter must be ann dict, you sent a {}'.format(type(data)))
         else:
+
             try:
                 self.created: datetime = parser.parse(data.get("created", None))
             except (ValueError, OverflowError):
                 self.created = data.get("created", None)
-            self.group_id: str = data.get("group_id", None)
+            self.group_id: str = data.get("groupId", None)
             self.hostname: str = data.get("hostname", None)
             self.hostname_alias: str = data.get("userAlias", self.hostname)
             self.id: str = data.get("id", None)
@@ -486,11 +487,10 @@ class Host(object):
             self.cluster_name: str = self.hostname_alias.split('-')[0]
             self.log_files: Optional[List[HostLogFile]] = None
 
-    def get_measurement_for_host(self, granularity: AtlasGranularities = AtlasGranularities.HOUR,
-                                 period: AtlasPeriods = AtlasPeriods.WEEKS_1,
-                                 measurement: AtlasMeasurementTypes = AtlasMeasurementTypes.Cache.dirty,
-                                 pageNum: int = Settings.pageNum,
-                                 itemsPerPage: int = Settings.itemsPerPage,
+
+    def get_measurement_for_host(self, atlas_obj,  granularity: Optional[AtlasGranularities] = None,
+                                 period: Optional[AtlasPeriods] = None,
+                                 measurement: Optional[AtlasMeasurementTypes] = None,
                                  iterable: bool = True) -> Union[dict, Iterable[AtlasMeasurement]]:
         """Get  measurement(s) for a host
 
@@ -509,48 +509,58 @@ class Host(object):
             granularity (AtlasGranularities): the desired granularity
             period (AtlasPeriods): The desired period
             measurement (AtlasMeasurementTypes) : The desired measurement or Measurement class
-            pageNum (int): Page number
-            itemsPerPage (int): Number of Users per Page
             iterable (bool): To return an iterable high level object instead of a low level API response
 
         Returns:
              Iterable[AtlasMeasurement] or dict: Iterable object representing this function OR Response payload
 
         Raises:
-            ErrPaginationLimits: Out of limits
 
 
         """
 
-        # Check limits and raise an Exception if needed
-        ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+        # Set default
+        if measurement is None:
+            measurement = AtlasMeasurementTypes.Cache.dirty
+            logger.info(f'The measurement is {measurement}')
+        if period is None:
+            period = AtlasPeriods.WEEKS_1
+        logger.info(f'The granularity is {granularity}')
+
+        if granularity is None:
+            granularity = AtlasGranularities.HOUR
+        logger.info(f'The granularity is {granularity}')
 
         # Check to see if we received a leaf or branch of the measurements
         try:
             parent = super(measurement)
-            self.logger.info('We received a branch, whos parent is {}'.format(parent.__str__()))
+            logger.info('We received a branch, whos parent is {}'.format(parent.__str__()))
             leaves = measurement.get_all()
             measurement_list = list(leaves)
             measurement = '&m='.join(measurement_list)
         except TypeError:
-            self.logger.info('We received a leaf')
+            logger.info('We received a leaf')
 
         # Build the URL
         uri = Settings.api_resources["Monitoring and Logs"]["Get measurement for host"].format(
-            group_id=self.atlas.group,
-            host=host_obj.hostname,
-            port=host_obj.port,
+            group_id=self.group_id,
+            host=self.hostname,
+            port=self.port,
             granularity=granularity,
             period=period,
             measurement=measurement
         )
+
+
+
+
         # Build the request
-        return_val = self.atlas.network.get(Settings.BASE_URL + uri)
+        return_val = atlas_obj.network.get(Settings.BASE_URL + uri)
         measurement_obj = None
         if iterable:
             measurements = return_val.get('measurements')
             measurements_count = len(measurements)
-            self.logger.info('There are {} measurements.'.format(measurements_count))
+            logger.info('There are {} measurements.'.format(measurements_count))
 
             for each in measurements:
                 measurement_obj = AtlasMeasurement(name=each.get('name'),

@@ -48,6 +48,7 @@ from atlasapi.organizations import Organization
 from requests import get
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 import gzip
+from atlasapi.lib import fix_enums
 
 logger = logging.getLogger('Atlas')
 
@@ -568,9 +569,11 @@ class Atlas:
                     self.host_list[n] = host_obj
             self.logger.info("Added new host item")
 
-        def get_measurement_for_hosts(self, granularity: Optional[AtlasGranularities] =None,
+        def get_measurement_for_hosts(self,
+                                      granularity: Optional[AtlasGranularities] =None,
                                       period: Optional[AtlasPeriods] = None,
-                                      measurement: Optional[AtlasMeasurementTypes] = None, return_data: bool = False):
+                                      measurement: Optional[AtlasMeasurementTypes] = None,
+                                      return_data: bool = False):
             """Get measurement(s) for all hosts in the host_list
 
 
@@ -807,6 +810,18 @@ class Atlas:
             # Check to see if we received a leaf or branch of the measurements
             logger.debug(f'Measurement is: {measurement}')
             logger.debug(f'Measurement object type is {type(measurement)}')
+
+            # fix up the strange tuple issue
+
+
+            if isinstance(granularity,tuple):
+                logger.info(f'Somehow got a tuple for granularity {granularity}. Need to get the str')
+                granularity: tuple = granularity[0]
+            if isinstance(period, tuple):
+                logger.debug(f'Somehow got a tuple for period {period}. Need to get the str')
+                period: tuple = period[0]
+
+
             try:
                 parent = super(measurement)
                 self.logger.error('We received a branch, whos parent is {}'.format(parent.__str__()))
@@ -818,23 +833,13 @@ class Atlas:
 
             # Build the URL
 
-            if isinstance(measurement,tuple):
-                logger.debug(f'Somehow got a tuple for measurement {measurement}. Need to get the str')
-                measurement: tuple = measurement[0]
-            if isinstance(granularity,tuple):
-                logger.info(f'Somehow got a tuple for granularity {granularity}. Need to get the str')
-                granularity: tuple = granularity[0]
-            if isinstance(period, tuple):
-                logger.debug(f'Somehow got a tuple for period {period}. Need to get the str')
-                period: tuple = period[0]
-
             uri = Settings.api_resources["Monitoring and Logs"]["Get measurement for host"].format(
                 group_id=self.atlas.group,
                 host=host_obj.hostname,
                 port=host_obj.port,
-                granularity=granularity,
-                period=period,
-                measurement=measurement
+                granularity=fix_enums(granularity),
+                period=fix_enums(period),
+                measurement=fix_enums(measurement)
             )
             logger.debug(f'The URI used will be {uri}')
             # Build the request

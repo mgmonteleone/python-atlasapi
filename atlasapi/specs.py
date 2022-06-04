@@ -472,7 +472,7 @@ class Host(object):
                 self.created: datetime = parser.parse(data.get("created", None))
             except (ValueError, OverflowError):
                 self.created = data.get("created", None)
-            self.group_id: str = data.get("group_id", None)
+            self.group_id: str = data.get("groupId", None)
             self.hostname: str = data.get("hostname", None)
             self.hostname_alias: str = data.get("userAlias", self.hostname)
             self.id: str = data.get("id", None)

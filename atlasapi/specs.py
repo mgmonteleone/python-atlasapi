@@ -45,11 +45,11 @@ from atlasapi.lib import AtlasGranularities, AtlasPeriods, AtlasLogNames
 import logging
 from future import standard_library
 import humanfriendly as hf
-
+from logging import Logger
 from statistics import mean
 
 standard_library.install_aliases()
-logger = logging.getLogger('Atlas.specs')
+logger: Logger = logging.getLogger('Atlas.specs')
 
 
 # etc., as needed
@@ -125,6 +125,7 @@ class StatisticalValuesFriendly:
             self.mean: str = hf.format_number(mean(clean_list(data_list)))
             self.min: str = hf.format_number(min(clean_list(data_list)))
             self.max: str = hf.format_number(max(clean_list(data_list)))
+
 
 class AtlasMeasurementTypes(_GetAll):
     """
@@ -252,6 +253,7 @@ class AtlasMeasurementTypes(_GetAll):
             guest = 'SYSTEM_NORMALIZED_CPU_GUEST'
             steal = 'SYSTEM_NORMALIZED_CPU_STEAL'
 
+
 class AtlasMeasurementValue(object):
     def __init__(self, value_dict: dict):
         """
@@ -277,6 +279,7 @@ class AtlasMeasurementValue(object):
             logger.info('Value is none.')
             self.value = None
 
+    # noinspection PyBroadException
     @property
     def value_int(self) -> Optional[int]:
         try:
@@ -318,7 +321,7 @@ class AtlasMeasurement(object):
             """
 
     def __init__(self, name: AtlasMeasurementTypes, period: AtlasPeriods,
-                 granularity: AtlasGranularities, measurements: List[AtlasMeasurementValue]=None):
+                 granularity: AtlasGranularities, measurements: List[AtlasMeasurementValue] = None):
         if measurements is None:
             measurements = list()
         self.name: AtlasMeasurementTypes = name
@@ -416,7 +419,7 @@ class AtlasMeasurement(object):
         data_list = list()
         for each_measurement in self.measurements:
             data_list.append(each_measurement.value_float)
-        return StatisticalValuesFriendly(data_list=data_list,data_type='number')
+        return StatisticalValuesFriendly(data_list=data_list, data_type='number')
 
     def __hash__(self):
         return hash(self.name + '-' + self.period)
@@ -429,7 +432,6 @@ class AtlasMeasurement(object):
         """
         if isinstance(other, AtlasMeasurement):
             return ((self.name == other.name) and (self.period == other.period))
-
 
 
 ListOfAtlasMeasurementValues = NewType('ListOfAtlasMeasurementValues', List[Optional[AtlasMeasurementValue]])
@@ -470,7 +472,7 @@ class Host(object):
                 self.created: datetime = parser.parse(data.get("created", None))
             except (ValueError, OverflowError):
                 self.created = data.get("created", None)
-            self.group_id: str = data.get("group_id", None)
+            self.group_id: str = data.get("groupId", None)
             self.hostname: str = data.get("hostname", None)
             self.hostname_alias: str = data.get("userAlias", self.hostname)
             self.id: str = data.get("id", None)
@@ -486,11 +488,9 @@ class Host(object):
             self.cluster_name: str = self.hostname_alias.split('-')[0]
             self.log_files: Optional[List[HostLogFile]] = None
 
-    def get_measurement_for_host(self, granularity: AtlasGranularities = AtlasGranularities.HOUR,
-                                 period: AtlasPeriods = AtlasPeriods.WEEKS_1,
-                                 measurement: AtlasMeasurementTypes = AtlasMeasurementTypes.Cache.dirty,
-                                 pageNum: int = Settings.pageNum,
-                                 itemsPerPage: int = Settings.itemsPerPage,
+    def get_measurement_for_host(self, atlas_obj, granularity: Optional[AtlasGranularities] = None,
+                                 period: Optional[AtlasPeriods] = None,
+                                 measurement: Optional[AtlasMeasurementTypes] = None,
                                  iterable: bool = True) -> Union[dict, Iterable[AtlasMeasurement]]:
         """Get  measurement(s) for a host
 
@@ -509,48 +509,55 @@ class Host(object):
             granularity (AtlasGranularities): the desired granularity
             period (AtlasPeriods): The desired period
             measurement (AtlasMeasurementTypes) : The desired measurement or Measurement class
-            pageNum (int): Page number
-            itemsPerPage (int): Number of Users per Page
             iterable (bool): To return an iterable high level object instead of a low level API response
 
         Returns:
              Iterable[AtlasMeasurement] or dict: Iterable object representing this function OR Response payload
 
         Raises:
-            ErrPaginationLimits: Out of limits
 
 
         """
 
-        # Check limits and raise an Exception if needed
-        ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+        # Set default
+        if measurement is None:
+            measurement = AtlasMeasurementTypes.Cache.dirty
+            logger.info(f'The measurement is {measurement}')
+        if period is None:
+            period = AtlasPeriods.WEEKS_1
+        logger.info(f'The granularity is {granularity}')
+
+        if granularity is None:
+            granularity = AtlasGranularities.HOUR
+        logger.info(f'The granularity is {granularity}')
 
         # Check to see if we received a leaf or branch of the measurements
         try:
             parent = super(measurement)
-            self.logger.info('We received a branch, whos parent is {}'.format(parent.__str__()))
+            logger.info('We received a branch, whos parent is {}'.format(parent.__str__()))
             leaves = measurement.get_all()
             measurement_list = list(leaves)
             measurement = '&m='.join(measurement_list)
         except TypeError:
-            self.logger.info('We received a leaf')
+            logger.info('We received a leaf')
 
         # Build the URL
         uri = Settings.api_resources["Monitoring and Logs"]["Get measurement for host"].format(
-            group_id=self.atlas.group,
-            host=host_obj.hostname,
-            port=host_obj.port,
+            group_id=self.group_id,
+            host=self.hostname,
+            port=self.port,
             granularity=granularity,
             period=period,
             measurement=measurement
         )
+
         # Build the request
-        return_val = self.atlas.network.get(Settings.BASE_URL + uri)
+        return_val = atlas_obj.network.get(Settings.BASE_URL + uri)
         measurement_obj = None
         if iterable:
             measurements = return_val.get('measurements')
             measurements_count = len(measurements)
-            self.logger.info('There are {} measurements.'.format(measurements_count))
+            logger.info('There are {} measurements.'.format(measurements_count))
 
             for each in measurements:
                 measurement_obj = AtlasMeasurement(name=each.get('name'),
@@ -591,7 +598,6 @@ class Host(object):
 
 
 ListOfHosts = NewType('ListOfHosts', List[Optional[Host]])
-
 
 
 class RoleSpecs:
@@ -682,6 +688,8 @@ class DatabaseUsersPermissionsSpecs:
             :param roleName:
             :param databaseName:
             :type collectionName: str
+
+        TODO: Need to test if this works correctly, looks like their may be a type problem.
         """
         role = {"databaseName": databaseName,
                 "roleName": roleName}
@@ -703,6 +711,7 @@ class DatabaseUsersPermissionsSpecs:
         """Remove multiple roles
 
         Args:
+            collectionName (str):
             databaseName (str): Database Name
             roleNames (list of RoleSpecs): roles
 
@@ -770,8 +779,3 @@ class AlertStatusSpec:
     TRACKING = "TRACKING"
     OPEN = "OPEN"
     CLOSED = "CLOSED"
-
-
-
-
-

@@ -14,7 +14,7 @@ import logging
 from time import sleep
 from atlasapi.lib import AtlasUnits, ClusterType
 from atlasapi.specs import AtlasMeasurement, Host, AtlasPeriods, AtlasGranularities, AtlasMeasurementTypes,\
-    AtlasMeasurementValue
+    AtlasMeasurementValue, ReplicaSetTypes
 from io import BytesIO
 from datetime import datetime, timedelta
 
@@ -223,3 +223,11 @@ class MeasurementTests(BaseTests):
 
 
     test_13_get_multiple_metrics_at_once_for_host.basic = True
+
+    def test_14_return_primaries(self):
+        self.a.Hosts.fill_host_list()
+        for each_host in self.a.Hosts.host_list_primaries:
+            print(f'Cluster: {each_host.cluster_name}, Host: {each_host.hostname}, is type: {each_host.type}')
+            self.assertEqual(each_host.type, ReplicaSetTypes.REPLICA_PRIMARY)
+
+    test_14_return_primaries.basic = True

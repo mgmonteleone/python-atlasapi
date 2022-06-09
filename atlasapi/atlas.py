@@ -24,7 +24,7 @@ from atlasapi.errors import *
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 from atlasapi.specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, DatabaseUsersPermissionsSpecs,\
-    OptionalAtlasMeasurement, AtlasMeasurement, AtlasMeasurementValue, AtlasMeasurementTypes
+    OptionalAtlasMeasurement, AtlasMeasurement, AtlasMeasurementValue, AtlasMeasurementTypes, ReplicaSetTypes
 from typing import Union, Iterator, List, Optional
 from atlasapi.atlas_types import OptionalInt, OptionalBool, ListofDict
 from atlasapi.clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
@@ -529,10 +529,6 @@ class Atlas:
             """
             Returns a list of clusters found in the hosts for this group.
 
-
-            This is done by parsing the hostnames of the hosts, so any changes to that logic will break this.
-            TODO: This is now broken.
-
             Returns:
                 Set[str}: A set of cluster names
             """
@@ -567,6 +563,16 @@ class Atlas:
                 if i == host_obj:
                     self.host_list[n] = host_obj
             self.logger.info("Added new host item")
+
+        @property
+        def host_list_primaries(self) -> Iterable[Host]:
+            """Yields only hosts which are currently primary.
+
+            """
+            for each_host in self.host_list:
+                if each_host.type == ReplicaSetTypes.REPLICA_PRIMARY:
+                    yield each_host
+
 
         def get_measurement_for_hosts(self, granularity: Optional[AtlasGranularities] =None,
                                       period: Optional[AtlasPeriods] = None,

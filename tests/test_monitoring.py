@@ -13,7 +13,7 @@ from tests import BaseTests
 import logging
 from time import sleep
 from atlasapi.lib import AtlasUnits, ClusterType
-from atlasapi.specs import AtlasMeasurement, Host, AtlasPeriods, AtlasGranularities, AtlasMeasurementTypes,\
+from atlasapi.specs import AtlasMeasurement, Host, AtlasPeriods, AtlasGranularities, AtlasMeasurementTypes, \
     AtlasMeasurementValue, ReplicaSetTypes
 from io import BytesIO
 from datetime import datetime, timedelta
@@ -214,13 +214,11 @@ class MeasurementTests(BaseTests):
     def test_13_get_multiple_metrics_at_once_for_host(self):
         self.a.Hosts.fill_host_list()
         test_host: Host = self.a.Hosts.host_list[0]
-        measurements = test_host.get_measurement_for_host(atlas_obj=self.a,measurement=AtlasMeasurementTypes.Cache)
+        measurements = test_host.get_measurement_for_host(atlas_obj=self.a, measurement=AtlasMeasurementTypes.Cache)
         for each in measurements:
             self.assertIsInstance(each, AtlasMeasurement)
             for each_one in each.measurements:
                 self.assertIsInstance(each_one, AtlasMeasurementValue)
-
-
 
     test_13_get_multiple_metrics_at_once_for_host.basic = True
 
@@ -231,3 +229,11 @@ class MeasurementTests(BaseTests):
             self.assertEqual(each_host.type, ReplicaSetTypes.REPLICA_PRIMARY)
 
     test_14_return_primaries.basic = True
+
+    def test_15_return_secondaries(self):
+        self.a.Hosts.fill_host_list()
+        for each_host in self.a.Hosts.host_list_secondaries:
+            print(f'Cluster: {each_host.cluster_name}, Host: {each_host.hostname}, is type: {each_host.type}')
+            self.assertEqual(each_host.type, ReplicaSetTypes.REPLICA_SECONDARY)
+
+    test_15_return_secondaries.basic = True

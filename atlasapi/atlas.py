@@ -573,6 +573,15 @@ class Atlas:
                 if each_host.type == ReplicaSetTypes.REPLICA_PRIMARY:
                     yield each_host
 
+        @property
+        def host_list_secondaries(self) -> Iterable[Host]:
+            """Yields only hosts which are currently secondaries.
+
+            """
+            for each_host in self.host_list:
+                if each_host.type == ReplicaSetTypes.REPLICA_SECONDARY:
+                    yield each_host
+
 
         def get_measurement_for_hosts(self, granularity: Optional[AtlasGranularities] =None,
                                       period: Optional[AtlasPeriods] = None,

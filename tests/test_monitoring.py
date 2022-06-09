@@ -237,3 +237,18 @@ class MeasurementTests(BaseTests):
             self.assertEqual(each_host.type, ReplicaSetTypes.REPLICA_SECONDARY)
 
     test_15_return_secondaries.basic = True
+
+    def test_16_issue_98_metric_name_write(self):
+        measurements = [AtlasMeasurementTypes.TicketsAvailable.writes]
+        granularity = AtlasGranularities.DAY,
+        period = AtlasPeriods.WEEKS_1
+        for measurement in measurements:
+            self.a.Hosts.fill_host_list()
+            self.a.Hosts.get_measurement_for_hosts(measurement=measurement, granularity=granularity, period=period)
+            print(f'For {self.a.Hosts.host_list_with_measurements.__len__()} hosts:')
+            for each in self.a.Hosts.host_list_with_measurements[0].measurements:
+                print(f'For metric {each.name}')
+                self.assertIsInstance(each.measurement_stats_friendly_number,
+                                      atlasapi.specs.StatisticalValuesFriendly)
+                print(f'👍Value is {each.measurement_stats_friendly_number.__dict__}')
+                self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)

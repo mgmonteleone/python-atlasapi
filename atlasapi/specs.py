@@ -218,7 +218,7 @@ class AtlasMeasurementTypes(_GetAll):
 
     class TicketsAvailable(_GetAll):
         reads = 'TICKETS_AVAILABLE_READS'
-        writes = 'TICKETS_AVAILABLE_WRITES'
+        writes = 'TICKETS_AVAILABLE_WRITE'
 
     class CPU(_GetAll):
         class Process(_GetAll):

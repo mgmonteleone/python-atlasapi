@@ -13,7 +13,8 @@ from tests import BaseTests
 import logging
 from time import sleep
 from atlasapi.lib import AtlasUnits, ClusterType
-from atlasapi.specs import AtlasMeasurement, Host, AtlasPeriods, AtlasGranularities, AtlasMeasurementTypes
+from atlasapi.specs import AtlasMeasurement, Host, AtlasPeriods, AtlasGranularities, AtlasMeasurementTypes,\
+    AtlasMeasurementValue
 from io import BytesIO
 from datetime import datetime, timedelta
 
@@ -41,15 +42,17 @@ class MeasurementTests(BaseTests):
 
     def test_02_fill_measurement(self):
         self.a.Hosts.fill_host_list()
-        out = self.a.Hosts.get_measurement_for_hosts(return_data=True)
-        self.assertGreaterEqual(len(self.a.Hosts.host_list_with_measurements), 3)
+        self.assertGreaterEqual(len(self.a.Hosts.host_list), 2)
+        self.a.Hosts.get_measurement_for_hosts()
         for each in self.a.Hosts.host_list_with_measurements:
             self.assertIsInstance(each, Host)
             self.assertGreaterEqual(len(each.measurements), 1)
             for each_measurement in each.measurements:
                 print(
-                    f'The Mean values are: {each.hostname}: {each_measurement.name}: {each_measurement.measurement_stats.mean}')
-                print(f'The Mean values are: {each.hostname}: {each_measurement.name}: {each_measurement.measurement_stats.mean}')
+                    f'The Mean values are: {each.hostname}: {each_measurement.name}: '
+                    f'{each_measurement.measurement_stats.mean}')
+                print(f'The Mean values are: {each.hostname}: {each_measurement.name}:'
+                      f' {each_measurement.measurement_stats.mean}')
                 self.assertIsInstance(each_measurement, AtlasMeasurement)
 
     test_02_fill_measurement.basic = True
@@ -208,3 +211,15 @@ class MeasurementTests(BaseTests):
 
     test_12_issue_90_get_measurement_for_host.basic = True
 
+    def test_13_get_multiple_metrics_at_once_for_host(self):
+        self.a.Hosts.fill_host_list()
+        test_host: Host = self.a.Hosts.host_list[0]
+        measurements = test_host.get_measurement_for_host(atlas_obj=self.a,measurement=AtlasMeasurementTypes.Cache)
+        for each in measurements:
+            self.assertIsInstance(each, AtlasMeasurement)
+            for each_one in each.measurements:
+                self.assertIsInstance(each_one, AtlasMeasurementValue)
+
+
+
+    test_13_get_multiple_metrics_at_once_for_host.basic = True

@@ -311,7 +311,7 @@ class AtlasMeasurementValue(object):
 class AtlasMeasurement(object):
     """A point in time container for an Atlas measurement.
 
-            For a certain period, granularity and measurementType hoslds a list fo measurementValues.
+            For a certain period, granularity and measurementType holds a list fo measurementValues.
 
             Args:
                 name (AtlasMeasurementTypes): The name of the measurement type
@@ -550,6 +550,7 @@ class Host(object):
             period=period,
             measurement=measurement
         )
+        logger.info(f'The URI is.... {uri}')
 
         # Build the request
         return_val = atlas_obj.network.get(Settings.BASE_URL + uri)

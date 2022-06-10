@@ -47,6 +47,7 @@ from future import standard_library
 import humanfriendly as hf
 from logging import Logger
 from statistics import mean
+from statistics import StatisticsError
 
 standard_library.install_aliases()
 logger: Logger = logging.getLogger('Atlas.specs')
@@ -101,30 +102,43 @@ class HostLogFile(object):
 
 class StatisticalValues:
     def __init__(self, data_list: list):
-        self.samples: int = len(clean_list(data_list))
-        self.mean: float = float(mean(clean_list(data_list)))
-        self.min: float = float(min(clean_list(data_list)))
-        self.max: float = float(max(clean_list(data_list)))
+        try:
+            self.samples: int = len(clean_list(data_list))
+            self.mean: float = float(mean(clean_list(data_list)))
+            self.min: float = float(min(clean_list(data_list)))
+            self.max: float = float(max(clean_list(data_list)))
+        except StatisticsError:
+            logger.warning('Could not compute statistical values.')
+            self.samples: int = 0
+            self.mean: int = 0
+            self.min: float = 0
+            self.max: float = 0
 
 
 class StatisticalValuesFriendly:
     def __init__(self, data_list: list, data_type: str = None) -> None:
-        """Returns human readable values for stats
+        """Returns human-readable values for stats
 
         Args:
             data_list:
             data_type: The datatype either bytes or number
         """
-        if data_type is None:
-            data_type = 'bytes'
-        if data_type == 'bytes':
-            self.mean: str = hf.format_size(mean(clean_list(data_list)))
-            self.min: str = hf.format_size(min(clean_list(data_list)))
-            self.max: str = hf.format_size(max(clean_list(data_list)))
-        else:
-            self.mean: str = hf.format_number(mean(clean_list(data_list)))
-            self.min: str = hf.format_number(min(clean_list(data_list)))
-            self.max: str = hf.format_number(max(clean_list(data_list)))
+        try:
+            if data_type is None:
+                data_type = 'bytes'
+            if data_type == 'bytes':
+                self.mean: str = hf.format_size(mean(clean_list(data_list)))
+                self.min: str = hf.format_size(min(clean_list(data_list)))
+                self.max: str = hf.format_size(max(clean_list(data_list)))
+            else:
+                self.mean: str = hf.format_number(mean(clean_list(data_list)))
+                self.min: str = hf.format_number(min(clean_list(data_list)))
+                self.max: str = hf.format_number(max(clean_list(data_list)))
+        except StatisticsError:
+            logger.warning('Could not compute statistical values.')
+            self.mean: str = 'No Value'
+            self.min: str = 'No value'
+            self.max: str = 'No value'
 
 
 class AtlasMeasurementTypes(_GetAll):

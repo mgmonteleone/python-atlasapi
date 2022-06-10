@@ -506,7 +506,7 @@ class Atlas:
             if for_cluster:
                 out_list = list()
                 for host in host_list:
-                    if host.cluster_name == for_cluster:
+                    if host.cluster_name.lower() == for_cluster.lower():
                         out_list.append(host)
                 self.host_list = out_list
             else:

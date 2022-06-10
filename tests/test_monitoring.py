@@ -252,3 +252,23 @@ class MeasurementTests(BaseTests):
                                       atlasapi.specs.StatisticalValuesFriendly)
                 print(f'👍Value is {each.measurement_stats_friendly_number.__dict__}')
                 self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
+
+    def test_17_return_multiple_metrics(self):
+        self.a.Hosts.fill_host_list()
+        for each_host in self.a.Hosts.host_list_secondaries:
+            print(
+                f'Cluster: {each_host.cluster_name}, Host: {each_host.hostname}, is type: {each_host.type} ia port {each_host.port}')
+            self.assertEqual(each_host.type, ReplicaSetTypes.REPLICA_SECONDARY)
+            measurements = list(
+                each_host.get_measurement_for_host(atlas_obj=self.a, measurement=AtlasMeasurementTypes.Db.data_size))
+            each_host.add_measurements(measurements)
+            for each_measurement in each_host.measurements:
+                print(each_measurement.measurement_stats.mean)
+
+    def test_18_return_no_hosts_if_wrong_filter(self):
+        self.a.Hosts.fill_host_list(for_cluster='monkeypants')
+        self.assertEqual(len(list(self.a.Hosts.host_list)), 0)
+
+    def test_19_issue101_case_insensitive_clustername(self):
+        self.a.Hosts.fill_host_list(for_cluster='pyAtlasTestCluster')
+        self.assertGreater(len(list(self.a.Hosts.host_list)), 1)

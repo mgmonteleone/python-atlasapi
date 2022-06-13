@@ -21,6 +21,7 @@ from datetime import datetime, timedelta
 logger = logging.getLogger('test')
 
 
+# noinspection PyTypeChecker
 class MeasurementTests(BaseTests):
 
     def test_00_get_hosts_count(self):
@@ -257,7 +258,8 @@ class MeasurementTests(BaseTests):
         self.a.Hosts.fill_host_list()
         for each_host in self.a.Hosts.host_list_secondaries:
             print(
-                f'Cluster: {each_host.cluster_name}, Host: {each_host.hostname}, is type: {each_host.type} ia port {each_host.port}')
+                f'Cluster: {each_host.cluster_name}, Host: {each_host.hostname}, is type'
+                f': {each_host.type} ia port {each_host.port}')
             self.assertEqual(each_host.type, ReplicaSetTypes.REPLICA_SECONDARY)
             measurements = list(
                 each_host.get_measurement_for_host(atlas_obj=self.a, measurement=AtlasMeasurementTypes.Db.data_size))
@@ -269,6 +271,21 @@ class MeasurementTests(BaseTests):
         self.a.Hosts.fill_host_list(for_cluster='monkeypants')
         self.assertEqual(len(list(self.a.Hosts.host_list)), 0)
 
+    test_18_return_no_hosts_if_wrong_filter.basic = True
+
     def test_19_issue101_case_insensitive_clustername(self):
         self.a.Hosts.fill_host_list(for_cluster='pyAtlasTestCluster')
         self.assertGreater(len(list(self.a.Hosts.host_list)), 1)
+
+    test_19_issue101_case_insensitive_clustername.basic = True
+
+    def test_20_issue_104_hyphen_in_cluster_name(self):
+        cluster_name = 'cluster-02'
+        self.a.Hosts.fill_host_list(for_cluster=cluster_name)
+        for each in self.a.Hosts.host_list:
+            print(
+                f'cluster: {each.cluster_name} - Host: {each.hostname_alias}'
+                f' cluster_name_alias= {each.cluster_name_alias}')
+            self.assertEqual(cluster_name, each.cluster_name_alias)
+
+    test_20_issue_104_hyphen_in_cluster_name.basic = False

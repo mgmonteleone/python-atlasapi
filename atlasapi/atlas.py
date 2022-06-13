@@ -478,6 +478,7 @@ class Atlas:
                 obj_list = list()
                 for item in item_list:
                     obj_list.append(Host(item))
+
                 return_val = obj_list
             else:
                 uri = Settings.api_resources["Monitoring and Logs"]["Get all processes for group"].format(
@@ -507,6 +508,8 @@ class Atlas:
                 out_list = list()
                 for host in host_list:
                     if host.cluster_name.lower() == for_cluster.lower():
+                        out_list.append(host)
+                    elif host.cluster_name_alias.lower() == for_cluster.lower():
                         out_list.append(host)
                 self.host_list = out_list
             else:

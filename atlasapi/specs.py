@@ -477,6 +477,7 @@ class Host(object):
             type (ReplicaSetTypes): The type of replica set this intstance is a member of
             measurements (Optional[List[AtlasMeasurement]]: Holds list of host Measurements
             cluster_name (str): The cluster name (taken from the hostname)
+            cluster_name_alias (str) : The cluster name user alias, taken from the hostname user friendly alias.
             log_files (Optional[List[HostLogFile]]): Holds list of log files when requested.
         """
         if type(data) != dict:
@@ -492,14 +493,31 @@ class Host(object):
             self.id: str = data.get("id", None)
             try:
                 self.last_ping = parser.parse(data.get("lastPing", None))
-            except (ValueError, OverflowError):
+            except (ValueError, OverflowError, TypeError):
                 self.last_ping = data.get("lastPing", None)
             self.links: Optional[List[str]] = data.get("links", [])
             self.port: Optional[int] = data.get("port", None)
             self.replica_set_name: Optional[str] = data.get("replicaSetName", None)
             self.type: OptionalStr = ReplicaSetTypes[data.get("typeName", "NO_DATA")]
             self.measurements: Optional[List[AtlasMeasurement]] = []
-            self.cluster_name: str = self.hostname_alias.split('-')[0]
+
+            # NOTE: cluster_name_alias is NOT reliable since it relies on parsing the hostname_alias, which is
+            # lowercased. If the clustername_alias uses any casing, this will not be usuable.
+
+            if '-shard-' in self.hostname_alias:
+                self.cluster_name_alias: str = self.hostname_alias.split('-shard-')[0]
+            elif '-config-' in self.hostname_alias:
+                self.cluster_name_alias: str = self.hostname_alias.split('-config-')[0]
+            else:
+                self.cluster_name_alias: str = self.hostname_alias.split('-')[0]
+
+            if '-shard-' in self.hostname:
+                self.cluster_name: str = self.hostname.split('-shard-')[0]
+            elif '-config-' in self.hostname:
+                self.cluster_name: str = self.hostname.split('-config-')[0]
+            else:
+                self.cluster_name: str = self.hostname.split('-')[0]
+
             self.log_files: Optional[List[HostLogFile]] = None
 
     def get_measurement_for_host(self, atlas_obj, granularity: Optional[AtlasGranularities] = None,

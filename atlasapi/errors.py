@@ -20,7 +20,9 @@ Provides all specific Exceptions
 
 from atlasapi.settings import Settings
 from pprint import pprint
+import logging
 
+logger = logging.getLogger('Error_Handler')
 
 class ErrRole(Exception):
     """A role is not compatible with Atlas"""
@@ -97,6 +99,19 @@ class ErrAtlasGeneric(Exception):
         """
         return self.code, self.details
 
+class ErrMaintenanceError(ErrAtlasGeneric):
+    """Atlas : Atlas MaintenanceRelatedError
+
+    Constructor
+
+    Args:
+        c (int): HTTP code
+        details (dict): Response payload
+    """
+
+    def __init__(self, c, details):
+        super().__init__(details.get('detail', f'Atlas Maintenance Error: {details.get("detail")} '), c, details)
+
 
 class ErrAtlasBadRequest(ErrAtlasGeneric):
     """Atlas : Bad Request
@@ -116,6 +131,14 @@ class ErrAtlasBadRequest(ErrAtlasGeneric):
             raise (ErrAtlasJobError(c, details))
         if details.get('errorCode', None) == 'CANNOT_CANCEL_AUTOMATED_RESTORE':
             raise (ErrAtlasBackupError(c,details))
+        if details.get('errorCode', None) in ['ATLAS_MAINTENANCE_ALREADY_SCHEDULED',
+                                              'ATLAS_NUM_MAINTENANCE_DEFERRALS_EXCEEDED']:
+            raise (ErrMaintenanceError(c,details))
+        else:
+            logger.critical(f"A generic error was raised")
+            logger.critical(details)
+
+
         super().__init__("Something was wrong with the client request.", c, details)
 
 
@@ -159,6 +182,7 @@ class ErrAtlasBackupError(ErrAtlasGeneric):
 
     def __init__(self, c, details):
         super().__init__(details.get('detail', 'Atlas Backup error'), c, details)
+
 
 class ErrAtlasUnauthorized(ErrAtlasGeneric):
     """Atlas : Unauthorized

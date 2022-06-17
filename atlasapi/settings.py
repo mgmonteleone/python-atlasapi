@@ -144,7 +144,7 @@ class Settings:
             "Orgs the authenticated user can access": URI_STUB + "/orgs/",
             "Org by org_id": URI_STUB + "/orgs/{ORG_ID}",
             "Atlas Users associated to Org": URI_STUB + "/orgs/{ORGS_ID}/users/",
-            "Projects associated with the Org": URI_STUB + "/groups/{ORG_ID}/groups"
+            "Projects associated with the Org": URI_STUB + "/orgs/{ORG_ID}/groups"
         }
 
     }
@@ -155,7 +155,7 @@ class Settings:
 
     # Atlas default pagination
     pageNum = 1
-    itemsPerPage = 1000
+    itemsPerPage = 500
     itemsPerPageMin = 1
     itemsPerPageMax = 2000
 

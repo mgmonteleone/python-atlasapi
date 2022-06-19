@@ -45,7 +45,11 @@ class Settings:
             "Get measurements of for host": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/disks/{"
                                             "DISK-NAME}/measurements",
             "Get the log file for a host in the cluster": "/api/atlas/v1.0/groups/{group_id}/clusters/{"
-                                                          "host}/logs/{logname}"
+                                                          "host}/logs/{logname}",
+            "Get Available Disks for Process": "GET api/atlas/v1.0/groups/{group_id}/processes/"
+                                                       "{host}:{port}/disks",
+            "Get Measurements of a Disk for Process" : "GET /groups/{group_id}/processes/{host}:{port}/disks/"
+                                                       "{disk_name}/measurements"
         },
         "Events": {
             "Get All Project Events": URI_STUB + "/groups/{group_id}/events??includeRaw=true&pageNum={page_num}"

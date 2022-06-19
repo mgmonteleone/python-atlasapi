@@ -26,6 +26,7 @@ import logging
 from json import dumps
 from io import BytesIO
 from typing import Union
+
 logger = logging.getLogger('network')
 logger.setLevel(logging.WARNING)
 
@@ -37,12 +38,13 @@ class Network:
         user (str): user
         password (str): password
     """
-    def __init__(self, user, password, AuthMethod: Union[HTTPDigestAuth,HTTPBasicAuth] = HTTPDigestAuth):
+
+    def __init__(self, user, password, AuthMethod: Union[HTTPDigestAuth, HTTPBasicAuth] = HTTPDigestAuth):
         self.user: str = user
         self.password: str = password
-        self.auth_method: Union[HTTPDigestAuth,HTTPBasicAuth] =  AuthMethod
+        self.auth_method: Union[HTTPDigestAuth, HTTPBasicAuth] = AuthMethod
 
-    def answer(self, c, details: Union[dict,BytesIO]):
+    def answer(self, c, details: Union[dict, BytesIO]):
         """Answer will provide all necessary feedback for the caller
         
         Args:
@@ -98,7 +100,7 @@ class Network:
             file_obj = BytesIO()
             r = requests.get(uri,
                              allow_redirects=False,
-                             stream = True,
+                             stream=True,
                              timeout=Settings.file_request_timeout,
                              headers={},
                              auth=self.auth_method(self.user, self.password))
@@ -120,7 +122,6 @@ class Network:
             if r:
                 r.connection.close()
 
-
     def get(self, uri):
         """Get request
         
@@ -134,7 +135,7 @@ class Network:
             Exception: Network issue
         """
         r = None
-        
+
         try:
             r = requests.get(uri,
                              allow_redirects=True,
@@ -144,7 +145,6 @@ class Network:
             logger.debug("Auth information = {} {}".format(self.user, self.password))
 
             return self.answer(r.status_code, r.json())
-
         except Exception:
             logger.warning('Request: {}'.format(r.request.__dict__))
             logger.warning('Response: {}'.format(r.__dict__))
@@ -152,7 +152,41 @@ class Network:
         finally:
             if r:
                 r.connection.close()
-    
+
+    def get_big(self, uri):
+        """Get request (max results)
+
+        This is a temporary fix until we re-factor pagination.
+
+        Args:
+            uri (str): URI
+
+        Returns:
+            Json: API response
+
+        Raises:
+            Exception: Network issue
+        """
+        r = None
+
+        try:
+            r = requests.get(uri,
+                             allow_redirects=True,
+                             params= {'itemsPerPage': Settings.itemsPerPage},
+                             timeout=Settings.requests_timeout,
+                             headers={},
+                             auth=self.auth_method(self.user, self.password))
+            logger.debug("Auth information = {} {}".format(self.user, self.password))
+
+            return self.answer(r.status_code, r.json())
+        except Exception:
+            logger.warning('Request: {}'.format(r.request.__dict__))
+            logger.warning('Response: {}'.format(r.__dict__))
+            raise
+        finally:
+            if r:
+                r.connection.close()
+
     def post(self, uri, payload):
         """Post request
         
@@ -167,13 +201,13 @@ class Network:
             Exception: Network issue
         """
         r = None
-        
+
         try:
             r = requests.post(uri,
                               json=payload,
                               allow_redirects=True,
                               timeout=Settings.requests_timeout,
-                              headers={"Content-Type" : "application/json"},
+                              headers={"Content-Type": "application/json"},
                               auth=self.auth_method(self.user, self.password))
             return self.answer(r.status_code, r.json())
         except:
@@ -181,7 +215,7 @@ class Network:
         finally:
             if r:
                 r.connection.close()
-    
+
     def patch(self, uri, payload):
         """Patch request
         
@@ -201,7 +235,7 @@ class Network:
                                json=payload,
                                allow_redirects=True,
                                timeout=Settings.requests_timeout,
-                               headers={"Content-Type" : "application/json"},
+                               headers={"Content-Type": "application/json"},
                                auth=self.auth_method(self.user, self.password))
 
             try:
@@ -217,7 +251,7 @@ class Network:
         finally:
             if r:
                 r.connection.close()
-    
+
     def delete(self, uri):
         """Delete request
         
@@ -231,7 +265,7 @@ class Network:
             Exception: Network issue
         """
         r = None
-        
+
         try:
             r = requests.delete(uri,
                                 allow_redirects=True,

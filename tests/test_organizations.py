@@ -9,6 +9,7 @@ from atlasapi.atlas import Atlas
 from atlasapi.organizations import Organization
 from atlasapi.teams import TeamRoles
 from atlasapi.atlas_users import AtlasUser
+from atlasapi.projects import Project
 from json import dumps
 from tests import BaseTests
 import logging
@@ -49,10 +50,22 @@ class ProjectTests(BaseTests):
 
     def test_03_get_organization_count(self):
         result = self.a.Organizations.count
-        #pprint(result.__dict__)
         self.assertIsInstance(result, int, "The count should be an int")
 
     test_03_get_organization_count.basic = True
+
+    def test_04_get_all_projects_for_org(self):
+        org_id = '5ac52173d383ad0caf52e11c'
+        project_count = 0
+        for each_project in self.a_owner.Organizations.get_all_projects_for_org(org_id=org_id):
+            print(f"Found Project :{each_project.name}, {type(each_project)}")
+            self.assertIsInstance(each_project, Project, f"The return type was not <Project>, it was {type(each_project)}")
+            project_count +=1
+
+        self.assertGreater(project_count,0, "Did not find any projects, this is a bug, or the test org is not set up "
+                                            "correctly.")
+
+    test_04_get_all_projects_for_org.basic = True
 
 
 

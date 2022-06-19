@@ -23,7 +23,7 @@ from atlasapi.errors import *
 
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
-from atlasapi.specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, DatabaseUsersPermissionsSpecs,\
+from atlasapi.specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, DatabaseUsersPermissionsSpecs, \
     OptionalAtlasMeasurement, AtlasMeasurement, AtlasMeasurementValue, AtlasMeasurementTypes, ReplicaSetTypes
 from typing import Union, Iterator, List, Optional
 from atlasapi.atlas_types import OptionalInt, OptionalBool, ListofDict
@@ -585,8 +585,7 @@ class Atlas:
                 if each_host.type == ReplicaSetTypes.REPLICA_SECONDARY:
                     yield each_host
 
-
-        def get_measurement_for_hosts(self, granularity: Optional[AtlasGranularities] =None,
+        def get_measurement_for_hosts(self, granularity: Optional[AtlasGranularities] = None,
                                       period: Optional[AtlasPeriods] = None,
                                       measurement: Optional[AtlasMeasurementTypes] = None, return_data: bool = False):
             """Get measurement(s) for all hosts in the host_list
@@ -836,10 +835,10 @@ class Atlas:
 
             # Build the URL
 
-            if isinstance(measurement,tuple):
+            if isinstance(measurement, tuple):
                 logger.debug(f'Somehow got a tuple for measurement {measurement}. Need to get the str')
                 measurement: tuple = measurement[0]
-            if isinstance(granularity,tuple):
+            if isinstance(granularity, tuple):
                 logger.info(f'Somehow got a tuple for granularity {granularity}. Need to get the str')
                 granularity: tuple = granularity[0]
             if isinstance(period, tuple):
@@ -2001,7 +2000,7 @@ class Atlas:
                 yield Organization.from_dict(each)
 
         def organization_by_name(self, org_name: str) -> Organization:
-            """Singe organization searched by name.
+            """Single organization searched by name.
 
             Args:
                 org_name: Organization name with which to filter the returned list. Performs a case-insensitive
@@ -2039,6 +2038,26 @@ class Atlas:
 
             """
             return self._get_orgs()[1]
+
+        def get_all_projects_for_org(self, org_id: str) -> Iterable[Project]:
+            """Get projects related to the current Org
+
+            url: https://www.mongodb.com/docs/atlas/reference/api/organization-get-all-projects/
+
+            Args:
+                org_id (str): The organization id which owns the projects.
+
+            Returns:
+                Iterable[Project]: Iterable containing projects
+
+
+            """
+            uri: str = Settings.api_resources["Organizations"]["Projects associated with the Org"].format(
+                ORG_ID=org_id)
+
+            response = self.atlas.network.get_big(Settings.BASE_URL + uri)
+            for entry in response.get('results', []):
+                yield Project.from_dict(entry)
 
 
 class AtlasPagination:
@@ -2176,3 +2195,26 @@ class CloudBackupSnapshotsGetAll(AtlasPagination):
 
     def __init__(self, atlas, pageNum, itemsPerPage):
         super().__init__(atlas, atlas.CloudBackups.get_all_backup_snapshots, pageNum, itemsPerPage)
+
+
+class OrganizationProjectsGetAll(AtlasPagination):
+    """Pagination for Database User : Get All"""
+
+    def __init__(self, atlas: Atlas, org_id: str, pageNum, itemsPerPage):
+        super().__init__(atlas, self.fetch, pageNum, itemsPerPage)
+        print(f"Got to init")
+        self._get_all_projects_for_org = atlas.Organizations.get_all_projects_for_org
+        self.org_id = org_id
+
+    def fetch(self, pageNum, itemsPerPage):
+        """Intermediate fetching
+
+        Args:
+            pageNum (int): Page number
+            itemsPerPage (int): Number of Events per Page
+
+        Returns:
+            dict: Response payload
+        """
+        print("Got to fetch")
+        return self._get_all_projects_for_org(self.org_id, pageNum, itemsPerPage)

@@ -17,6 +17,7 @@ Settings module
 
 Provides few constants, APIs endpoints.
 """
+import os
 from os import getenv
 
 
@@ -155,9 +156,9 @@ class Settings:
 
     # Atlas default pagination
     pageNum = 1
-    itemsPerPage = 500
-    itemsPerPageMin = 1
-    itemsPerPageMax = 2000
+    itemsPerPage: int  = int(os.getenv('ITEMS_PER_PAGE', 500))
+    itemsPerPageMin: int = int(os.getenv('ITEMS_PER_PAGE_MIN', 1))
+    itemsPerPageMax: int = int(os.getenv('ITEMS_PER_PAGE_MAX', 2000))
 
     # Requests
     requests_timeout = 10

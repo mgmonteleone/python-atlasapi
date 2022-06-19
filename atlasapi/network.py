@@ -172,7 +172,7 @@ class Network:
         try:
             r = requests.get(uri,
                              allow_redirects=True,
-                             params= {'itemsPerPage': 500},
+                             params= {'itemsPerPage': Settings.itemsPerPage},
                              timeout=Settings.requests_timeout,
                              headers={},
                              auth=self.auth_method(self.user, self.password))

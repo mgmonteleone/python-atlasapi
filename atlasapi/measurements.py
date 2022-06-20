@@ -185,7 +185,37 @@ class AtlasMeasurementTypes(_GetAll):
             guest = 'SYSTEM_NORMALIZED_CPU_GUEST'
             steal = 'SYSTEM_NORMALIZED_CPU_STEAL'
 
+    class Disk(_GetAll):
+        class IOPS(_GetAll):
+            read = 'DISK_PARTITION_IOPS_READ'
+            read_max = 'MAX_DISK_PARTITION_IOPS_READ'
+            write = 'DISK_PARTITION_IOPS_WRITE'
+            write_max = 'MAX_DISK_PARTITION_IOPS_WRITE'
+            total = 'DISK_PARTITION_IOPS_TOTAL'
+            total_max = 'MAX_DISK_PARTITION_IOPS_TOTAL'
 
+        class Util(_GetAll):
+            util = 'DISK_PARTITION_UTILIZATION'
+            util_max = 'MAX_DISK_PARTITION_UTILIZATION'
+
+        class Latency(_GetAll):
+            read = 'DISK_PARTITION_LATENCY_READ'
+            read_max = 'MAX_DISK_PARTITION_LATENCY_READ'
+            write = 'DISK_PARTITION_LATENCY_WRITE'
+            write_max = 'MAX_DISK_PARTITION_LATENCY_WRITE'
+
+        class Free(_GetAll):
+            space_free = 'DISK_PARTITION_SPACE_FREE'
+            space_free_max = 'MAX_DISK_PARTITION_SPACE_FREE'
+            used = 'DISK_PARTITION_SPACE_USED'
+            used_max = 'MAX_DISK_PARTITION_SPACE_USED'
+            percent_fee = 'DISK_PARTITION_SPACE_PERCENT_FREE'
+            percent_free_max = 'MAX_DISK_PARTITION_SPACE_PERCENT_FREE'
+            percent_used = 'DISK_PARTITION_SPACE_PERCENT_USED'
+            percent_used_max = 'MAX_DISK_PARTITION_SPACE_PERCENT_USED'
+
+
+# noinspection PyBroadException
 class AtlasMeasurementValue(object):
     def __init__(self, value_dict: dict):
         """
@@ -328,7 +358,7 @@ class AtlasMeasurement(object):
             dict:
         """
         return dict(measurements=self._measurements, date_start=self.date_start, date_end=self.date_end, name=self.name,
-                    units= self.units, period=self.period, granularity=self.granularity,
+                    units=self.units, period=self.period, granularity=self.granularity,
                     measurements_count=self.measurements_count
                     )
 
@@ -346,9 +376,7 @@ class AtlasMeasurement(object):
         data_list = list()
         for each_measurement in self.measurements:
             data_list.append(each_measurement.value_float)
-        return StatisticalValuesFriendly(data_list=data_list,data_type=self.units)
-
-
+        return StatisticalValuesFriendly(data_list=data_list, data_type=self.units)
 
     def __hash__(self):
         return hash(self.name + '-' + self.period)
@@ -360,7 +388,7 @@ class AtlasMeasurement(object):
         :return:
         """
         if isinstance(other, AtlasMeasurement):
-            return ((self.name == other.name) and (self.period == other.period))
+            return (self.name == other.name) and (self.period == other.period)
 
 
 ListOfAtlasMeasurementValues = NewType('ListOfAtlasMeasurementValues', List[Optional[AtlasMeasurementValue]])

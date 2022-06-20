@@ -31,6 +31,9 @@ logger = logging.getLogger('network')
 logger.setLevel(logging.WARNING)
 
 
+def merge(dict1, dict2):
+    return dict2.update(dict1)
+
 class Network:
     """Network constructor
     
@@ -153,7 +156,7 @@ class Network:
             if r:
                 r.connection.close()
 
-    def get_big(self, uri):
+    def get_big(self, uri, params: dict = None):
         """Get request (max results)
 
         This is a temporary fix until we re-factor pagination.
@@ -168,21 +171,27 @@ class Network:
             Exception: Network issue
         """
         r = None
+        print(f"Revieved the following parameters {params}")
+        if params:
+            logger.warning(f"Revieved the following parameters {params}")
+            merge({'itemsPerPage': Settings.itemsPerPage},params)
+            logger.warning(f"The parameters are now {params}")
+        else:
+            params = {'itemsPerPage': Settings.itemsPerPage}
 
         try:
+            logger.warning(f"The parameters object is {params}")
             r = requests.get(uri,
                              allow_redirects=True,
-                             params= {'itemsPerPage': Settings.itemsPerPage},
+                             params=params,
                              timeout=Settings.requests_timeout,
                              headers={},
                              auth=self.auth_method(self.user, self.password))
             logger.debug("Auth information = {} {}".format(self.user, self.password))
 
             return self.answer(r.status_code, r.json())
-        except Exception:
-            logger.warning('Request: {}'.format(r.request.__dict__))
-            logger.warning('Response: {}'.format(r.__dict__))
-            raise
+        except Exception as e:
+            raise e
         finally:
             if r:
                 r.connection.close()

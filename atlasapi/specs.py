@@ -296,6 +296,7 @@ class Host(object):
         if granularity is None:
             granularity = AtlasGranularities.HOUR
         logger.info(f'The granularity is {granularity}')
+
         parameters = {'granularity': granularity, 'period': period}
         uri = Settings.api_resources["Monitoring and Logs"]["Get Measurements of a Disk for Process"].format(
             group_id=self.group_id,
@@ -312,15 +313,15 @@ class Host(object):
             measurements = return_val.get('measurements')
             measurements_count = len(measurements)
             logger.warning('There are {} measurements.'.format(measurements_count))
-
             for each in measurements:
                 measurement_obj = AtlasMeasurement(name=each.get('name'),
                                                    period=period,
-                                                   granularity=granularity)
+                                                   granularity=granularity,
+                                                   units=each.get('units', None))
                 for each_and_every in each.get('dataPoints'):
                     measurement_obj.measurements = AtlasMeasurementValue(each_and_every)
 
-            yield measurement_obj
+                yield measurement_obj
 
         return return_val
 

@@ -38,8 +38,8 @@ class StatisticalValuesFriendly:
         """
         try:
             if data_type is None:
-                data_type = 'bytes'
-            if data_type == 'bytes':
+                data_type = 'SCALAR_PER_SECOND'
+            if data_type == 'BYTES':
                 self.mean: str = hf.format_size(mean(clean_list(data_list)))
                 self.min: str = hf.format_size(min(clean_list(data_list)))
                 self.max: str = hf.format_size(max(clean_list(data_list)))
@@ -47,6 +47,7 @@ class StatisticalValuesFriendly:
                 self.mean: str = hf.format_number(mean(clean_list(data_list)))
                 self.min: str = hf.format_number(min(clean_list(data_list)))
                 self.max: str = hf.format_number(max(clean_list(data_list)))
+
         except StatisticsError:
             logger.warning('Could not compute statistical values.')
             self.mean: str = 'No Value'
@@ -242,16 +243,18 @@ class AtlasMeasurement(object):
 
             Args:
                 name (AtlasMeasurementTypes): The name of the measurement type
+                units (Text): Descriptive text of units used.
                 period (AtlasPeriods): The period the measurement covers
                 granularity (AtlasGranularities): The granularity used for the measurement
                 measurements (List[AtlasMeasurementValue]): A list of the actual measurement values
             """
 
     def __init__(self, name: AtlasMeasurementTypes, period: AtlasPeriods,
-                 granularity: AtlasGranularities, measurements: List[AtlasMeasurementValue] = None):
+                 granularity: AtlasGranularities, units: str = None, measurements: List[AtlasMeasurementValue] = None):
         if measurements is None:
             measurements = list()
         self.name: AtlasMeasurementTypes = name
+        self.units: str = units
         self.period: AtlasPeriods = period
         self.granularity: AtlasGranularities = granularity
         self._measurements: List[AtlasMeasurementValue] = measurements
@@ -321,7 +324,8 @@ class AtlasMeasurement(object):
             dict:
         """
         return dict(measurements=self._measurements, date_start=self.date_start, date_end=self.date_end, name=self.name,
-                    period=self.period, granularity=self.granularity, measurements_count=self.measurements_count
+                    units= self.units, period=self.period, granularity=self.granularity,
+                    measurements_count=self.measurements_count
                     )
 
     @property
@@ -333,20 +337,14 @@ class AtlasMeasurement(object):
         return StatisticalValues(data_list=data_list)
 
     @property
-    def measurement_stats_friendly_bytes(self) -> StatisticalValuesFriendly:
+    def measurement_stats_friendly(self) -> StatisticalValuesFriendly:
         """Returns  statistical info for measurement data in friendly bytes format"""
         data_list = list()
         for each_measurement in self.measurements:
             data_list.append(each_measurement.value_float)
-        return StatisticalValuesFriendly(data_list=data_list)
+        return StatisticalValuesFriendly(data_list=data_list,data_type=self.units)
 
-    @property
-    def measurement_stats_friendly_number(self) -> StatisticalValuesFriendly:
-        """Returns  statistical info for measurement data in friendly bytes format"""
-        data_list = list()
-        for each_measurement in self.measurements:
-            data_list.append(each_measurement.value_float)
-        return StatisticalValuesFriendly(data_list=data_list, data_type='number')
+
 
     def __hash__(self):
         return hash(self.name + '-' + self.period)

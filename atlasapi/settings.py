@@ -49,7 +49,11 @@ class Settings:
             "Get Available Disks for Process": "/api/atlas/v1.0/groups/{group_id}/processes/"
                                                "{host}:{port}/disks",
             "Get Measurements of a Disk for Process": "/api/atlas/v1.0/groups/{group_id}/processes/{host}:{port}/disks/"
-                                                      "{disk_name}/measurements"
+                                                      "{disk_name}/measurements",
+            "Get Measurements of a Database for Process": "/api/atlas/v1.0/groups/{group_id}/processes/{host}:{port}/"
+                                                          "databases/database_name}/measurements",
+            "Get Available Databases for Process": "/api/atlas/v1.0/groups/{group_id}/processes/"
+                                                   "{host}:{port}/databases"
         },
         "Events": {
             "Get All Project Events": URI_STUB + "/groups/{group_id}/events??includeRaw=true&pageNum={page_num}"

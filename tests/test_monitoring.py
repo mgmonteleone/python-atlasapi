@@ -289,3 +289,15 @@ class MeasurementTests(BaseTests):
             self.assertEqual(cluster_name, each.cluster_name_alias)
 
     test_20_issue_104_hyphen_in_cluster_name.basic = False
+
+    def test_21_get_partitions_for_host(self):
+        cluster_name = 'pyAtlasTestCluster'
+        self.a.Hosts.fill_host_list(for_cluster=cluster_name)
+
+        for each_host in self.a.Hosts.host_list:
+            partition_names = each_host.get_partitions(self.a)
+            for each_partition in partition_names:
+                self.assertIsInstance(each_partition, str, f"This should return a partition name as str, instead it "
+                                                           f"returned {type(each_partition)}")
+
+    test_21_get_partitions_for_host.basic = True

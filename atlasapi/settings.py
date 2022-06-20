@@ -46,10 +46,10 @@ class Settings:
                                             "DISK-NAME}/measurements",
             "Get the log file for a host in the cluster": "/api/atlas/v1.0/groups/{group_id}/clusters/{"
                                                           "host}/logs/{logname}",
-            "Get Available Disks for Process": "GET api/atlas/v1.0/groups/{group_id}/processes/"
-                                                       "{host}:{port}/disks",
-            "Get Measurements of a Disk for Process" : "GET /groups/{group_id}/processes/{host}:{port}/disks/"
-                                                       "{disk_name}/measurements"
+            "Get Available Disks for Process": "/api/atlas/v1.0/groups/{group_id}/processes/"
+                                               "{host}:{port}/disks",
+            "Get Measurements of a Disk for Process": "/api/atlas/v1.0/groups/{group_id}/processes/{host}:{port}/disks/"
+                                                      "{disk_name}/measurements"
         },
         "Events": {
             "Get All Project Events": URI_STUB + "/groups/{group_id}/events??includeRaw=true&pageNum={page_num}"
@@ -160,7 +160,7 @@ class Settings:
 
     # Atlas default pagination
     pageNum = 1
-    itemsPerPage: int  = int(os.getenv('ITEMS_PER_PAGE', 500))
+    itemsPerPage: int = int(os.getenv('ITEMS_PER_PAGE', 500))
     itemsPerPageMin: int = int(os.getenv('ITEMS_PER_PAGE_MIN', 1))
     itemsPerPageMax: int = int(os.getenv('ITEMS_PER_PAGE_MAX', 2000))
 

@@ -145,10 +145,10 @@ class Network:
             logger.debug("Auth information = {} {}".format(self.user, self.password))
 
             return self.answer(r.status_code, r.json())
-        except Exception:
+        except Exception as e:
             logger.warning('Request: {}'.format(r.request.__dict__))
             logger.warning('Response: {}'.format(r.__dict__))
-            raise
+            raise e
         finally:
             if r:
                 r.connection.close()

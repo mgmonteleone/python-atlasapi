@@ -28,6 +28,7 @@ from builtins import str
 
 from dateutil.parser import parse
 
+import atlasapi.atlas
 from atlasapi.atlas_types import OptionalFloat
 from atlasapi.lib import AtlasPeriods, AtlasGranularities, logger, _GetAll
 
@@ -38,7 +39,7 @@ from datetime import datetime
 from enum import Enum
 from dateutil import parser
 from atlasapi.atlas_types import *
-from typing import Optional, NewType, List, Any, Union, Iterable, BinaryIO, Tuple, Generator
+from typing import Optional, NewType, List, Any, Union, Iterable, BinaryIO, Tuple, Generator, Set
 from datetime import datetime
 import isodate
 from atlasapi.lib import AtlasGranularities, AtlasPeriods, AtlasLogNames
@@ -621,6 +622,31 @@ class Host(object):
             self.log_files = [log_obj]
         else:
             self.log_files.append(log_obj)
+
+    def get_partitions(self, atlas_obj) -> Iterable[str]:
+        """Returns all disks(partitions) configured on the Atlas Host
+
+        Yields names of partitions, and appends them to the partitions property.
+
+        Args:
+            atlas_obj :
+
+        Returns:
+            List[str]: A list of partition names.
+        """
+        uri = Settings.api_resources["Monitoring and Logs"]["Get Available Disks for Process"].format(
+            group_id=self.group_id,
+            host=self.hostname,
+            port=self.port,
+        )
+        logger.info(f"The full URI being called is {Settings.BASE_URL + uri}")
+        return_val = atlas_obj.network.get(Settings.BASE_URL + uri)
+        partition_list: List[Optional[str]] = []
+        for each_partition in return_val.get("results"):
+            partition_name: str = each_partition.get('partitionName', None)
+            yield partition_name
+
+
 
     def __hash__(self):
         return hash(self.hostname)

@@ -341,3 +341,17 @@ class MeasurementTests(BaseTests):
             self.assertGreaterEqual(len(db_list), 2, "There should be at least two datbases on each host!")
 
     test_24_get_databases.basic = True
+
+    def test_25_get_measurements_for_configdb(self):
+        cluster_name = 'pyAtlasTestCluster'
+        self.a.Hosts.fill_host_list(for_cluster=cluster_name)
+        for each_host in self.a.Hosts.host_list:
+            pprint(f"For Host: {each_host.hostname}")
+            output: AtlasMeasurement = each_host.get_measurements_for_database(self.a, database_name="sample_airbnb")
+            for each in output:
+                print('Measurement'.center(80, '*'))
+                print(f"Name: {each.name}: {each.measurement_stats_friendly.mean} {each.units}")
+                self.assertIsInstance(each.measurement_stats_friendly,
+                                      atlasapi.measurements.StatisticalValuesFriendly)
+
+    test_25_get_measurements_for_configdb.basic = True

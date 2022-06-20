@@ -51,7 +51,7 @@ class Settings:
             "Get Measurements of a Disk for Process": "/api/atlas/v1.0/groups/{group_id}/processes/{host}:{port}/disks/"
                                                       "{disk_name}/measurements",
             "Get Measurements of a Database for Process": "/api/atlas/v1.0/groups/{group_id}/processes/{host}:{port}/"
-                                                          "databases/database_name}/measurements",
+                                                          "databases/{database_name}/measurements",
             "Get Available Databases for Process": "/api/atlas/v1.0/groups/{group_id}/processes/"
                                                    "{host}:{port}/databases"
         },

@@ -43,6 +43,10 @@ class StatisticalValuesFriendly:
                 self.mean: str = hf.format_size(mean(clean_list(data_list)))
                 self.min: str = hf.format_size(min(clean_list(data_list)))
                 self.max: str = hf.format_size(max(clean_list(data_list)))
+            elif data_type == 'SCALAR':
+                self.mean: str = hf.format_number(mean(clean_list(data_list)))
+                self.min: str = hf.format_number(min(clean_list(data_list)))
+                self.max: str = hf.format_number(max(clean_list(data_list)))
             else:
                 self.mean: str = hf.format_number(mean(clean_list(data_list)))
                 self.min: str = hf.format_number(min(clean_list(data_list)))

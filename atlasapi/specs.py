@@ -40,7 +40,7 @@ import logging
 from future import standard_library
 from logging import Logger
 
-from measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement
+from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement
 
 standard_library.install_aliases()
 logger: Logger = logging.getLogger('Atlas.specs')
@@ -222,6 +222,7 @@ class Host(object):
 
             for each in measurements:
                 measurement_obj = AtlasMeasurement(name=each.get('name'),
+                                                   units=each.get('units', None),
                                                    period=period,
                                                    granularity=granularity)
                 for each_and_every in each.get('dataPoints'):

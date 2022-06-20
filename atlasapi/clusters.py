@@ -263,7 +263,7 @@ class ClusterConfig(object):
                  cluster_type: ClusterType = ClusterType.REPLICASET,
                  disk_size_gb: int = 32,
                  name: str = None,
-                 mongodb_major_version: MongoDBMajorVersion = MongoDBMajorVersion.v4_0,
+                 mongodb_major_version: MongoDBMajorVersion = MongoDBMajorVersion.v4_4,
                  mongodb_version: Optional[str] = None,
                  num_shards: int = 1,
                  mongo_uri: Optional[str] = None,

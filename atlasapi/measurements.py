@@ -7,8 +7,8 @@ import logging
 import humanfriendly as hf
 from dateutil.parser import parse
 
-from atlas_types import OptionalFloat
-from lib import _GetAll, AtlasPeriods, AtlasGranularities
+from atlasapi.atlas_types import OptionalFloat
+from atlasapi.lib import _GetAll, AtlasPeriods, AtlasGranularities
 
 logger: logging.Logger = logging.getLogger('Atlas.measurements')
 

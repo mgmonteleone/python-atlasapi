@@ -252,15 +252,12 @@ class Host(object):
             self.log_files.append(log_obj)
 
     def get_partitions(self, atlas_obj) -> Iterable[str]:
-        """Returns all disks(partitions) configured on the Atlas Host
-
-        Yields names of partitions, and appends them to the partitions property.
-
+        """Returns names of all disks(partitions) configured on the Atlas Host
         Args:
             atlas_obj :
 
         Returns:
-            List[str]: A list of partition names.
+            Iterable[str]: A list of partition names.
         """
         uri = Settings.api_resources["Monitoring and Logs"]["Get Available Disks for Process"].format(
             group_id=self.group_id,
@@ -269,7 +266,6 @@ class Host(object):
         )
         logger.info(f"The full URI being called is {Settings.BASE_URL + uri}")
         return_val = atlas_obj.network.get(Settings.BASE_URL + uri)
-        partition_list: List[Optional[str]] = []
         for each_partition in return_val.get("results"):
             partition_name: str = each_partition.get('partitionName', None)
             yield partition_name
@@ -344,6 +340,28 @@ class Host(object):
         """
         return self.get_measurements_for_disk(atlas_obj=atlas_obj, partition_name='data', granularity=granularity,
                                              period=period)
+
+    def get_databases(self, atlas_obj) -> Iterable[str]:
+        """Returns all disks(partitions) configured on the Atlas Host
+
+        Yields names of databases, and appends them to the databa
+
+        Args:
+            atlas_obj :
+
+        Returns:
+            List[str]: A list of database names.
+        """
+        uri = Settings.api_resources["Monitoring and Logs"]["Get Available Databases for Process"].format(
+            group_id=self.group_id,
+            host=self.hostname,
+            port=self.port,
+        )
+        logger.info(f"The full URI being called is {Settings.BASE_URL + uri}")
+        return_val = atlas_obj.network.get(Settings.BASE_URL + uri)
+        for each_database in return_val.get("results"):
+            db_name  = each_database.get('databaseName', None)
+            yield db_name
 
     def __hash__(self):
         return hash(self.hostname)

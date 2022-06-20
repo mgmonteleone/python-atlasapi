@@ -195,8 +195,8 @@ class MeasurementTests(BaseTests):
             self.a.Hosts.get_measurement_for_hosts(measurement=measurement, granularity=granularity, period=period)
             print(f'For {self.a.Hosts.host_list_with_measurements.__len__()} hosts:')
             for each in self.a.Hosts.host_list_with_measurements[0].measurements:
-                logger.info(f'For metric {each.name}'.center(80,'*'))
-                logger.info(f'👍Value is {each.measurement_stats}'.center(80,'*'))
+                logger.info(f'For metric {each.name}'.center(80, '*'))
+                logger.info(f'👍Value is {each.measurement_stats}'.center(80, '*'))
                 self.assertIsInstance(each.measurement_stats, atlasapi.measurements.StatisticalValues)
 
     test_11_measurement_stats_connections.basic = True
@@ -310,7 +310,8 @@ class MeasurementTests(BaseTests):
                 for each in output:
                     print('Measurement'.center(80, '*'))
                     print(f"Name: {each.name}: {each.measurement_stats_friendly.mean} {each.units}")
-                    self.assertIsInstance(each.measurement_stats_friendly, atlasapi.measurements.StatisticalValuesFriendly)
+                    self.assertIsInstance(each.measurement_stats_friendly,
+                                          atlasapi.measurements.StatisticalValuesFriendly)
 
     test_22_get_measurements_for_partition.basic = True
 
@@ -328,3 +329,15 @@ class MeasurementTests(BaseTests):
 
     test_23_get_measurements_for_data_partition.basic = True
 
+    def test_24_get_databases(self):
+        cluster_name = 'pyAtlasTestCluster'
+        self.a.Hosts.fill_host_list(for_cluster=cluster_name)
+        for each_host in self.a.Hosts.host_list:
+            output = each_host.get_databases(self.a)
+            db_list = []
+            for each_db in output:
+                db_list.append(each_db)
+            print(f'There are are {len(db_list)} dbs on {each_host.hostname_alias}'.center(120, '*'))
+            self.assertGreaterEqual(len(db_list), 2, "There should be at least two datbases on each host!")
+
+    test_24_get_databases.basic = True

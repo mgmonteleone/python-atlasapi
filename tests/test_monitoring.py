@@ -299,7 +299,7 @@ class MeasurementTests(BaseTests):
 
     test_21_get_partitions_for_host.basic = True
 
-    def test_22_get_measurements_for_data_partition(self):
+    def test_22_get_measurements_for_partition(self):
         cluster_name = 'pyAtlasTestCluster'
         self.a.Hosts.fill_host_list(for_cluster=cluster_name)
         for each_host in self.a.Hosts.host_list:
@@ -310,5 +310,21 @@ class MeasurementTests(BaseTests):
                 for each in output:
                     print('Measurement'.center(80, '*'))
                     print(f"Name: {each.name}: {each.measurement_stats_friendly.mean} {each.units}")
+                    self.assertIsInstance(each.measurement_stats_friendly, atlasapi.measurements.StatisticalValuesFriendly)
 
-            break
+    test_22_get_measurements_for_partition.basic = True
+
+    def test_23_get_measurements_for_data_partition(self):
+        cluster_name = 'pyAtlasTestCluster'
+        self.a.Hosts.fill_host_list(for_cluster=cluster_name)
+        for each_host in self.a.Hosts.host_list:
+            pprint(f"For Host: {each_host.hostname}")
+            output: AtlasMeasurement = each_host.data_partition_stats(self.a)
+            for each in output:
+                print('Measurement'.center(80, '*'))
+                print(f"Name: {each.name}: {each.measurement_stats_friendly.mean} {each.units}")
+                self.assertIsInstance(each.measurement_stats_friendly,
+                                      atlasapi.measurements.StatisticalValuesFriendly)
+
+    test_23_get_measurements_for_data_partition.basic = True
+

@@ -33,7 +33,7 @@ from atlasapi.errors import ErrRole
 from enum import Enum
 from dateutil import parser
 from atlasapi.atlas_types import *
-from typing import Optional, NewType, List, Union, Iterable, BinaryIO
+from typing import Optional, NewType, List, Union, Iterable, BinaryIO, Any
 from datetime import datetime
 from atlasapi.lib import AtlasGranularities, AtlasPeriods, AtlasLogNames
 import logging
@@ -276,16 +276,18 @@ class Host(object):
 
     def get_measurements_for_disk(self, atlas_obj, partition_name: str,
                                   granularity: Optional[AtlasGranularities] = None,
-                                  period: Optional[AtlasPeriods] = None, iterable: bool = True) -> Iterable[str]:
-        """Returns All Metrics for the hosts partition.
+                                  period: Optional[AtlasPeriods] = None, iterable: bool = True) -> \
+            Iterable[Union[AtlasMeasurement, Any]]:
+        """Returns All Metrics for a Hosts partition, for a given period and granularity.
 
+        Uses default granularity and period if not passed.
 
         Args:
-            iterable:
+            iterable (bool): Defaults to true, if not true will return the raw response from API.
             partition_name: The Atlas partition name (commonly `data`)
             period (Optional[AtlasPeriods]):The period for the disk measurements
             granularity (Optional[AtlasGranularitues]): The granularity for the disk measurements.
-            atlas_obj : A configured Atlas instance to connect to the API with.
+            atlas_obj (atlasapi.atlas.Atlas): A configured Atlas instance to connect to the API with.
 
         Returns:
             List[str]: A list of partition names.
@@ -325,6 +327,23 @@ class Host(object):
                 yield measurement_obj
 
         return return_val
+
+    def data_partition_stats(self, atlas_obj, granularity: Optional[AtlasGranularities] = None,
+                             period: Optional[AtlasPeriods] = None, ) -> Iterable[AtlasMeasurement]:
+        """Returns disk measurements for the data partition of the host.
+
+        Hard codes the name of the partition to `data` and returns all metrics.
+
+        Args:
+            atlas_obj: Instantiated Atlas instance to access the API
+            granularity (Optional[AtlasGranularitues]): The granularity for the disk measurements.
+            atlas_obj (atlasapi.atlas.Atlas): A configured Atlas instance to connect to the API with.
+
+        Returns (Iterable[AtlasMeasurement]): A generator yielding AtlasMeasurements
+
+        """
+        return self.get_measurements_for_disk(atlas_obj=atlas_obj, partition_name='data', granularity=granularity,
+                                             period=period)
 
     def __hash__(self):
         return hash(self.hostname)

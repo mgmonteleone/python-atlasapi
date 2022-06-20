@@ -214,6 +214,21 @@ class AtlasMeasurementTypes(_GetAll):
             percent_used = 'DISK_PARTITION_SPACE_PERCENT_USED'
             percent_used_max = 'MAX_DISK_PARTITION_SPACE_PERCENT_USED'
 
+    class Namespaces(_GetAll):
+        """Metrics regarding namespaces (databases) on each host.
+
+        As found in dbstats (https://www.mongodb.com/docs/manual/reference/command/dbStats/)
+            """
+        object_size = 'DATABASE_AVERAGE_OBJECT_SIZE' # dbStats.avgObjSize Average size of each document in bytes. This is the dataSize divided by the number of documents. The scale argument does not affect the avgObjSize value.
+        collection_count = 'DATABASE_COLLECTION_COUNT'
+        data_size = 'DATABASE_DATA_SIZE' # Total size of the uncompressed data held in the database. The dataSize decreases when you remove documents.
+        storage_size = 'DATABASE_STORAGE_SIZE' # Sum of the space allocated to all collections in the database for document storage, including free space. storageSize does not include space allocated to indexes. See indexSize for the total index size.
+        index_size = 'DATABASE_INDEX_SIZE' # Sum of the space allocated to all indexes in the database, including free index space.
+        index_count = 'DATABASE_INDEX_COUNT'
+        extent_count = 'DATABASE_EXTENT_COUNT' # ?
+        object_count = 'DATABASE_OBJECT_COUNT' # Number of objects (specifically, documents) in the database across all collections.
+        view_count = 'DATABASE_VIEW_COUNT'
+
 
 # noinspection PyBroadException
 class AtlasMeasurementValue(object):

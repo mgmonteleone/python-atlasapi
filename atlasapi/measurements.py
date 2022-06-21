@@ -23,7 +23,7 @@ class StatisticalValues:
         except StatisticsError:
             logger.warning('Could not compute statistical values.')
             self.samples: int = 0
-            self.mean: int = 0
+            self.mean: float = 0
             self.min: float = 0
             self.max: float = 0
 

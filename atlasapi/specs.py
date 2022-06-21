@@ -290,7 +290,7 @@ class Host(object):
         """
         if period is None:
             period = AtlasPeriods.WEEKS_1
-        logger.info(f'The granularity is {granularity}')
+        logger.info(f'The period  is {period}')
 
         if granularity is None:
             granularity = AtlasGranularities.HOUR
@@ -383,7 +383,7 @@ class Host(object):
         """
         if period is None:
             period = AtlasPeriods.WEEKS_1
-        logger.info(f'The granularity is {granularity}')
+        logger.info(f'The period is {period}')
 
         if granularity is None:
             granularity = AtlasGranularities.HOUR

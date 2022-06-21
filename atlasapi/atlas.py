@@ -24,7 +24,8 @@ from atlasapi.errors import *
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 from atlasapi.specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, DatabaseUsersPermissionsSpecs, \
-    OptionalAtlasMeasurement, AtlasMeasurement, AtlasMeasurementValue, AtlasMeasurementTypes, ReplicaSetTypes
+    ReplicaSetTypes
+from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement, OptionalAtlasMeasurement
 from typing import Union, Iterator, List, Optional
 from atlasapi.atlas_types import OptionalInt, OptionalBool, ListofDict
 from atlasapi.clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
@@ -606,10 +607,10 @@ class Atlas:
 
 
                             :param return_data:
-                            :rtype: List[specs.AtlasMeasurement]
+                            :rtype: List[measurements.AtlasMeasurement]
                             :type period: AtlasPeriods
                             :type granularity: AtlasGranularities
-                            :type measurement: specs.AtlasMeasurementTypes
+                            :type measurement: measurements.AtlasMeasurementTypes
                         """
 
             if not self.host_list:
@@ -801,14 +802,14 @@ class Atlas:
             Raises:
                 ErrPaginationLimits: Out of limits
 
-                :rtype: List[specs.AtlasMeasurement]
+                :rtype: List[measurements.AtlasMeasurement]
                 :type iterable: OptionalBool
                 :type itemsPerPage: OptionalInt
                 :type pageNum: OptionalInt
                 :type period: AtlasPeriods
                 :type granularity: AtlasGranularities
                 :type host_obj: Host
-                :type measurement: specs.AtlasMeasurementTypes
+                :type measurement: measurements.AtlasMeasurementTypes
 
             """
 

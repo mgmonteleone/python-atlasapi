@@ -7,14 +7,15 @@ from pprint import pprint
 from os import environ, getenv
 
 import atlasapi.specs
+import atlasapi.measurements
 from atlasapi.atlas import Atlas
 from json import dumps
 from tests import BaseTests
 import logging
 from time import sleep
 from atlasapi.lib import AtlasUnits, ClusterType
-from atlasapi.specs import AtlasMeasurement, Host, AtlasPeriods, AtlasGranularities, AtlasMeasurementTypes, \
-    AtlasMeasurementValue, ReplicaSetTypes
+from atlasapi.specs import Host, AtlasPeriods, AtlasGranularities, ReplicaSetTypes
+from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement
 from io import BytesIO
 from datetime import datetime, timedelta
 
@@ -64,9 +65,9 @@ class MeasurementTests(BaseTests):
         print(f'For {self.a.Hosts.host_list_with_measurements.__len__()} hosts:')
         for each in self.a.Hosts.host_list_with_measurements[0].measurements:
             print(f'For metric {each.name}')
-            self.assertIsInstance(each.measurement_stats_friendly_bytes, atlasapi.specs.StatisticalValuesFriendly)
-            print(f'Value is {each.measurement_stats_friendly_bytes.__dict__}')
-            self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
+            self.assertIsInstance(each.measurement_stats_friendly, atlasapi.measurements.StatisticalValuesFriendly)
+            print(f'Value is {each.measurement_stats_friendly.__dict__}')
+            self.assertIsInstance(each.measurement_stats, atlasapi.measurements.StatisticalValues)
 
     test_03_measurement_stats.basic = True
 
@@ -81,9 +82,9 @@ class MeasurementTests(BaseTests):
         print(f'For {self.a.Hosts.host_list_with_measurements.__len__()} hosts:')
         for each in self.a.Hosts.host_list_with_measurements[0].measurements:
             print(f'For metric {each.name}')
-            self.assertIsInstance(each.measurement_stats_friendly_number, atlasapi.specs.StatisticalValuesFriendly)
-            print(f'Value is {each.measurement_stats_friendly_number.__dict__}')
-            self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
+            self.assertIsInstance(each.measurement_stats_friendly, atlasapi.measurements.StatisticalValuesFriendly)
+            print(f'Value is {each.measurement_stats_friendly.__dict__}')
+            self.assertIsInstance(each.measurement_stats, atlasapi.measurements.StatisticalValues)
 
     test_04_measurement_stats_objects.basic = True
 
@@ -97,12 +98,12 @@ class MeasurementTests(BaseTests):
         print(f'For {self.a.Hosts.host_list_with_measurements.__len__()} hosts:')
         for each in self.a.Hosts.host_list_with_measurements[0].measurements:
             print(f'For metric {each.name}')
-            self.assertIsInstance(each.measurement_stats_friendly_number, atlasapi.specs.StatisticalValuesFriendly)
-            print(f'Value is {each.measurement_stats_friendly_number.__dict__}')
+            self.assertIsInstance(each.measurement_stats_friendly, atlasapi.measurements.StatisticalValuesFriendly)
+            print(f'Value is {each.measurement_stats_friendly.__dict__}')
             print(f'For metric {each.name}')
-            self.assertIsInstance(each.measurement_stats_friendly_number, atlasapi.specs.StatisticalValuesFriendly)
-            print(f'Value is {each.measurement_stats_friendly_number.__dict__}')
-            self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
+            self.assertIsInstance(each.measurement_stats_friendly, atlasapi.measurements.StatisticalValuesFriendly)
+            print(f'Value is {each.measurement_stats_friendly.__dict__}')
+            self.assertIsInstance(each.measurement_stats, atlasapi.measurements.StatisticalValues)
 
     test_05_measurement_stats_objects_returned.basic = True
 
@@ -116,9 +117,9 @@ class MeasurementTests(BaseTests):
         print(f'For {self.a.Hosts.host_list_with_measurements.__len__()} hosts:')
         for each in self.a.Hosts.host_list_with_measurements[0].measurements:
             print(f'For metric {each.name}')
-            self.assertIsInstance(each.measurement_stats_friendly_bytes, atlasapi.specs.StatisticalValuesFriendly)
-            print(f'👍Value is {each.measurement_stats_friendly_bytes.__dict__}')
-            self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
+            self.assertIsInstance(each.measurement_stats_friendly, atlasapi.measurements.StatisticalValuesFriendly)
+            print(f'👍Value is {each.measurement_stats_friendly.__dict__}')
+            self.assertIsInstance(each.measurement_stats, atlasapi.measurements.StatisticalValues)
 
     test_06_measurement_stats_cache_bytes_into.basic = True
 
@@ -132,9 +133,9 @@ class MeasurementTests(BaseTests):
         print(f'For {self.a.Hosts.host_list_with_measurements.__len__()} hosts:')
         for each in self.a.Hosts.host_list_with_measurements[0].measurements:
             print(f'For metric {each.name}')
-            self.assertIsInstance(each.measurement_stats_friendly_bytes, atlasapi.specs.StatisticalValuesFriendly)
-            print(f'👍Value is {each.measurement_stats_friendly_bytes.__dict__}')
-            self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
+            self.assertIsInstance(each.measurement_stats_friendly, atlasapi.measurements.StatisticalValuesFriendly)
+            print(f'👍Value is {each.measurement_stats_friendly.__dict__}')
+            self.assertIsInstance(each.measurement_stats, atlasapi.measurements.StatisticalValues)
 
     test_07_measurement_stats_cache_bytes_from.basic = True
 
@@ -148,9 +149,9 @@ class MeasurementTests(BaseTests):
         print(f'For {self.a.Hosts.host_list_with_measurements.__len__()} hosts:')
         for each in self.a.Hosts.host_list_with_measurements[0].measurements:
             print(f'For metric {each.name}')
-            self.assertIsInstance(each.measurement_stats_friendly_bytes, atlasapi.specs.StatisticalValuesFriendly)
-            print(f'👍Value is {each.measurement_stats_friendly_bytes.__dict__}')
-            self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
+            self.assertIsInstance(each.measurement_stats_friendly, atlasapi.measurements.StatisticalValuesFriendly)
+            print(f'👍Value is {each.measurement_stats_friendly.__dict__}')
+            self.assertIsInstance(each.measurement_stats, atlasapi.measurements.StatisticalValues)
 
     test_08_measurement_stats_cache_dirty.basic = True
 
@@ -164,9 +165,9 @@ class MeasurementTests(BaseTests):
         print(f'For {self.a.Hosts.host_list_with_measurements.__len__()} hosts:')
         for each in self.a.Hosts.host_list_with_measurements[0].measurements:
             print(f'For metric {each.name}')
-            self.assertIsInstance(each.measurement_stats_friendly_bytes, atlasapi.specs.StatisticalValuesFriendly)
-            print(f'👍Value is {each.measurement_stats_friendly_bytes.__dict__}')
-            self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
+            self.assertIsInstance(each.measurement_stats_friendly, atlasapi.measurements.StatisticalValuesFriendly)
+            print(f'👍Value is {each.measurement_stats_friendly.__dict__}')
+            self.assertIsInstance(each.measurement_stats, atlasapi.measurements.StatisticalValues)
 
     test_09_measurement_stats_cache_used.basic = True
 
@@ -180,9 +181,8 @@ class MeasurementTests(BaseTests):
             print(f'For {self.a.Hosts.host_list_with_measurements.__len__()} hosts:')
             for each in self.a.Hosts.host_list_with_measurements[0].measurements:
                 print(f'For metric {each.name}')
-                self.assertIsInstance(each.measurement_stats_friendly_number, atlasapi.specs.StatisticalValuesFriendly)
-                print(f'👍Value is {each.measurement_stats_friendly_number.__dict__}')
-                self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
+                print(f'👍Value is {each.measurement_stats_friendly}')
+                self.assertIsInstance(each.measurement_stats_friendly, atlasapi.measurements.StatisticalValuesFriendly)
 
     test_10_measurement_stats_tickets.basic = True
 
@@ -195,10 +195,9 @@ class MeasurementTests(BaseTests):
             self.a.Hosts.get_measurement_for_hosts(measurement=measurement, granularity=granularity, period=period)
             print(f'For {self.a.Hosts.host_list_with_measurements.__len__()} hosts:')
             for each in self.a.Hosts.host_list_with_measurements[0].measurements:
-                print(f'For metric {each.name}')
-                self.assertIsInstance(each.measurement_stats_friendly_number, atlasapi.specs.StatisticalValuesFriendly)
-                print(f'👍Value is {each.measurement_stats_friendly_number.__dict__}')
-                self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
+                logger.info(f'For metric {each.name}'.center(80, '*'))
+                logger.info(f'👍Value is {each.measurement_stats}'.center(80, '*'))
+                self.assertIsInstance(each.measurement_stats, atlasapi.measurements.StatisticalValues)
 
     test_11_measurement_stats_connections.basic = True
 
@@ -249,10 +248,8 @@ class MeasurementTests(BaseTests):
             print(f'For {self.a.Hosts.host_list_with_measurements.__len__()} hosts:')
             for each in self.a.Hosts.host_list_with_measurements[0].measurements:
                 print(f'For metric {each.name}')
-                self.assertIsInstance(each.measurement_stats_friendly_number,
-                                      atlasapi.specs.StatisticalValuesFriendly)
-                print(f'👍Value is {each.measurement_stats_friendly_number.__dict__}')
-                self.assertIsInstance(each.measurement_stats, atlasapi.specs.StatisticalValues)
+                print(f'👍Value is {each.measurement_stats_friendly.__dict__}')
+                self.assertIsInstance(each.measurement_stats, atlasapi.measurements.StatisticalValues)
 
     def test_17_return_multiple_metrics(self):
         self.a.Hosts.fill_host_list()
@@ -289,3 +286,72 @@ class MeasurementTests(BaseTests):
             self.assertEqual(cluster_name, each.cluster_name_alias)
 
     test_20_issue_104_hyphen_in_cluster_name.basic = False
+
+    def test_21_get_partitions_for_host(self):
+        cluster_name = 'pyAtlasTestCluster'
+        self.a.Hosts.fill_host_list(for_cluster=cluster_name)
+
+        for each_host in self.a.Hosts.host_list:
+            partition_names = each_host.get_partitions(self.a)
+            for each_partition in partition_names:
+                self.assertIsInstance(each_partition, str, f"This should return a partition name as str, instead it "
+                                                           f"returned {type(each_partition)}")
+
+    test_21_get_partitions_for_host.basic = True
+
+    def test_22_get_measurements_for_partition(self):
+        cluster_name = 'pyAtlasTestCluster'
+        self.a.Hosts.fill_host_list(for_cluster=cluster_name)
+        for each_host in self.a.Hosts.host_list:
+            pprint(f"For Host: {each_host.hostname}")
+            partition_names = each_host.get_partitions(self.a)
+            for each_partition in partition_names:
+                output: AtlasMeasurement = each_host.get_measurements_for_disk(self.a, each_partition)
+                for each in output:
+                    print('Measurement'.center(80, '*'))
+                    print(f"Name: {each.name}: {each.measurement_stats_friendly.mean} {each.units}")
+                    self.assertIsInstance(each.measurement_stats_friendly,
+                                          atlasapi.measurements.StatisticalValuesFriendly)
+
+    test_22_get_measurements_for_partition.basic = True
+
+    def test_23_get_measurements_for_data_partition(self):
+        cluster_name = 'pyAtlasTestCluster'
+        self.a.Hosts.fill_host_list(for_cluster=cluster_name)
+        for each_host in self.a.Hosts.host_list:
+            pprint(f"For Host: {each_host.hostname}")
+            output: AtlasMeasurement = each_host.data_partition_stats(self.a)
+            for each in output:
+                print('Measurement'.center(80, '*'))
+                print(f"Name: {each.name}: {each.measurement_stats_friendly.mean} {each.units}")
+                self.assertIsInstance(each.measurement_stats_friendly,
+                                      atlasapi.measurements.StatisticalValuesFriendly)
+
+    test_23_get_measurements_for_data_partition.basic = True
+
+    def test_24_get_databases(self):
+        cluster_name = 'pyAtlasTestCluster'
+        self.a.Hosts.fill_host_list(for_cluster=cluster_name)
+        for each_host in self.a.Hosts.host_list:
+            output = each_host.get_databases(self.a)
+            db_list = []
+            for each_db in output:
+                db_list.append(each_db)
+            print(f'There are are {len(db_list)} dbs on {each_host.hostname_alias}'.center(120, '*'))
+            self.assertGreaterEqual(len(db_list), 2, "There should be at least two datbases on each host!")
+
+    test_24_get_databases.basic = True
+
+    def test_25_get_measurements_for_configdb(self):
+        cluster_name = 'pyAtlasTestCluster'
+        self.a.Hosts.fill_host_list(for_cluster=cluster_name)
+        for each_host in self.a.Hosts.host_list:
+            pprint(f"For Host: {each_host.hostname}")
+            output: AtlasMeasurement = each_host.get_measurements_for_database(self.a, database_name="sample_airbnb")
+            for each in output:
+                print('Measurement'.center(80, '*'))
+                print(f"Name: {each.name}: {each.measurement_stats_friendly.mean} {each.units}")
+                self.assertIsInstance(each.measurement_stats_friendly,
+                                      atlasapi.measurements.StatisticalValuesFriendly)
+
+    test_25_get_measurements_for_configdb.basic = True

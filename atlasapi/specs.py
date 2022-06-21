@@ -23,49 +23,30 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from builtins import open
 from builtins import str
 
-from dateutil.parser import parse
-
-from atlasapi.atlas_types import OptionalFloat
-from atlasapi.lib import AtlasPeriods, AtlasGranularities, logger, _GetAll
+from atlasapi.lib import logger
 
 from atlasapi.settings import Settings
 from atlasapi.errors import ErrRole
 
-from datetime import datetime
 from enum import Enum
 from dateutil import parser
 from atlasapi.atlas_types import *
-from typing import Optional, NewType, List, Any, Union, Iterable, BinaryIO, Tuple, Generator
+from typing import Optional, NewType, List, Union, Iterable, BinaryIO, Any
 from datetime import datetime
-import isodate
 from atlasapi.lib import AtlasGranularities, AtlasPeriods, AtlasLogNames
 import logging
 from future import standard_library
-import humanfriendly as hf
 from logging import Logger
-from statistics import mean
-from statistics import StatisticsError
+
+from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement
 
 standard_library.install_aliases()
 logger: Logger = logging.getLogger('Atlas.specs')
 
 
 # etc., as needed
-
-
-def clean_list(data_list: list) -> list:
-    """Returns a list with any none values removed
-
-    Args:
-        data_list (list): The list to be cleaned
-
-    Returns (list): The list cleaned of None values.
-
-    """
-    return list(filter(None, data_list))
 
 
 class IAMType(Enum):
@@ -100,359 +81,6 @@ class HostLogFile(object):
         self.log_name = log_name
 
 
-class StatisticalValues:
-    def __init__(self, data_list: list):
-        try:
-            self.samples: int = len(clean_list(data_list))
-            self.mean: float = float(mean(clean_list(data_list)))
-            self.min: float = float(min(clean_list(data_list)))
-            self.max: float = float(max(clean_list(data_list)))
-        except StatisticsError:
-            logger.warning('Could not compute statistical values.')
-            self.samples: int = 0
-            self.mean: int = 0
-            self.min: float = 0
-            self.max: float = 0
-
-
-class StatisticalValuesFriendly:
-    def __init__(self, data_list: list, data_type: str = None) -> None:
-        """Returns human-readable values for stats
-
-        Args:
-            data_list:
-            data_type: The datatype either bytes or number
-        """
-        try:
-            if data_type is None:
-                data_type = 'bytes'
-            if data_type == 'bytes':
-                self.mean: str = hf.format_size(mean(clean_list(data_list)))
-                self.min: str = hf.format_size(min(clean_list(data_list)))
-                self.max: str = hf.format_size(max(clean_list(data_list)))
-            else:
-                self.mean: str = hf.format_number(mean(clean_list(data_list)))
-                self.min: str = hf.format_number(min(clean_list(data_list)))
-                self.max: str = hf.format_number(max(clean_list(data_list)))
-        except StatisticsError:
-            logger.warning('Could not compute statistical values.')
-            self.mean: str = 'No Value'
-            self.min: str = 'No value'
-            self.max: str = 'No value'
-
-
-class AtlasMeasurementTypes(_GetAll):
-    """
-    Helper class for all available atlas measurements.
-
-    All classes and embedded classes have a get_all class method that returns an iterator of all measurements
-    and sub measurements.
-
-    """
-    connections = 'CONNECTIONS'
-
-    class Asserts(_GetAll):
-        regular = 'ASSERT_REGULAR'
-        warning = 'ASSERT_WARNING'
-        msg = 'ASSERT_MSG'
-        user = 'ASSERT_USER'
-
-    class Cache(_GetAll):
-        bytes_read = 'CACHE_BYTES_READ_INTO'
-        bytes_written = 'CACHE_BYTES_WRITTEN_FROM'
-        dirty = 'CACHE_DIRTY_BYTES'
-        used = 'CACHE_USED_BYTES'
-
-    class Cursors(_GetAll):
-        open = 'CURSORS_TOTAL_OPEN'
-        timed_out = 'CURSORS_TOTAL_TIMED_OUT'
-
-    class Db(_GetAll):
-        storage = 'DB_STORAGE_TOTAL'
-        data_size = 'DB_DATA_SIZE_TOTAL'
-
-    class DocumentMetrics(_GetAll):
-        returned = 'DOCUMENT_METRICS_RETURNED'
-        inserted = 'DOCUMENT_METRICS_INSERTED'
-        updated = 'DOCUMENT_METRICS_UPDATED'
-        deleted = 'DOCUMENT_METRICS_DELETED'
-
-    class ExtraInfo(_GetAll):
-        page_faults = 'EXTRA_INFO_PAGE_FAULTS'
-
-    class GlobalLockCurrentQueue(_GetAll):
-        total = 'GLOBAL_LOCK_CURRENT_QUEUE_TOTAL'
-        readers = 'GLOBAL_LOCK_CURRENT_QUEUE_READERS'
-        writers = 'GLOBAL_LOCK_CURRENT_QUEUE_WRITERS'
-
-    class Memory(_GetAll):
-        resident = 'MEMORY_RESIDENT'
-        virtual = 'MEMORY_VIRTUAL'
-        mapped = 'MEMORY_MAPPED'
-
-    class Network(_GetAll):
-        bytes_id = 'NETWORK_BYTES_IN'  # initial typo, kept for backwards compatibility
-        bytes_in = 'NETWORK_BYTES_IN'
-        bytes_out = 'NETWORK_BYTES_OUT'
-        num_requests = 'NETWORK_NUM_REQUESTS'
-
-    class Opcounter(_GetAll):
-        cmd = 'OPCOUNTER_CMD'
-        query = 'OPCOUNTER_QUERY'
-        update = 'OPCOUNTER_UPDATE'
-        delete = 'OPCOUNTER_DELETE'
-        getmore = 'OPCOUNTER_GETMORE'
-        insert = 'OPCOUNTER_INSERT'
-
-        class Repl(_GetAll):
-            cmd = 'OPCOUNTER_REPL_CMD'
-            update = 'OPCOUNTER_REPL_UPDATE'
-            delete = 'OPCOUNTER_REPL_DELETE'
-            insert = 'OPCOUNTER_REPL_INSERT'
-
-    class Operations(_GetAll):
-        scan_and_order = 'OPERATIONS_SCAN_AND_ORDER'
-
-        class ExecutionTime(_GetAll):
-            reads = 'OP_EXECUTION_TIME_READS'
-            writes = 'OP_EXECUTION_TIME_WRITES'
-            commands = 'OP_EXECUTION_TIME_COMMANDS'
-
-    class Oplog(_GetAll):
-        master_time = 'OPLOG_MASTER_TIME'
-        rate = 'OPLOG_RATE_GB_PER_HOUR'
-
-    class QueryExecutor(_GetAll):
-        scanned = 'QUERY_EXECUTOR_SCANNED'
-        scanned_objects = 'QUERY_EXECUTOR_SCANNED_OBJECTS'
-
-    class QueryTargetingScanned(_GetAll):
-        per_returned = 'QUERY_TARGETING_SCANNED_PER_RETURNED'
-        objects_per_returned = 'QUERY_TARGETING_SCANNED_OBJECTS_PER_RETURNED'
-
-    class TicketsAvailable(_GetAll):
-        reads = 'TICKETS_AVAILABLE_READS'
-        writes = 'TICKETS_AVAILABLE_WRITE'
-
-    class CPU(_GetAll):
-        class Process(_GetAll):
-            user = 'PROCESS_CPU_USER'
-            kernel = 'PROCESS_CPU_KERNEL'
-            children_user = 'PROCESS_CPU_CHILDREN_USER'
-            children_kernel = 'PROCESS_CPU_CHILDREN_KERNEL'
-
-        class ProcessNormalized(_GetAll):
-            user = 'PROCESS_NORMALIZED_CPU_USER'
-            kernel = 'PROCESS_NORMALIZED_CPU_KERNEL'
-            children_user = 'PROCESS_NORMALIZED_CPU_CHILDREN_USER'
-            children_kernel = 'PROCESS_NORMALIZED_CPU_CHILDREN_KERNEL'
-
-        class System(_GetAll):
-            user = 'SYSTEM_CPU_USER'
-            kernel = 'SYSTEM_CPU_KERNEL'
-            nice = 'SYSTEM_CPU_NICE'
-            iowait = 'SYSTEM_CPU_IOWAIT'
-            irq = 'SYSTEM_CPU_IRQ'
-            softirq = 'SYSTEM_CPU_SOFTIRQ'
-            guest = 'SYSTEM_CPU_GUEST'
-            steal = 'SYSTEM_CPU_STEAL'
-
-        class SystemNormalized(_GetAll):
-            user = 'SYSTEM_NORMALIZED_CPU_USER'
-            kernel = 'SYSTEM_NORMALIZED_CPU_KERNEL'
-            nice = 'SYSTEM_NORMALIZED_CPU_NICE'
-            iowait = 'SYSTEM_NORMALIZED_CPU_IOWAIT'
-            irq = 'SYSTEM_NORMALIZED_CPU_IRQ'
-            softirq = 'SYSTEM_NORMALIZED_CPU_SOFTIRQ'
-            guest = 'SYSTEM_NORMALIZED_CPU_GUEST'
-            steal = 'SYSTEM_NORMALIZED_CPU_STEAL'
-
-
-class AtlasMeasurementValue(object):
-    def __init__(self, value_dict: dict):
-        """
-        Class for holding a measurement value
-        :type value_dict: dict
-        :param value_dict: An Atlas standard Measurement value dictionary.
-        """
-        timestamp: int = value_dict.get('timestamp', None)
-        value: float = value_dict.get('value', None)
-        try:
-            self.timestamp: datetime = parse(timestamp)
-        except (ValueError, TypeError):
-            logger.warning('Could not parse "{}" as a datetime.')
-            self.timestamp = None
-        try:
-            if value is None:
-                self.value = None
-            self.value: float = float(value)
-        except ValueError as e:
-            self.value = None
-            logger.warning('Could not parse the metric value "{}". Error was {}'.format(value, e))
-        except TypeError:
-            logger.info('Value is none.')
-            self.value = None
-
-    # noinspection PyBroadException
-    @property
-    def value_int(self) -> Optional[int]:
-        try:
-            return int(self.value)
-        except Exception as e:
-            return None
-
-    @property
-    def value_float(self) -> Optional[float]:
-        try:
-            return float(self.value)
-        except Exception:
-            return None
-
-    def as_dict(self) -> dict:
-        return dict(timestamp=self.timestamp.__str__(), value=self.value, value_int=self.value_int,
-                    value_float=self.value_float)
-
-    @property
-    def as_tuple(self) -> Tuple[datetime, OptionalFloat]:
-        """
-        Returns a MeasurementValue as a tuple, timestamp first.
-        :rtype: Tuple[datetime,OptionalFloat]
-        :return: A tuple with a datetime and a float
-        """
-        return self.timestamp, self.value
-
-
-class AtlasMeasurement(object):
-    """A point in time container for an Atlas measurement.
-
-            For a certain period, granularity and measurementType holds a list fo measurementValues.
-
-            Args:
-                name (AtlasMeasurementTypes): The name of the measurement type
-                period (AtlasPeriods): The period the measurement covers
-                granularity (AtlasGranularities): The granularity used for the measurement
-                measurements (List[AtlasMeasurementValue]): A list of the actual measurement values
-            """
-
-    def __init__(self, name: AtlasMeasurementTypes, period: AtlasPeriods,
-                 granularity: AtlasGranularities, measurements: List[AtlasMeasurementValue] = None):
-        if measurements is None:
-            measurements = list()
-        self.name: AtlasMeasurementTypes = name
-        self.period: AtlasPeriods = period
-        self.granularity: AtlasGranularities = granularity
-        self._measurements: List[AtlasMeasurementValue] = measurements
-
-    @property
-    def measurements(self) -> Iterable[AtlasMeasurementValue]:
-        """
-        Getter for the measurements.
-
-        Returns:
-            Iterator[AtlasMeasurementValue]: An iterator containing values objects.
-        """
-        for item in self._measurements:
-            yield item
-
-    @measurements.setter
-    def measurements(self, value):
-        if type(value) == list:
-            self._measurements.extend(value)
-        else:
-            self._measurements.append(value)
-
-    @measurements.deleter
-    def measurements(self):
-        self._measurements = []
-
-    def measurements_as_tuples(self):
-        if isinstance(self._measurements[0], AtlasMeasurementValue):
-            for item in self._measurements:
-                yield item.as_tuple
-
-    @property
-    def date_start(self):
-        """The date of the first measurement.
-
-        Returns:
-            datetime: The date of the first measurement.
-        """
-        seq = [x.timestamp for x in self._measurements]
-        return min(seq)
-
-    @property
-    def date_end(self):
-        """The date of the last measurement
-
-        Returns:
-            datetime: The date of the last measurement.
-
-        """
-        seq = [x.timestamp for x in self._measurements]
-        return max(seq)
-
-    @property
-    def measurements_count(self):
-        """The count of measurements
-
-        Returns:
-            int: The count of measurements in the set
-        """
-        return len(self._measurements)
-
-    @property
-    def as_dict(self):
-        """Returns the measurement as a dict, including the computed properties.
-
-        Returns:
-            dict:
-        """
-        return dict(measurements=self._measurements, date_start=self.date_start, date_end=self.date_end, name=self.name,
-                    period=self.period, granularity=self.granularity, measurements_count=self.measurements_count
-                    )
-
-    @property
-    def measurement_stats(self) -> StatisticalValues:
-        """Returns a statistical info for measurement data"""
-        data_list = list()
-        for each_measurement in self.measurements:
-            data_list.append(each_measurement.value_float)
-        return StatisticalValues(data_list=data_list)
-
-    @property
-    def measurement_stats_friendly_bytes(self) -> StatisticalValuesFriendly:
-        """Returns  statistical info for measurement data in friendly bytes format"""
-        data_list = list()
-        for each_measurement in self.measurements:
-            data_list.append(each_measurement.value_float)
-        return StatisticalValuesFriendly(data_list=data_list)
-
-    @property
-    def measurement_stats_friendly_number(self) -> StatisticalValuesFriendly:
-        """Returns  statistical info for measurement data in friendly bytes format"""
-        data_list = list()
-        for each_measurement in self.measurements:
-            data_list.append(each_measurement.value_float)
-        return StatisticalValuesFriendly(data_list=data_list, data_type='number')
-
-    def __hash__(self):
-        return hash(self.name + '-' + self.period)
-
-    def __eq__(self, other):
-        """
-        Measurements are considered duplicate of name and period are the same
-        :param other:
-        :return:
-        """
-        if isinstance(other, AtlasMeasurement):
-            return ((self.name == other.name) and (self.period == other.period))
-
-
-ListOfAtlasMeasurementValues = NewType('ListOfAtlasMeasurementValues', List[Optional[AtlasMeasurementValue]])
-
-OptionalAtlasMeasurement = NewType('OptionalAtlasMeasurement', Optional[AtlasMeasurement])
-
-
 class Host(object):
     def __init__(self, data: dict) -> None:
         """An Atlas Host
@@ -475,7 +103,7 @@ class Host(object):
             port (int): The TCP port the instance is running on.
             replica_set_name (str): The name of the replica set running on the instance
             type (ReplicaSetTypes): The type of replica set this intstance is a member of
-            measurements (Optional[List[AtlasMeasurement]]: Holds list of host Measurements
+            measurements (Optional[List[measurements.AtlasMeasurement]]: Holds list of host Measurements
             cluster_name (str): The cluster name (taken from the hostname)
             cluster_name_alias (str) : The cluster name user alias, taken from the hostname user friendly alias.
             log_files (Optional[List[HostLogFile]]): Holds list of log files when requested.
@@ -594,6 +222,7 @@ class Host(object):
 
             for each in measurements:
                 measurement_obj = AtlasMeasurement(name=each.get('name'),
+                                                   units=each.get('units', None),
                                                    period=period,
                                                    granularity=granularity)
                 for each_and_every in each.get('dataPoints'):
@@ -621,6 +250,172 @@ class Host(object):
             self.log_files = [log_obj]
         else:
             self.log_files.append(log_obj)
+
+    def get_partitions(self, atlas_obj) -> Iterable[str]:
+        """Returns names of all disks(partitions) configured on the Atlas Host
+        Args:
+            atlas_obj :
+
+        Returns:
+            Iterable[str]: A list of partition names.
+        """
+        uri = Settings.api_resources["Monitoring and Logs"]["Get Available Disks for Process"].format(
+            group_id=self.group_id,
+            host=self.hostname,
+            port=self.port,
+        )
+        logger.info(f"The full URI being called is {Settings.BASE_URL + uri}")
+        return_val = atlas_obj.network.get(Settings.BASE_URL + uri)
+        for each_partition in return_val.get("results"):
+            partition_name: str = each_partition.get('partitionName', None)
+            yield partition_name
+
+    def get_measurements_for_disk(self, atlas_obj, partition_name: str,
+                                  granularity: Optional[AtlasGranularities] = None,
+                                  period: Optional[AtlasPeriods] = None, iterable: bool = True) -> \
+            Iterable[Union[AtlasMeasurement, Any]]:
+        """Returns All Metrics for a Hosts partition, for a given period and granularity.
+
+        Uses default granularity and period if not passed.
+
+        Args:
+            iterable (bool): Defaults to true, if not true will return the raw response from API.
+            partition_name: The Atlas partition name (commonly `data`)
+            period (Optional[AtlasPeriods]):The period for the disk measurements
+            granularity (Optional[AtlasGranularitues]): The granularity for the disk measurements.
+            atlas_obj (atlasapi.atlas.Atlas): A configured Atlas instance to connect to the API with.
+
+        Returns:
+            List[str]: A list of partition names.
+        """
+        if period is None:
+            period = AtlasPeriods.WEEKS_1
+        logger.info(f'The period  is {period}')
+
+        if granularity is None:
+            granularity = AtlasGranularities.HOUR
+        logger.info(f'The granularity is {granularity}')
+
+        parameters = {'granularity': granularity, 'period': period}
+        uri = Settings.api_resources["Monitoring and Logs"]["Get Measurements of a Disk for Process"].format(
+            group_id=self.group_id,
+            host=self.hostname,
+            port=self.port,
+            disk_name=partition_name,
+        )
+        logger.info(f"The full URI being called is {Settings.BASE_URL + uri}")
+        logger.info(f"We sent the following parameters: {parameters}")
+        return_val = atlas_obj.network.get_big(Settings.BASE_URL + uri, params=parameters)
+
+        measurement_obj = None
+        if iterable:
+            measurements = return_val.get('measurements')
+            measurements_count = len(measurements)
+            logger.warning('There are {} measurements.'.format(measurements_count))
+            for each in measurements:
+                measurement_obj = AtlasMeasurement(name=each.get('name'),
+                                                   period=period,
+                                                   granularity=granularity,
+                                                   units=each.get('units', None))
+                for each_and_every in each.get('dataPoints'):
+                    measurement_obj.measurements = AtlasMeasurementValue(each_and_every)
+
+                yield measurement_obj
+
+        return return_val
+
+    def data_partition_stats(self, atlas_obj, granularity: Optional[AtlasGranularities] = None,
+                             period: Optional[AtlasPeriods] = None, ) -> Iterable[AtlasMeasurement]:
+        """Returns disk measurements for the data partition of the host.
+
+        Hard codes the name of the partition to `data` and returns all metrics.
+
+        Args:
+            atlas_obj: Instantiated Atlas instance to access the API
+            granularity (Optional[AtlasGranularitues]): The granularity for the disk measurements.
+            atlas_obj (atlasapi.atlas.Atlas): A configured Atlas instance to connect to the API with.
+
+        Returns (Iterable[AtlasMeasurement]): A generator yielding AtlasMeasurements
+
+        """
+        return self.get_measurements_for_disk(atlas_obj=atlas_obj, partition_name='data', granularity=granularity,
+                                              period=period)
+
+    def get_databases(self, atlas_obj) -> Iterable[str]:
+        """Returns all disks(partitions) configured on the Atlas Host
+
+        Yields names of databases, and appends them to the databa
+
+        Args:
+            atlas_obj :
+
+        Returns:
+            List[str]: A list of database names.
+        """
+        uri = Settings.api_resources["Monitoring and Logs"]["Get Available Databases for Process"].format(
+            group_id=self.group_id,
+            host=self.hostname,
+            port=self.port,
+        )
+        logger.info(f"The full URI being called is {Settings.BASE_URL + uri}")
+        return_val = atlas_obj.network.get(Settings.BASE_URL + uri)
+        for each_database in return_val.get("results"):
+            db_name = each_database.get('databaseName', None)
+            yield db_name
+
+    def get_measurements_for_database(self, atlas_obj, database_name: str,
+                                      granularity: Optional[AtlasGranularities] = None,
+                                      period: Optional[AtlasPeriods] = None, iterable: bool = True) -> \
+            Iterable[Union[AtlasMeasurement, Any]]:
+        """Returns All Metrics for a database, for a given period and granularity.
+
+        Uses default granularity and period if not passed.
+
+        Args:
+            iterable (bool): Defaults to true, if not true will return the raw response from API.
+            database_name (str): The database name (local should always exist, and can be used for testing)
+            period (Optional[AtlasPeriods]):The period for the disk measurements
+            granularity (Optional[AtlasGranularitues]): The granularity for the disk measurements.
+            atlas_obj (atlasapi.atlas.Atlas): A configured Atlas instance to connect to the API with.
+
+        Returns:
+           Iterable[Union[AtlasMeasurement, Any]: Yields AtlasMeasirements or the original response.
+        """
+        if period is None:
+            period = AtlasPeriods.WEEKS_1
+        logger.info(f'The period is {period}')
+
+        if granularity is None:
+            granularity = AtlasGranularities.HOUR
+        logger.info(f'The granularity is {granularity}')
+
+        parameters = {'granularity': granularity, 'period': period}
+        uri = Settings.api_resources["Monitoring and Logs"]["Get Measurements of a Database for Process"].format(
+            group_id=self.group_id,
+            host=self.hostname,
+            port=self.port,
+            database_name=database_name,
+        )
+        logger.info(f"The full URI being called is {Settings.BASE_URL + uri}")
+        logger.info(f"We sent the following parameters: {parameters}")
+        return_val = atlas_obj.network.get_big(Settings.BASE_URL + uri, params=parameters)
+
+        measurement_obj = None
+        if iterable:
+            measurements = return_val.get('measurements')
+            measurements_count = len(measurements)
+            logger.warning('There are {} measurements.'.format(measurements_count))
+            for each in measurements:
+                measurement_obj = AtlasMeasurement(name=each.get('name'),
+                                                   period=period,
+                                                   granularity=granularity,
+                                                   units=each.get('units', None))
+                for each_and_every in each.get('dataPoints'):
+                    measurement_obj.measurements = AtlasMeasurementValue(each_and_every)
+
+                yield measurement_obj
+
+        return return_val
 
     def __hash__(self):
         return hash(self.hostname)

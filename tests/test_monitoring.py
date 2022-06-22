@@ -355,3 +355,16 @@ class MeasurementTests(BaseTests):
                                       atlasapi.measurements.StatisticalValuesFriendly)
 
     test_25_get_measurements_for_configdb.basic = True
+
+    def test_26_issue_114_add_ten_second_granularity(self):
+        cluster_name = 'pyAtlasTestCluster'
+        self.a.Hosts.fill_host_list(for_cluster=cluster_name)
+        host = list(self.a.Hosts.host_list)[0]
+        pprint(f"For Host: {host.hostname}")
+        output: AtlasMeasurement = host.get_measurements_for_disk(self.a,partition_name="data", granularity=AtlasGranularities.TEN_SECOND, period=AtlasPeriods.HOURS_24)
+        for each in output:
+            print('Measurement'.center(80, '*'))
+            print(f"Name: {each.name}: {each.measurement_stats_friendly.mean} {each.units} {each.granularity}")
+
+    # This test requires a cluster of m40 or higher , so will not run this in the automated suite.
+    test_26_issue_114_add_ten_second_granularity.basic = False

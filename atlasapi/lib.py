@@ -72,10 +72,12 @@ class AtlasGranularities(object):
     To add more possible granularities, add them here.
 
     """
+    TEN_SECOND = duration_isoformat(Duration(seconds=10))
     MINUTE = duration_isoformat(Duration(minutes=1))
     FIVE_MINUTE = duration_isoformat(Duration(minutes=5))
     HOUR = duration_isoformat(Duration(hours=1))
     DAY = duration_isoformat(Duration(days=1))
+
 
 
 class AtlasPeriods(object):

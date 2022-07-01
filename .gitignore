@@ -8,3 +8,5 @@ dist
 .eggs
 gendocs/_build/
 /docs/
+.vscode/settings.json
+.env

@@ -25,6 +25,9 @@ class Settings:
     # Atlas APIs
     BASE_URL = getenv('BASE_URL', 'https://cloud.mongodb.com')
     URI_STUB = '/api/atlas/v1.0'
+   
+    # Pagination defaults
+    ITEMS_PER_PAGE: int = int(os.getenv('ITEMS_PER_PAGE', 500))
 
     api_resources = {
         "Project": {
@@ -56,11 +59,8 @@ class Settings:
                                                    "{host}:{port}/databases"
         },
         "Events": {
-            "Get All Project Events": URI_STUB + "/groups/{group_id}/events??includeRaw=true&pageNum={page_num}"
-                                                 "&itemsPerPage={items_per_page}",
-            "Get Project Events Since Date": URI_STUB + "/groups/{group_id}/events?includeRaw=true&pageNum={"
-                                                        "page_num}&itemsPerPage={items_per_page}&minDate={"
-                                                        "min_date}"
+            "Get All Project Events": URI_STUB + "/groups/{group_id}/events?includeRaw=true" + f"&itemsPerPage={ITEMS_PER_PAGE}",
+            "Get Project Events Since Date": URI_STUB + "/groups/{group_id}/events?includeRaw=true&minDate={min_date}" + f"&itemsPerPage={ITEMS_PER_PAGE}"
         },
         "Clusters": {
             "Get All Clusters": "/api/atlas/v1.0/groups/%s/clusters?pageNum=%d&itemsPerPage=%d",

@@ -18,6 +18,7 @@ Network module
 Module which handles the basic network operations with the Atlas API>
 """
 
+from math import ceil
 import requests
 from requests.auth import HTTPDigestAuth, HTTPBasicAuth
 from atlasapi.settings import Settings
@@ -125,6 +126,40 @@ class Network:
             if r:
                 r.connection.close()
 
+    def _paginate(self, method , url, **kwargs):
+        """(Internal) Paginate requests
+        
+        Args:
+            method (str): method for the Request object: GET, OPTIONS, HEAD, POST, PUT, PATCH, or DELETE.
+            url (str): URL for the Request object
+
+        Yields:
+            dict: Response payload
+        """
+        session = None
+
+        try:
+            session = requests.Session()
+            request = session.request(method=method, url=url, **kwargs)
+            logger.debug("Request arguments: {}".format(str(kwargs)))
+            first_page = self.answer(request.status_code, request.json())
+            yield first_page
+            total_count = first_page.get("totalCount", 0)
+            items_per_page = Settings.itemsPerPage
+            if total_count > items_per_page:
+                for page_number in range(2, ceil(total_count / items_per_page) + 1):
+                    request = session.request(method=method, url=url, params={'pageNum':page_number}, **kwargs)
+                    logger.debug("Request arguments: {}".format(str(kwargs)))
+                    next_page = self.answer(request.status_code, request.json())
+                    yield next_page
+        except Exception as e:
+            logger.warning('Request: {}'.format(request.request.__dict__))
+            logger.warning('Response: {}'.format(request.__dict__))
+            raise e
+        finally:
+            if session:
+                session.close()
+    
     def get(self, uri):
         """Get request
         
@@ -137,64 +172,13 @@ class Network:
         Raises:
             Exception: Network issue
         """
-        r = None
-
-        try:
-            r = requests.get(uri,
-                             allow_redirects=True,
-                             timeout=Settings.requests_timeout,
-                             headers={},
-                             auth=self.auth_method(self.user, self.password))
-            logger.debug("Auth information = {} {}".format(self.user, self.password))
-
-            return self.answer(r.status_code, r.json())
-        except Exception as e:
-            logger.warning('Request: {}'.format(r.request.__dict__))
-            logger.warning('Response: {}'.format(r.__dict__))
-            raise e
-        finally:
-            if r:
-                r.connection.close()
-
-    def get_big(self, uri, params: dict = None):
-        """Get request (max results)
-
-        This is a temporary fix until we re-factor pagination.
-
-        Args:
-            uri (str): URI
-
-        Returns:
-            Json: API response
-
-        Raises:
-            Exception: Network issue
-        """
-        r = None
-        print(f"Revieved the following parameters {params}")
-        if params:
-            logger.warning(f"Revieved the following parameters {params}")
-            merge({'itemsPerPage': Settings.itemsPerPage},params)
-            logger.warning(f"The parameters are now {params}")
-        else:
-            params = {'itemsPerPage': Settings.itemsPerPage}
-
-        try:
-            logger.warning(f"The parameters object is {params}")
-            r = requests.get(uri,
-                             allow_redirects=True,
-                             params=params,
-                             timeout=Settings.requests_timeout,
-                             headers={},
-                             auth=self.auth_method(self.user, self.password))
-            logger.debug("Auth information = {} {}".format(self.user, self.password))
-
-            return self.answer(r.status_code, r.json())
-        except Exception as e:
-            raise e
-        finally:
-            if r:
-                r.connection.close()
+        yield from self._paginate(
+                method='GET',
+                url=uri,
+                allow_redirects=True,
+                timeout=Settings.requests_timeout,
+                headers={},
+                auth=self.auth_method(self.user, self.password))
 
     def post(self, uri, payload):
         """Post request

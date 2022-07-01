@@ -30,7 +30,7 @@ from typing import Union, Iterator, List, Optional
 from atlasapi.atlas_types import OptionalInt, OptionalBool, ListofDict
 from atlasapi.clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
     InstanceSizeName, AdvancedOptions, TLSProtocols
-from atlasapi.events import atlas_event_factory, ListOfEvents
+from atlasapi.events import atlas_event_factory, EventsIterable
 import logging
 from typing import Union, Iterable, Set, BinaryIO, Generator, Iterator
 from atlasapi.errors import ErrAtlasUnauthorized, ErrAtlasBadRequest
@@ -890,78 +890,49 @@ class Atlas:
             self.atlas = atlas  # type: Atlas
             self.logger = logging.getLogger('Atlas.Events')  # type: logging
 
-        def _get_all_project_events(self, since_datetime: datetime = None, pageNum: int = Settings.pageNum,
-                                    itemsPerPage: int = Settings.itemsPerPage,
-                                    iterable: bool = False) -> ListOfEvents:
+        def _get_all_project_events(self, since_datetime: datetime = None):
             """Get All Project Events
 
             Internal use only, actual data retrieval comes from properties all
             url: https://docs.atlas.mongodb.com/reference/api/events-projects-get-all/
 
             Keyword Args:
-                pageNum (int): Page number
-                itemsPerPage (int): Number of Users per Page
-                iterable (bool): To return an iterable high level object instead of a low level API response
+                since_datetime (datetime): Date and time from when Atlas starts returning events.
 
-            Returns:
-                ListOfEvents or dict: Iterable object representing this function OR Response payload
-
-            Raises:
-                ErrPaginationLimits: Out of limits
-                :rtype: Union[ListOfEvents, dict]
-                :type iterable: OptionalBool
-                :type itemsPerPage: OptionalInt
-                :type pageNum: OptionalInt
-
+            Yields:
+                AtlasEvent: An Atlas Event
             """
-
-            # Check limits and raise an Exception if needed
-            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
-
-            if iterable:
-                item_list = list(EventsGetForProject(self.atlas, since_datetime, pageNum, itemsPerPage))
-                obj_list: ListOfEvents = list()
-                for item in item_list:
-                    obj_list.append(atlas_event_factory(item))
-                return obj_list
-
             if since_datetime:
                 uri = Settings.api_resources["Events"]["Get Project Events Since Date"].format(
                     min_date=since_datetime.isoformat(),
-                    group_id=self.atlas.group,
-                    page_num=pageNum,
-                    items_per_page=itemsPerPage)
-
-                return_val = self.atlas.network.get(Settings.BASE_URL + uri)
-
+                    group_id=self.atlas.group)
             else:
                 uri = Settings.api_resources["Events"]["Get All Project Events"].format(
-                    group_id=self.atlas.group,
-                    page_num=pageNum,
-                    items_per_page=itemsPerPage)
-
-                return_val = self.atlas.network.get(Settings.BASE_URL + uri)
-            return return_val
+                    group_id=self.atlas.group)
+            response = self.atlas.network.get(Settings.BASE_URL + uri)
+            for page in response:
+                for event in page["results"]:
+                    yield atlas_event_factory(event)
 
         @property
-        def all(self) -> ListOfEvents:
+        def all(self) -> EventsIterable:
             """
-            Returns all events for the current project/group.
+            Returns an iterable of all events for the current project/group.
 
-            Returns:
-                ListOfEvents: A list of event objects.
+            Yields:
+                EventsIterable: An iterable of event objects.
 
             """
-            return self._get_all_project_events(iterable=True)
+            yield from self._get_all_project_events()
 
-        def since(self, since_datetime: datetime) -> ListOfEvents:
+        def since(self, since_datetime: datetime) -> EventsIterable:
             """
-            Returns all events since the passed datetime. (UTC)
+            Returns an iterable of all events since the passed datetime. (UTC)
 
-            Returns:
-                ListOfEvents:
+            Yields:
+                EventsIterable: An iterable of event objects.
             """
-            return self._get_all_project_events(iterable=True, since_datetime=since_datetime)
+            yield from self._get_all_project_events(since_datetime=since_datetime)
 
     class _DatabaseUsers:
         """Database Users API
@@ -2056,7 +2027,7 @@ class Atlas:
             uri: str = Settings.api_resources["Organizations"]["Projects associated with the Org"].format(
                 ORG_ID=org_id)
 
-            response = self.atlas.network.get_big(Settings.BASE_URL + uri)
+            response = self.atlas.network.get(Settings.BASE_URL + uri)
             for entry in response.get('results', []):
                 yield Project.from_dict(entry)
 
@@ -2133,28 +2104,6 @@ class HostsGetAll(AtlasPagination):
 
     def __init__(self, atlas: Atlas, pageNum: int, itemsPerPage: int):
         super().__init__(atlas, atlas.Hosts._get_all_hosts, pageNum, itemsPerPage)
-
-
-# noinspection PyProtectedMember
-class EventsGetForProject(AtlasPagination):
-
-    def __init__(self, atlas: Atlas, since_datetime: datetime, pageNum: int, itemsPerPage: int):
-        super().__init__(atlas, self.fetch, pageNum, itemsPerPage)
-        self._get_all_project_events = atlas.Events._get_all_project_events
-        self.since_datetime = since_datetime
-
-    def fetch(self, pageNum, itemsPerPage):
-        """Intermediate fetching
-
-        Args:
-            pageNum (int): Page number
-            itemsPerPage (int): Number of Events per Page
-
-        Returns:
-            dict: Response payload
-        """
-        return self._get_all_project_events(self.since_datetime, pageNum, itemsPerPage)
-
 
 class DatabaseUsersGetAll(AtlasPagination):
     """Pagination for Database User : Get All"""

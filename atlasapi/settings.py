@@ -24,7 +24,7 @@ from os import getenv
 class Settings:
     # Atlas APIs
     BASE_URL = getenv('BASE_URL', 'https://cloud.mongodb.com')
-    URI_STUB = '/api/atlas/v1.0'
+    URI_STUB = getenv('URI_STUB', '/api/atlas/v1.0'))
 
     api_resources = {
         "Project": {

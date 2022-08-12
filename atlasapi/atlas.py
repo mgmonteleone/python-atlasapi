@@ -410,8 +410,12 @@ class Atlas:
             elif existing_config.paused is True and toggle_if_paused is True:
                 logger.warning('Cluster is paused, will toggle to unpaused, since toggle_if paused is true')
                 new_config = dict(paused=False)
-            else:
+            elif toggle_if_paused is False:
                 new_config = dict(paused=True)
+            else:
+                logger.error("The cluster is unpaused. No need to unpause again.")
+                raise ErrAtlasBadRequest(400,
+                                         {'msg': 'The cluster is already unpaused. No need to unpause again.'})
             return self.modify_cluster(cluster=cluster, cluster_config=new_config)
 
         def test_failover(self, cluster: str) -> Optional[dict]:

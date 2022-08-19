@@ -14,6 +14,7 @@ from tests import BaseTests
 import logging
 from time import sleep
 from datetime import datetime, timedelta, timezone
+from types import GeneratorType
 
 USER = getenv('ATLAS_USER', None)
 API_KEY = getenv('ATLAS_KEY', None)
@@ -30,21 +31,25 @@ class EventsTests(BaseTests):
 
     def test_00_All_Events(self):
         out = self.a.Events.all
-        self.assertIsInstance(out, list)
-        self.assertIsInstance(out[0], events._AtlasBaseEvent)
-        self.assertIsInstance(out[10], events._AtlasBaseEvent)
-        verbose_logger.warning(f'The count of all events is {len(out)}')
+        self.assertIsInstance(out, GeneratorType)
+        len = 0
+        for each in out:
+            self.assertIsInstance(each, events._AtlasBaseEvent)
+            len+=1
+        verbose_logger.warning(f'The count of all events is {len}')
 
     test_00_All_Events.basic = False
 
     def test_01_get_project_events_since(self):
         test_datetime = datetime.utcnow() - timedelta(hours=12)
         verbose_logger.info(f'Events Since {test_datetime.isoformat()}')
-        out = self.a.Events._get_all_project_events(iterable=True, since_datetime=test_datetime)
-        verbose_logger.warning(f'The count of since events is {len(out)}')
-        self.assertIsInstance(out, list)
+        out = self.a.Events._get_all_project_events(since_datetime=test_datetime)
+        self.assertIsInstance(out, GeneratorType)
+        len = 0
         for each in out:
             self.assertIsInstance(each, events._AtlasBaseEvent)
+            len+=1
+        verbose_logger.warning(f'The count of since events is {len}')
 
     test_01_get_project_events_since.basic = True
 
@@ -53,10 +58,12 @@ class EventsTests(BaseTests):
         test_datetime = datetime.utcnow() - timedelta(hours=12)
         verbose_logger.info(f'Events Since (public) {test_datetime.isoformat()}')
         out = self.a.Events.since(test_datetime)
-        verbose_logger.warning(f'The count of since events is {len(out)}')
-        self.assertIsInstance(out, list)
+        self.assertIsInstance(out, GeneratorType)
+        len = 0
         for each in out:
             self.assertIsInstance(each, events._AtlasBaseEvent)
+            len+=1
+        verbose_logger.warning(f'The count of since events is {len}')
 
     test_02_since.basic = True
 
@@ -67,9 +74,12 @@ class EventsTests(BaseTests):
         test_datetime = datetime.utcnow() - timedelta(hours=12)
         verbose_logger.info(f'CPS Events Since (public) {test_datetime.isoformat()}')
         out = self.a.Events.since(test_datetime)
-        verbose_logger.warning(f'The count of since events is {len(out)}')
-        self.assertIsInstance(out, list)
+        self.assertIsInstance(out, GeneratorType)
+        len = 0
         for each in out:
             if type(each) == events.AtlasCPSEvent:
                 self.assertIsInstance(each,events.AtlasCPSEvent)
+                len+=1
+        verbose_logger.warning(f'The count of CPS Events is {len}')
+
     test_04_CPS.basic = True

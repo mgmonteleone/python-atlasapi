@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import NewType, List, Optional, Union, Dict
+from typing import NewType, List, Optional, Union, Dict, Iterable
 from dateutil.parser import parse
 import logging
 from datetime import datetime
@@ -154,4 +154,4 @@ def atlas_event_factory(value_dict: dict) -> Union[
         return AtlasEvent(value_dict=value_dict)
 
 
-ListOfEvents = NewType('ListOfEvents', List[Union[Dict, _AtlasBaseEvent]])
+EventsIterable = NewType('EventsIterable', Iterable[Union[Dict, _AtlasBaseEvent]])

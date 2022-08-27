@@ -153,22 +153,22 @@ class Network:
                     next_page = self.answer(request.status_code, request.json())
                     yield next_page
         except Exception as e:
-            logger.warning('Request: {}'.format(request.request.__dict__))
-            logger.warning('Response: {}'.format(request.__dict__))
+            #logger.warning('Request: {}'.format(request.__dict__))
+            #logger.warning('Response: {}'.format(request.__dict__))
             raise e
         finally:
             if session:
                 session.close()
-    
+
     def get(self, uri):
         """Get request
-        
+
         Args:
             uri (str): URI
-            
+
         Returns:
             Json: API response
-            
+
         Raises:
             Exception: Network issue
         """

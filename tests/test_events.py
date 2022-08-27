@@ -83,3 +83,6 @@ class EventsTests(BaseTests):
         verbose_logger.warning(f'The count of CPS Events is {len}')
 
     test_04_CPS.basic = True
+
+
+    #TODO: Add tests which confirm validity of the returned object.

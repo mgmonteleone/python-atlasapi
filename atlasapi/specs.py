@@ -331,6 +331,7 @@ class Host(object):
         Hard codes the name of the partition to `data` and returns all metrics.
 
         Args:
+            period:
             atlas_obj: Instantiated Atlas instance to access the API
             granularity (Optional[AtlasGranularitues]): The granularity for the disk measurements.
             atlas_obj (atlasapi.atlas.Atlas): A configured Atlas instance to connect to the API with.

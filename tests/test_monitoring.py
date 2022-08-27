@@ -25,20 +25,25 @@ logger = logging.getLogger('test')
 # noinspection PyTypeChecker
 class MeasurementTests(BaseTests):
 
+
+    def test_00_get_method_test(self):
+        for each_host in self.a.Hosts._get_all_hosts():
+            self.assertIsInstance(each_host, Host)
+
+    test_00_get_method_test.basic = True
     def test_00_get_hosts_count(self):
         atlas: Atlas = self.a
         atlas.Hosts.fill_host_list()
+        logger.warning("Found {len(atlas.Hosts.host_list)} hosts")
         self.assertGreater(len(atlas.Hosts.host_list), 2)
 
     test_00_get_hosts_count.basic = True
 
     def test_01_get_cluster_names(self):
         self.a.Hosts.fill_host_list()
-        cluster_list = self.a.Hosts.cluster_list
-
-        # for each_cluster in cluster_list:
-        #    pprint(each_cluster)
-        self.assertGreater(len(cluster_list), 0)
+        cluster_list = self.a.Hosts.host_names
+        for each_cluster in cluster_list:
+            self.assertIsInstance(each_cluster, str)
 
     test_01_get_cluster_names.basic = True
 

@@ -24,7 +24,7 @@ from os import getenv
 class Settings:
     # Atlas APIs
     BASE_URL = getenv('BASE_URL', 'https://cloud.mongodb.com')
-    URI_STUB = '/api/atlas/v1.0'
+    URI_STUB = getenv('URI_STUB', '/api/atlas/v1.0')
 
     # Pagination defaults
     ITEMS_PER_PAGE: int = int(os.getenv('ITEMS_PER_PAGE', 500))
@@ -61,14 +61,13 @@ class Settings:
             "Get Project Events Since Date": URI_STUB + "/groups/{group_id}/events?includeRaw=true&minDate={min_date}" + f"&itemsPerPage={ITEMS_PER_PAGE}"
         },
         "Clusters": {
-            "Get All Clusters": "/api/atlas/v1.0/groups/%s/clusters?pageNum=%d&itemsPerPage=%d",
-            "Get a Single Cluster": "/api/atlas/v1.0/groups/%s/clusters/%s",
-            "Delete a Cluster": "/api/atlas/v1.0/groups/%s/clusters/%s",
-            "Create a Cluster": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/",
-            "Modify a Cluster": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}",
-            "Test Failover": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}/restartPrimaries",
-            "Advanced Configuration Options": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/{"
-                                              "CLUSTER_NAME}/processArgs",
+            "Get All Clusters": URI_STUB + "/groups/%s/clusters?pageNum=%d&itemsPerPage=%d",
+            "Get a Single Cluster": URI_STUB + "/groups/%s/clusters/%s",
+            "Delete a Cluster": URI_STUB + "/groups/%s/clusters/%s",
+            "Create a Cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/",
+            "Modify a Cluster": URI_STUB + "/{GROUP_ID}/clusters/{CLUSTER_NAME}",
+            "Test Failover": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}/restartPrimaries",
+            "Advanced Configuration Options": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}/processArgs",
 
         },
         "Database Users": {

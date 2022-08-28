@@ -2081,12 +2081,6 @@ class ClustersGetAll(AtlasPagination):
 
 
 # noinspection PyProtectedMember
-class HostsGetAll(AtlasPagination):
-    """Pagination for Processes : Get All"""
-
-    def __init__(self, atlas: Atlas, pageNum: int, itemsPerPage: int):
-        super().__init__(atlas, atlas.Hosts._get_all_hosts, pageNum, itemsPerPage)
-
 
 class DatabaseUsersGetAll(AtlasPagination):
     """Pagination for Database User : Get All"""

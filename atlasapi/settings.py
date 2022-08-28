@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Matthew G. Monteleone
+# Copyright (c) 2022 Matthew G. Monteleone
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ from os import getenv
 class Settings:
     # Atlas APIs
     BASE_URL = getenv('BASE_URL', 'https://cloud.mongodb.com')
-    URI_STUB = getenv('URI_STUB', '/api/atlas/v1.0'))
+    URI_STUB = getenv('URI_STUB', '/api/atlas/v1.0')
 
     api_resources = {
         "Project": {
@@ -63,14 +63,13 @@ class Settings:
                                                         "min_date}"
         },
         "Clusters": {
-            "Get All Clusters": "/api/atlas/v1.0/groups/%s/clusters?pageNum=%d&itemsPerPage=%d",
-            "Get a Single Cluster": "/api/atlas/v1.0/groups/%s/clusters/%s",
-            "Delete a Cluster": "/api/atlas/v1.0/groups/%s/clusters/%s",
-            "Create a Cluster": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/",
-            "Modify a Cluster": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}",
-            "Test Failover": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}/restartPrimaries",
-            "Advanced Configuration Options": "/api/atlas/v1.0/groups/{GROUP_ID}/clusters/{"
-                                              "CLUSTER_NAME}/processArgs",
+            "Get All Clusters": URI_STUB + "/groups/%s/clusters?pageNum=%d&itemsPerPage=%d",
+            "Get a Single Cluster": URI_STUB + "/groups/%s/clusters/%s",
+            "Delete a Cluster": URI_STUB + "/groups/%s/clusters/%s",
+            "Create a Cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/",
+            "Modify a Cluster": URI_STUB + "/{GROUP_ID}/clusters/{CLUSTER_NAME}",
+            "Test Failover": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}/restartPrimaries",
+            "Advanced Configuration Options": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}/processArgs",
 
         },
         "Database Users": {

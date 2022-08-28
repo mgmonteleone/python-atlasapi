@@ -647,6 +647,7 @@ class Atlas:
             if date_to is None and date_from is None:
                 logger.info('No dates passed so we are not going to send date params, API default will be used.')
                 uri = Settings.BASE_URL + uri
+            # TODO: refator to use params instead of hand crafting the uri for the dates
             elif date_to is None and date_from is not None:
                 logger.info('Received only a date_from, so sending only startDate')
                 uri = Settings.BASE_URL + uri + f'?startDate={int(round(date_from.timestamp()))}'

@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Matthew G. Monteleone
+# Copyright (c) 2022 Matthew G. Monteleone
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,14 +49,12 @@ class Settings:
                                             "DISK-NAME}/measurements",
             "Get the log file for a host in the cluster": "/api/atlas/v1.0/groups/{group_id}/clusters/{"
                                                           "host}/logs/{logname}",
-            "Get Available Disks for Process": "/api/atlas/v1.0/groups/{group_id}/processes/"
-                                               "{host}:{port}/disks",
-            "Get Measurements of a Disk for Process": "/api/atlas/v1.0/groups/{group_id}/processes/{host}:{port}/disks/"
+            "Get Available Disks for Process": URI_STUB + "/groups/{group_id}/processes/{host}:{port}/disks",
+            "Get Measurements of a Disk for Process": URI_STUB + "/groups/{group_id}/processes/{host}:{port}/disks/"
                                                       "{disk_name}/measurements",
-            "Get Measurements of a Database for Process": "/api/atlas/v1.0/groups/{group_id}/processes/{host}:{port}/"
+            "Get Measurements of a Database for Process": URI_STUB + "/groups/{group_id}/processes/{host}:{port}/"
                                                           "databases/{database_name}/measurements",
-            "Get Available Databases for Process": "/api/atlas/v1.0/groups/{group_id}/processes/"
-                                                   "{host}:{port}/databases"
+            "Get Available Databases for Process": URI_STUB + "/groups/{group_id}/processes/{host}:{port}/databases"
         },
         "Events": {
             "Get All Project Events": URI_STUB + "/groups/{group_id}/events?includeRaw=true" + f"&itemsPerPage={ITEMS_PER_PAGE}",

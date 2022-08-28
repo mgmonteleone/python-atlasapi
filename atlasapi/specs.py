@@ -41,6 +41,8 @@ from future import standard_library
 from logging import Logger
 from pprint import pprint
 from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement
+from requests.compat import urljoin
+from urllib.parse import urlencode
 
 standard_library.install_aliases()
 logger: Logger = logging.getLogger('Atlas.specs')
@@ -259,9 +261,10 @@ class Host(object):
         )
         logger.info(f"The full URI being called is {Settings.BASE_URL + uri}")
         return_val = atlas_obj.network.get(Settings.BASE_URL + uri)
-        for each_partition in return_val.get("results"):
-            partition_name: str = each_partition.get('partitionName', None)
-            yield partition_name
+        for each_result in return_val:
+            for each_partition in each_result.get("results"):
+                partition_name: str = each_partition.get('partitionName', None)
+                yield partition_name
 
     def get_measurements_for_disk(self, atlas_obj, partition_name: str,
                                   granularity: Optional[AtlasGranularities] = None,
@@ -297,15 +300,11 @@ class Host(object):
             disk_name=partition_name,
         )
         logger.info(f"The full URI being called is {Settings.BASE_URL + uri}")
-        logger.info(f"We sent the following parameters: {parameters}")
-        return_val = atlas_obj.network.get_big(Settings.BASE_URL + uri, params=parameters)
-
+        logger.info(f"We will send the following parameters: {parameters}")
+        return_val = atlas_obj.network.get(uri=Settings.BASE_URL + uri, params=parameters)
         measurement_obj = None
-        if iterable:
-            measurements = return_val.get('measurements')
-            measurements_count = len(measurements)
-            logger.warning('There are {} measurements.'.format(measurements_count))
-            for each in measurements:
+        for each_page in return_val:
+            for each in each_page.get('measurements'):
                 measurement_obj = AtlasMeasurement(name=each.get('name'),
                                                    period=period,
                                                    granularity=granularity,
@@ -314,8 +313,6 @@ class Host(object):
                     measurement_obj.measurements = AtlasMeasurementValue(each_and_every)
 
                 yield measurement_obj
-
-        return return_val
 
     def data_partition_stats(self, atlas_obj, granularity: Optional[AtlasGranularities] = None,
                              period: Optional[AtlasPeriods] = None, ) -> Iterable[AtlasMeasurement]:
@@ -353,27 +350,26 @@ class Host(object):
         )
         logger.info(f"The full URI being called is {Settings.BASE_URL + uri}")
         return_val = atlas_obj.network.get(Settings.BASE_URL + uri)
-        for each_database in return_val.get("results"):
-            db_name = each_database.get('databaseName', None)
-            yield db_name
+        for each_page in return_val:
+            for each_database in each_page.get("results"):
+                db_name = each_database.get('databaseName', None)
+                yield db_name
 
     def get_measurements_for_database(self, atlas_obj, database_name: str,
                                       granularity: Optional[AtlasGranularities] = None,
-                                      period: Optional[AtlasPeriods] = None, iterable: bool = True) -> \
-            Iterable[Union[AtlasMeasurement, Any]]:
+                                      period: Optional[AtlasPeriods] = None) -> Iterable[AtlasMeasurement]:
         """Returns All Metrics for a database, for a given period and granularity.
 
         Uses default granularity and period if not passed.
 
         Args:
-            iterable (bool): Defaults to true, if not true will return the raw response from API.
             database_name (str): The database name (local should always exist, and can be used for testing)
             period (Optional[AtlasPeriods]):The period for the disk measurements
             granularity (Optional[AtlasGranularitues]): The granularity for the disk measurements.
             atlas_obj (atlasapi.atlas.Atlas): A configured Atlas instance to connect to the API with.
 
         Returns:
-           Iterable[Union[AtlasMeasurement, Any]: Yields AtlasMeasirements or the original response.
+           Iterable[Union[AtlasMeasurement]: Yields AtlasMeasirements .
         """
         if period is None:
             period = AtlasPeriods.WEEKS_1
@@ -392,14 +388,10 @@ class Host(object):
         )
         logger.info(f"The full URI being called is {Settings.BASE_URL + uri}")
         logger.info(f"We sent the following parameters: {parameters}")
-        return_val = atlas_obj.network.get_big(Settings.BASE_URL + uri, params=parameters)
-
+        return_val = atlas_obj.network.get(Settings.BASE_URL + uri, params=parameters)
         measurement_obj = None
-        if iterable:
-            measurements = return_val.get('measurements')
-            measurements_count = len(measurements)
-            logger.warning('There are {} measurements.'.format(measurements_count))
-            for each in measurements:
+        for each_page in return_val:
+            for each in each_page.get("measurements"):
                 measurement_obj = AtlasMeasurement(name=each.get('name'),
                                                    period=period,
                                                    granularity=granularity,
@@ -408,8 +400,6 @@ class Host(object):
                     measurement_obj.measurements = AtlasMeasurementValue(each_and_every)
 
                 yield measurement_obj
-
-        return return_val
 
     def __hash__(self):
         return hash(self.hostname)

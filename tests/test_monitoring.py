@@ -260,6 +260,8 @@ class MeasurementTests(BaseTests):
                 print(f'👍Value is {each.measurement_stats_friendly.__dict__}')
                 self.assertIsInstance(each.measurement_stats, atlasapi.measurements.StatisticalValues)
 
+    test_16_issue_98_metric_name_write.basic = True
+
     def test_17_return_multiple_metrics(self):
         self.a.Hosts.fill_host_list()
         for each_host in self.a.Hosts.host_list_secondaries:

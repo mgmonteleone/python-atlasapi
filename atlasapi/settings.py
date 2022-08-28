@@ -25,7 +25,7 @@ class Settings:
     # Atlas APIs
     BASE_URL = getenv('BASE_URL', 'https://cloud.mongodb.com')
     URI_STUB = '/api/atlas/v1.0'
-   
+
     # Pagination defaults
     ITEMS_PER_PAGE: int = int(os.getenv('ITEMS_PER_PAGE', 500))
 
@@ -35,10 +35,11 @@ class Settings:
         },
         "Monitoring and Logs": {
             "Get all processes for group": URI_STUB + "/groups/{group_id}/processes",
-            "Get information for process in group": "/api/atlas/v1.0/groups/%s/processes/%s:&s?pageNum=%d"
-                                                    "&itemsPerPage=%d",
-            "Get measurement for host": "/api/atlas/v1.0/groups/{group_id}/processes/{host}:{"
-                                        "port}/measurements?granularity={granularity}&period={period}&m={measurement}",
+            "Get information for process in group": URI_STUB + "/groups/%s/processes/%s:&s?pageNum=%d"
+                                                               "&itemsPerPage=%d",
+            "Get measurement for host": URI_STUB + "/groups/{group_id}/processes/{host}:{"
+                                                   "port}/measurements?granularity={granularity}&period={period}"
+                                                   "&m={measurement}",
             "Get list of databases for host": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/databases",
             "Get measurements of database for host.": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{"
                                                       "PORT}/databases/{DATABASE-NAME}/measurements",

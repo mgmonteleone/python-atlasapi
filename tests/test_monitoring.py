@@ -43,6 +43,7 @@ class MeasurementTests(BaseTests):
         self.a.Hosts.fill_host_list()
         cluster_list = self.a.Hosts.host_names
         for each_cluster in cluster_list:
+            print(f"Cluster name: {each_cluster}")
             self.assertIsInstance(each_cluster, str)
 
     test_01_get_cluster_names.basic = True
@@ -52,6 +53,7 @@ class MeasurementTests(BaseTests):
         self.assertGreaterEqual(len(self.a.Hosts.host_list), 2)
         self.a.Hosts.get_measurement_for_hosts()
         for each in self.a.Hosts.host_list_with_measurements:
+            logger.warning(f"Host: {each.__dict__}")
             self.assertIsInstance(each, Host)
             self.assertGreaterEqual(len(each.measurements), 1)
             for each_measurement in each.measurements:
@@ -65,6 +67,7 @@ class MeasurementTests(BaseTests):
     test_02_fill_measurement.basic = True
 
     def test_03_measurement_stats(self):
+
         self.a.Hosts.fill_host_list()
         self.a.Hosts.get_measurement_for_hosts()
         print(f'For {self.a.Hosts.host_list_with_measurements.__len__()} hosts:')
@@ -120,6 +123,7 @@ class MeasurementTests(BaseTests):
         print(f'THe original data type sent for measurement is {type(measurement)}')
         self.a.Hosts.get_measurement_for_hosts(measurement=measurement, granularity=granularity, period=period)
         print(f'For {self.a.Hosts.host_list_with_measurements.__len__()} hosts:')
+        print(f"There are {len(self.a.Hosts.host_list_with_measurements[0].measurements)}")
         for each in self.a.Hosts.host_list_with_measurements[0].measurements:
             print(f'For metric {each.name}')
             self.assertIsInstance(each.measurement_stats_friendly, atlasapi.measurements.StatisticalValuesFriendly)

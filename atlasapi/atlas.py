@@ -464,7 +464,7 @@ class Atlas:
                 group_id=self.atlas.group)
 
             try:
-                response = self.atlas.network.get(Settings.BASE_URL+uri)
+                response = self.atlas.network.get(Settings.BASE_URL + uri)
                 for page in response:
                     for each_process in page.get("results"):
                         yield Host(each_process)
@@ -749,10 +749,8 @@ class Atlas:
         def _get_measurement_for_host(self, host_obj: Host,
                                       granularity: Optional[AtlasGranularities] = None,
                                       period: Optional[AtlasPeriods] = None,
-                                      measurement: Optional[AtlasMeasurementTypes] = None,
-                                      pageNum: int = Settings.pageNum,
-                                      itemsPerPage: int = Settings.itemsPerPage,
-                                      iterable: bool = True) -> Union[dict, Iterable[AtlasMeasurement]]:
+                                      measurement: Optional[AtlasMeasurementTypes] = None
+                                      ) -> Iterable[AtlasMeasurement]:
             """Get  measurement(s) for a host
 
             Internal use only, should come from the host obj itself.
@@ -783,9 +781,6 @@ class Atlas:
                 ErrPaginationLimits: Out of limits
 
                 :rtype: List[measurements.AtlasMeasurement]
-                :type iterable: OptionalBool
-                :type itemsPerPage: OptionalInt
-                :type pageNum: OptionalInt
                 :type period: AtlasPeriods
                 :type granularity: AtlasGranularities
                 :type host_obj: Host
@@ -793,15 +788,14 @@ class Atlas:
 
             """
 
-            # Check limits and raise an Exception if needed
-            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+            #  Set default measurement, period and granularity if none are sent
             if measurement is None:
                 measurement = AtlasMeasurementTypes.Cache.dirty
             if period is None:
                 period = AtlasPeriods.WEEKS_1
-
             if granularity is None:
                 granularity = AtlasGranularities.HOUR
+
             # Check to see if we received a leaf or branch of the measurements
             logger.debug(f'Measurement is: {measurement}')
             logger.debug(f'Measurement object type is {type(measurement)}')
@@ -837,9 +831,18 @@ class Atlas:
             logger.debug(f'The URI used will be {uri}')
             # Build the request
             return_val = self.atlas.network.get(Settings.BASE_URL + uri)
+            for each_host in return_val:
+                try:
+                    measurements = each_host.get('measurements')
+                except Exception as e:
+                    logger.error(f"Error getting measurements from results")
 
-            if iterable:
-                measurements = return_val.get('measurements')
+                    logger.error(e)
+                    logger.error(f"The results look like {results}")
+                    logger.error(f"The results have length {len(list(results))}")
+                    for each in results:
+                        logger.error(f"Results are: {each}")
+                    raise e
                 measurements_count = len(measurements)
                 self.logger.info('There are {} measurements.'.format(measurements_count))
 
@@ -852,8 +855,7 @@ class Atlas:
 
                 yield measurement_obj
 
-            else:
-                return return_val
+
 
     class _Events:
         """Events API

@@ -39,7 +39,7 @@ from atlasapi.lib import AtlasGranularities, AtlasPeriods, AtlasLogNames
 import logging
 from future import standard_library
 from logging import Logger
-
+from pprint import pprint
 from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement
 
 standard_library.install_aliases()
@@ -150,8 +150,8 @@ class Host(object):
 
     def get_measurement_for_host(self, atlas_obj, granularity: Optional[AtlasGranularities] = None,
                                  period: Optional[AtlasPeriods] = None,
-                                 measurement: Optional[AtlasMeasurementTypes] = None,
-                                 iterable: bool = True) -> Union[dict, Iterable[AtlasMeasurement]]:
+                                 measurement: Optional[AtlasMeasurementTypes] = None
+                                 ) -> Union[dict, Iterable[AtlasMeasurement]]:
         """Get  measurement(s) for a host
 
         Returns measurements for the Host object.
@@ -165,7 +165,7 @@ class Host(object):
         /api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/measurements
 
         Keyword Args:
-            host_obj (Host): the host
+            Atlas obj (Atlas): the host
             granularity (AtlasGranularities): the desired granularity
             period (AtlasPeriods): The desired period
             measurement (AtlasMeasurementTypes) : The desired measurement or Measurement class
@@ -214,24 +214,17 @@ class Host(object):
 
         # Build the request
         return_val = atlas_obj.network.get(Settings.BASE_URL + uri)
-        measurement_obj = None
-        if iterable:
-            measurements = return_val.get('measurements')
-            measurements_count = len(measurements)
-            logger.info('There are {} measurements.'.format(measurements_count))
-
-            for each in measurements:
-                measurement_obj = AtlasMeasurement(name=each.get('name'),
-                                                   units=each.get('units', None),
+        for each_response in return_val:
+            for each_measurement in each_response.get("measurements"):
+                measurement_obj = AtlasMeasurement(name=each_measurement.get('name'),
+                                                   units=each_measurement.get('units', None),
                                                    period=period,
                                                    granularity=granularity)
-                for each_and_every in each.get('dataPoints'):
+                for each_and_every in each_measurement.get('dataPoints'):
                     measurement_obj.measurements = AtlasMeasurementValue(each_and_every)
 
-            yield measurement_obj
+                yield measurement_obj
 
-        else:
-            return return_val
 
     def add_measurements(self, measurement) -> None:
         # TODO: Make measurements unique, use a set instead, but then how do we concat 2?

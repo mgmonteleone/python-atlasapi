@@ -25,7 +25,8 @@ from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 from atlasapi.specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, DatabaseUsersPermissionsSpecs, \
     ReplicaSetTypes
-from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement, OptionalAtlasMeasurement
+from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement, \
+    OptionalAtlasMeasurement
 from typing import Union, Iterator, List, Optional
 from atlasapi.atlas_types import OptionalInt, OptionalBool, ListofDict
 from atlasapi.clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
@@ -446,52 +447,31 @@ class Atlas:
             self.host_list_with_measurements: Optional[List[Host]] = list()
             self.host_list: Optional[List[Host]] = list()
 
-        def _get_all_hosts(self, pageNum=Settings.pageNum,
-                           itemsPerPage=Settings.itemsPerPage,
-                           iterable=False):
+        def _get_all_hosts(self):
             """Get All Hosts (actually processes)
 
             Internal use only, actual data retrieval comes from properties host_list and host_names
-            url: https://docs.atlas.mongodb.com/reference/api/alerts-get-all-alerts/
+            url: https://www.mongodb.com/docs/atlas/reference/api/processes-get-all/
 
             Keyword Args:
-                pageNum (int): Page number
-                itemsPerPage (int): Number of Users per Page
-                iterable (bool): To return an iterable high level object instead of a low level API response
+
 
             Returns:
-                ListOfHosts or dict: Iterable object representing this function OR Response payload
-
-            Raises:
-                ErrPaginationLimits: Out of limits
-                :rtype: Union[ListOfHosts, dict]
-                :type iterable: OptionalBool
-                :type itemsPerPage: OptionalInt
-                :type pageNum: OptionalInt
+                ListOfHosts: Iterable object representing this function
 
             """
+            uri = Settings.api_resources["Monitoring and Logs"]["Get all processes for group"].format(
+                group_id=self.atlas.group)
 
-            # Check limits and raise an Exception if needed
-            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+            try:
+                response = self.atlas.network.get(Settings.BASE_URL + uri)
+                for page in response:
+                    for each_process in page.get("results"):
+                        yield Host(each_process)
+            except Exception as e:
+                raise e
 
-            if iterable:
-                item_list = list(HostsGetAll(self.atlas, pageNum, itemsPerPage))
-                obj_list = list()
-                for item in item_list:
-                    obj_list.append(Host(item))
-
-                return_val = obj_list
-            else:
-                uri = Settings.api_resources["Monitoring and Logs"]["Get all processes for group"].format(
-                    group_id=self.atlas.group,
-                    page_num=pageNum,
-                    items_per_page=itemsPerPage)
-
-                return_val = self.atlas.network.get(Settings.BASE_URL + uri)
-
-            return return_val
-
-        def fill_host_list(self, for_cluster: Optional[str] = None) -> List[Host]:
+        def fill_host_list(self, for_cluster: Optional[str] = None) -> Iterable[Host]:
             """
             Fills the `self.hostname` property with the current hosts for the project/group.
 
@@ -502,9 +482,9 @@ class Atlas:
                 for_cluster (str): The name of the cluster for filter the host list.
 
             Returns:
-                List[Host]: A lost of  `Host` objects
+                Iterable[Host]: Yields `Host` objects
             """
-            host_list = self._get_all_hosts(iterable=True)
+            host_list = self._get_all_hosts()
             if for_cluster:
                 out_list = list()
                 for host in host_list:
@@ -514,7 +494,7 @@ class Atlas:
                         out_list.append(host)
                 self.host_list = out_list
             else:
-                self.host_list = self._get_all_hosts(iterable=True)
+                self.host_list = list(self._get_all_hosts())
 
             return self.host_list
 
@@ -667,6 +647,7 @@ class Atlas:
             if date_to is None and date_from is None:
                 logger.info('No dates passed so we are not going to send date params, API default will be used.')
                 uri = Settings.BASE_URL + uri
+            # TODO: refator to use params instead of hand crafting the uri for the dates
             elif date_to is None and date_from is not None:
                 logger.info('Received only a date_from, so sending only startDate')
                 uri = Settings.BASE_URL + uri + f'?startDate={int(round(date_from.timestamp()))}'
@@ -769,10 +750,8 @@ class Atlas:
         def _get_measurement_for_host(self, host_obj: Host,
                                       granularity: Optional[AtlasGranularities] = None,
                                       period: Optional[AtlasPeriods] = None,
-                                      measurement: Optional[AtlasMeasurementTypes] = None,
-                                      pageNum: int = Settings.pageNum,
-                                      itemsPerPage: int = Settings.itemsPerPage,
-                                      iterable: bool = True) -> Union[dict, Iterable[AtlasMeasurement]]:
+                                      measurement: Optional[AtlasMeasurementTypes] = None
+                                      ) -> Iterable[AtlasMeasurement]:
             """Get  measurement(s) for a host
 
             Internal use only, should come from the host obj itself.
@@ -803,9 +782,6 @@ class Atlas:
                 ErrPaginationLimits: Out of limits
 
                 :rtype: List[measurements.AtlasMeasurement]
-                :type iterable: OptionalBool
-                :type itemsPerPage: OptionalInt
-                :type pageNum: OptionalInt
                 :type period: AtlasPeriods
                 :type granularity: AtlasGranularities
                 :type host_obj: Host
@@ -813,15 +789,14 @@ class Atlas:
 
             """
 
-            # Check limits and raise an Exception if needed
-            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+            #  Set default measurement, period and granularity if none are sent
             if measurement is None:
                 measurement = AtlasMeasurementTypes.Cache.dirty
             if period is None:
                 period = AtlasPeriods.WEEKS_1
-
             if granularity is None:
                 granularity = AtlasGranularities.HOUR
+
             # Check to see if we received a leaf or branch of the measurements
             logger.debug(f'Measurement is: {measurement}')
             logger.debug(f'Measurement object type is {type(measurement)}')
@@ -857,9 +832,18 @@ class Atlas:
             logger.debug(f'The URI used will be {uri}')
             # Build the request
             return_val = self.atlas.network.get(Settings.BASE_URL + uri)
+            for each_host in return_val:
+                try:
+                    measurements = each_host.get('measurements')
+                except Exception as e:
+                    logger.error(f"Error getting measurements from results")
 
-            if iterable:
-                measurements = return_val.get('measurements')
+                    logger.error(e)
+                    logger.error(f"The results look like {results}")
+                    logger.error(f"The results have length {len(list(results))}")
+                    for each in results:
+                        logger.error(f"Results are: {each}")
+                    raise e
                 measurements_count = len(measurements)
                 self.logger.info('There are {} measurements.'.format(measurements_count))
 
@@ -872,8 +856,7 @@ class Atlas:
 
                 yield measurement_obj
 
-            else:
-                return return_val
+
 
     class _Events:
         """Events API
@@ -2099,11 +2082,6 @@ class ClustersGetAll(AtlasPagination):
 
 
 # noinspection PyProtectedMember
-class HostsGetAll(AtlasPagination):
-    """Pagination for Processes : Get All"""
-
-    def __init__(self, atlas: Atlas, pageNum: int, itemsPerPage: int):
-        super().__init__(atlas, atlas.Hosts._get_all_hosts, pageNum, itemsPerPage)
 
 class DatabaseUsersGetAll(AtlasPagination):
     """Pagination for Database User : Get All"""

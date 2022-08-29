@@ -139,6 +139,7 @@ class Network:
         session = None
 
         try:
+            logger.debug(f"{method} - URI Being called is {url}")
             session = requests.Session()
             request = session.request(method=method, url=url, **kwargs)
             logger.debug("Request arguments: {}".format(str(kwargs)))
@@ -147,38 +148,50 @@ class Network:
             total_count = first_page.get("totalCount", 0)
             items_per_page = Settings.itemsPerPage
             if total_count > items_per_page:
+                logger.warning(f"More than on page required, proceeding . . .")
                 for page_number in range(2, ceil(total_count / items_per_page) + 1):
-                    request = session.request(method=method, url=url, params={'pageNum':page_number}, **kwargs)
+                    # Need to ensure that any params sent in kwargs are merged with the pageNum param.
+                    if kwargs.get('params'):
+                        existing_params: dict = kwargs.get('params')
+                        logger.debug(f"Existing params are: {existing_params}")
+                        existing_params.update(dict(pageNum=page_number))
+                        logger.debug(f"New params are {existing_params}")
+                        kwargs["params"] = existing_params
+                        logger.debug(f"Fully updated kwargs is now... {kwargs}")
+                    request = session.request(method=method, url=url, **kwargs)
                     logger.debug("Request arguments: {}".format(str(kwargs)))
                     next_page = self.answer(request.status_code, request.json())
                     yield next_page
         except Exception as e:
-            logger.warning('Request: {}'.format(request.request.__dict__))
-            logger.warning('Response: {}'.format(request.__dict__))
+            logger.error('Error in Request: {}'.format(request.__dict__))
             raise e
         finally:
             if session:
                 session.close()
-    
-    def get(self, uri):
+
+    def get(self, uri, **kwargs):
         """Get request
-        
+
         Args:
+            call_params:
             uri (str): URI
-            
+
         Returns:
             Json: API response
-            
+
         Raises:
             Exception: Network issue
         """
+        if kwargs is not None:
+            logger.info(f"kwargs are: {kwargs}")
         yield from self._paginate(
                 method='GET',
                 url=uri,
                 allow_redirects=True,
                 timeout=Settings.requests_timeout,
                 headers={},
-                auth=self.auth_method(self.user, self.password))
+                auth=self.auth_method(self.user, self.password),
+                **kwargs)
 
     def post(self, uri, payload):
         """Post request

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name='atlasapi',
-    version='2.0.1',
+    version='2.0.2',
     python_requires='>=3.7',
     packages=find_packages(exclude=("tests",)),
     install_requires=['requests', 'python-dateutil', 'isodate', 'future', 'pytz','coolname', 'humanfriendly', 'nose'],

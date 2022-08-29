@@ -25,20 +25,26 @@ logger = logging.getLogger('test')
 # noinspection PyTypeChecker
 class MeasurementTests(BaseTests):
 
+
+    def test_00_get_method_test(self):
+        for each_host in self.a.Hosts._get_all_hosts():
+            self.assertIsInstance(each_host, Host)
+
+    test_00_get_method_test.basic = True
     def test_00_get_hosts_count(self):
         atlas: Atlas = self.a
         atlas.Hosts.fill_host_list()
+        logger.warning("Found {len(atlas.Hosts.host_list)} hosts")
         self.assertGreater(len(atlas.Hosts.host_list), 2)
 
     test_00_get_hosts_count.basic = True
 
     def test_01_get_cluster_names(self):
         self.a.Hosts.fill_host_list()
-        cluster_list = self.a.Hosts.cluster_list
-
-        # for each_cluster in cluster_list:
-        #    pprint(each_cluster)
-        self.assertGreater(len(cluster_list), 0)
+        cluster_list = self.a.Hosts.host_names
+        for each_cluster in cluster_list:
+            print(f"Cluster name: {each_cluster}")
+            self.assertIsInstance(each_cluster, str)
 
     test_01_get_cluster_names.basic = True
 
@@ -47,6 +53,7 @@ class MeasurementTests(BaseTests):
         self.assertGreaterEqual(len(self.a.Hosts.host_list), 2)
         self.a.Hosts.get_measurement_for_hosts()
         for each in self.a.Hosts.host_list_with_measurements:
+            logger.warning(f"Host: {each.__dict__}")
             self.assertIsInstance(each, Host)
             self.assertGreaterEqual(len(each.measurements), 1)
             for each_measurement in each.measurements:
@@ -60,6 +67,7 @@ class MeasurementTests(BaseTests):
     test_02_fill_measurement.basic = True
 
     def test_03_measurement_stats(self):
+
         self.a.Hosts.fill_host_list()
         self.a.Hosts.get_measurement_for_hosts()
         print(f'For {self.a.Hosts.host_list_with_measurements.__len__()} hosts:')
@@ -115,6 +123,7 @@ class MeasurementTests(BaseTests):
         print(f'THe original data type sent for measurement is {type(measurement)}')
         self.a.Hosts.get_measurement_for_hosts(measurement=measurement, granularity=granularity, period=period)
         print(f'For {self.a.Hosts.host_list_with_measurements.__len__()} hosts:')
+        print(f"There are {len(self.a.Hosts.host_list_with_measurements[0].measurements)}")
         for each in self.a.Hosts.host_list_with_measurements[0].measurements:
             print(f'For metric {each.name}')
             self.assertIsInstance(each.measurement_stats_friendly, atlasapi.measurements.StatisticalValuesFriendly)
@@ -250,6 +259,8 @@ class MeasurementTests(BaseTests):
                 print(f'For metric {each.name}')
                 print(f'👍Value is {each.measurement_stats_friendly.__dict__}')
                 self.assertIsInstance(each.measurement_stats, atlasapi.measurements.StatisticalValues)
+
+    test_16_issue_98_metric_name_write.basic = True
 
     def test_17_return_multiple_metrics(self):
         self.a.Hosts.fill_host_list()

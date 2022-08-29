@@ -39,8 +39,10 @@ from atlasapi.lib import AtlasGranularities, AtlasPeriods, AtlasLogNames
 import logging
 from future import standard_library
 from logging import Logger
-
+from pprint import pprint
 from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement
+from requests.compat import urljoin
+from urllib.parse import urlencode
 
 standard_library.install_aliases()
 logger: Logger = logging.getLogger('Atlas.specs')
@@ -150,8 +152,8 @@ class Host(object):
 
     def get_measurement_for_host(self, atlas_obj, granularity: Optional[AtlasGranularities] = None,
                                  period: Optional[AtlasPeriods] = None,
-                                 measurement: Optional[AtlasMeasurementTypes] = None,
-                                 iterable: bool = True) -> Union[dict, Iterable[AtlasMeasurement]]:
+                                 measurement: Optional[AtlasMeasurementTypes] = None
+                                 ) -> Union[dict, Iterable[AtlasMeasurement]]:
         """Get  measurement(s) for a host
 
         Returns measurements for the Host object.
@@ -165,7 +167,7 @@ class Host(object):
         /api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/measurements
 
         Keyword Args:
-            host_obj (Host): the host
+            Atlas obj (Atlas): the host
             granularity (AtlasGranularities): the desired granularity
             period (AtlasPeriods): The desired period
             measurement (AtlasMeasurementTypes) : The desired measurement or Measurement class
@@ -214,24 +216,17 @@ class Host(object):
 
         # Build the request
         return_val = atlas_obj.network.get(Settings.BASE_URL + uri)
-        measurement_obj = None
-        if iterable:
-            measurements = return_val.get('measurements')
-            measurements_count = len(measurements)
-            logger.info('There are {} measurements.'.format(measurements_count))
-
-            for each in measurements:
-                measurement_obj = AtlasMeasurement(name=each.get('name'),
-                                                   units=each.get('units', None),
+        for each_response in return_val:
+            for each_measurement in each_response.get("measurements"):
+                measurement_obj = AtlasMeasurement(name=each_measurement.get('name'),
+                                                   units=each_measurement.get('units', None),
                                                    period=period,
                                                    granularity=granularity)
-                for each_and_every in each.get('dataPoints'):
+                for each_and_every in each_measurement.get('dataPoints'):
                     measurement_obj.measurements = AtlasMeasurementValue(each_and_every)
 
-            yield measurement_obj
+                yield measurement_obj
 
-        else:
-            return return_val
 
     def add_measurements(self, measurement) -> None:
         # TODO: Make measurements unique, use a set instead, but then how do we concat 2?
@@ -266,9 +261,10 @@ class Host(object):
         )
         logger.info(f"The full URI being called is {Settings.BASE_URL + uri}")
         return_val = atlas_obj.network.get(Settings.BASE_URL + uri)
-        for each_partition in return_val.get("results"):
-            partition_name: str = each_partition.get('partitionName', None)
-            yield partition_name
+        for each_result in return_val:
+            for each_partition in each_result.get("results"):
+                partition_name: str = each_partition.get('partitionName', None)
+                yield partition_name
 
     def get_measurements_for_disk(self, atlas_obj, partition_name: str,
                                   granularity: Optional[AtlasGranularities] = None,
@@ -304,15 +300,11 @@ class Host(object):
             disk_name=partition_name,
         )
         logger.info(f"The full URI being called is {Settings.BASE_URL + uri}")
-        logger.info(f"We sent the following parameters: {parameters}")
-        return_val = atlas_obj.network.get_big(Settings.BASE_URL + uri, params=parameters)
-
+        logger.info(f"We will send the following parameters: {parameters}")
+        return_val = atlas_obj.network.get(uri=Settings.BASE_URL + uri, params=parameters)
         measurement_obj = None
-        if iterable:
-            measurements = return_val.get('measurements')
-            measurements_count = len(measurements)
-            logger.warning('There are {} measurements.'.format(measurements_count))
-            for each in measurements:
+        for each_page in return_val:
+            for each in each_page.get('measurements'):
                 measurement_obj = AtlasMeasurement(name=each.get('name'),
                                                    period=period,
                                                    granularity=granularity,
@@ -322,8 +314,6 @@ class Host(object):
 
                 yield measurement_obj
 
-        return return_val
-
     def data_partition_stats(self, atlas_obj, granularity: Optional[AtlasGranularities] = None,
                              period: Optional[AtlasPeriods] = None, ) -> Iterable[AtlasMeasurement]:
         """Returns disk measurements for the data partition of the host.
@@ -331,6 +321,7 @@ class Host(object):
         Hard codes the name of the partition to `data` and returns all metrics.
 
         Args:
+            period:
             atlas_obj: Instantiated Atlas instance to access the API
             granularity (Optional[AtlasGranularitues]): The granularity for the disk measurements.
             atlas_obj (atlasapi.atlas.Atlas): A configured Atlas instance to connect to the API with.
@@ -359,27 +350,26 @@ class Host(object):
         )
         logger.info(f"The full URI being called is {Settings.BASE_URL + uri}")
         return_val = atlas_obj.network.get(Settings.BASE_URL + uri)
-        for each_database in return_val.get("results"):
-            db_name = each_database.get('databaseName', None)
-            yield db_name
+        for each_page in return_val:
+            for each_database in each_page.get("results"):
+                db_name = each_database.get('databaseName', None)
+                yield db_name
 
     def get_measurements_for_database(self, atlas_obj, database_name: str,
                                       granularity: Optional[AtlasGranularities] = None,
-                                      period: Optional[AtlasPeriods] = None, iterable: bool = True) -> \
-            Iterable[Union[AtlasMeasurement, Any]]:
+                                      period: Optional[AtlasPeriods] = None) -> Iterable[AtlasMeasurement]:
         """Returns All Metrics for a database, for a given period and granularity.
 
         Uses default granularity and period if not passed.
 
         Args:
-            iterable (bool): Defaults to true, if not true will return the raw response from API.
             database_name (str): The database name (local should always exist, and can be used for testing)
             period (Optional[AtlasPeriods]):The period for the disk measurements
             granularity (Optional[AtlasGranularitues]): The granularity for the disk measurements.
             atlas_obj (atlasapi.atlas.Atlas): A configured Atlas instance to connect to the API with.
 
         Returns:
-           Iterable[Union[AtlasMeasurement, Any]: Yields AtlasMeasirements or the original response.
+           Iterable[Union[AtlasMeasurement]: Yields AtlasMeasirements .
         """
         if period is None:
             period = AtlasPeriods.WEEKS_1
@@ -398,14 +388,10 @@ class Host(object):
         )
         logger.info(f"The full URI being called is {Settings.BASE_URL + uri}")
         logger.info(f"We sent the following parameters: {parameters}")
-        return_val = atlas_obj.network.get_big(Settings.BASE_URL + uri, params=parameters)
-
+        return_val = atlas_obj.network.get(Settings.BASE_URL + uri, params=parameters)
         measurement_obj = None
-        if iterable:
-            measurements = return_val.get('measurements')
-            measurements_count = len(measurements)
-            logger.warning('There are {} measurements.'.format(measurements_count))
-            for each in measurements:
+        for each_page in return_val:
+            for each in each_page.get("measurements"):
                 measurement_obj = AtlasMeasurement(name=each.get('name'),
                                                    period=period,
                                                    granularity=granularity,
@@ -414,8 +400,6 @@ class Host(object):
                     measurement_obj.measurements = AtlasMeasurementValue(each_and_every)
 
                 yield measurement_obj
-
-        return return_val
 
     def __hash__(self):
         return hash(self.hostname)

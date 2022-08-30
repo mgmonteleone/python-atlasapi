@@ -40,7 +40,7 @@ from time import time
 from atlasapi.whitelist import WhitelistEntry
 from atlasapi.maintenance_window import MaintenanceWindow, Weekdays
 from atlasapi.lib import AtlasLogNames, LogLine, ProviderName, MongoDBMajorVersion, AtlasPeriods, AtlasGranularities, \
-    AtlasUnits
+    AtlasUnits, ClusterType
 from atlasapi.cloud_backup import CloudBackupSnapshot, CloudBackupRequest, SnapshotRestore, SnapshotRestoreResponse, \
     DeliveryType
 from atlasapi.projects import Project, ProjectSettings
@@ -120,7 +120,7 @@ class Atlas:
             except ErrAtlasNotFound:
                 return False
 
-        def get_all_clusters(self, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage, iterable=False):
+        def get_all_clusters(self):
             """Get All Clusters
 
             url: https://docs.atlas.mongodb.com/reference/api/clusters-get-all/
@@ -134,17 +134,29 @@ class Atlas:
                 AtlasPagination or dict: Iterable object representing this function OR Response payload
 
             Raises:
-                ErrPaginationLimits: Out of limits
             """
 
-            # Check limits and raise an Exception if needed
-            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
-
-            if iterable:
-                return ClustersGetAll(self.atlas, pageNum, itemsPerPage)
-
-            uri = Settings.api_resources["Clusters"]["Get All Clusters"] % (self.atlas.group, pageNum, itemsPerPage)
-            return self.atlas.network.get(Settings.BASE_URL + uri)
+            uri = Settings.api_resources["Clusters"]["Get All Clusters"].format(GROUP_ID=self.atlas.group)
+            response = self.atlas.network.get(Settings.BASE_URL + uri)
+            for page in response:
+                for each_cluster in page.get("results"):
+                    try:
+                        cluster_type = ClusterType[each_cluster.get('clusterType', None)]
+                        if cluster_type == ClusterType.SHARDED:
+                            logger.info("Cluster Type is SHARDED, Returning a ShardedClusterConfig")
+                            out_obj = ShardedClusterConfig.fill_from_dict(data_dict=each_cluster)
+                        elif cluster_type == ClusterType.REPLICASET:
+                            logger.info("Cluster Type is REPLICASET, Returning a ClusterConfig")
+                            out_obj = ClusterConfig.fill_from_dict(data_dict=each_cluster)
+                        elif cluster_type == ClusterType.GEOSHARDED:
+                            logger.info("Cluster Type is GEOSHARDED, Returning a ClusterConfig")
+                            out_obj = ShardedClusterConfig.fill_from_dict(data_dict=each_cluster)
+                        else:
+                            logger.info(f"Cluster Type ({cluster_type}) is not recognized, Returning a REPLICASET")
+                            out_obj = ClusterConfig.fill_from_dict(data_dict=each_cluster)
+                    except Exception as e:
+                        raise e
+                    yield out_obj
 
         def get_single_cluster(self, cluster: str) -> dict:
             """Get a Single Cluster
@@ -855,8 +867,6 @@ class Atlas:
                         measurement_obj.measurements = AtlasMeasurementValue(each_and_every)
 
                 yield measurement_obj
-
-
 
     class _Events:
         """Events API
@@ -2074,15 +2084,7 @@ class AtlasPagination:
             pageNum += 1
 
 
-class ClustersGetAll(AtlasPagination):
-    """Pagination for Clusters : Get All"""
-
-    def __init__(self, atlas, pageNum, itemsPerPage):
-        super().__init__(atlas, atlas.Clusters.get_all_clusters, pageNum, itemsPerPage)
-
-
 # noinspection PyProtectedMember
-
 class DatabaseUsersGetAll(AtlasPagination):
     """Pagination for Database User : Get All"""
 

@@ -24,9 +24,10 @@ logger = logging.getLogger('test')
 class ClusterTests(BaseTests):
 
     def test_00_get_all_clusters(self):
-        cluster_list = list(self.a.Clusters.get_all_clusters(iterable=True))
-
-        self.assertTrue(type(cluster_list) is list)
+        cluster_list = self.a.Clusters.get_all_clusters()
+        for each in cluster_list:
+            print(f"✅ Found a {each.providerSettings.instance_size_name.value} cluster of type {each.cluster_type.value}✅")
+            self.assertIsInstance(each,ClusterConfig)
 
     test_00_get_all_clusters.basic = True
 

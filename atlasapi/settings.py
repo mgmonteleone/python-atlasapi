@@ -61,7 +61,7 @@ class Settings:
             "Get Project Events Since Date": URI_STUB + "/groups/{group_id}/events?includeRaw=true&minDate={min_date}" + f"&itemsPerPage={ITEMS_PER_PAGE}"
         },
         "Clusters": {
-            "Get All Clusters": URI_STUB + "/groups/%s/clusters?pageNum=%d&itemsPerPage=%d",
+            "Get All Clusters": URI_STUB + "/groups/{GROUP_ID}/clusters",
             "Get a Single Cluster": URI_STUB + "/groups/%s/clusters/%s",
             "Delete a Cluster": URI_STUB + "/groups/%s/clusters/%s",
             "Create a Cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/",

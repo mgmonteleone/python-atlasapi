@@ -213,7 +213,8 @@ class MeasurementTests(BaseTests):
     def test_12_issue_90_get_measurement_for_host(self):
         self.a.Hosts.fill_host_list()
         for each_host in self.a.Hosts.host_list:
-            measurements = list(each_host.get_measurement_for_host(atlas_obj=self.a,measurement=AtlasMeasurementTypes.connections))
+            measurements = list(each_host.get_measurement_for_host
+                                (atlas_obj=self.a,measurement=AtlasMeasurementTypes.connections))
             each_host.add_measurements(measurements)
             self.assertIsInstance(each_host.measurements[0], AtlasMeasurement)
             pprint(each_host.measurements[0].measurement_stats.mean)

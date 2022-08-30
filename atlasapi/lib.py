@@ -151,3 +151,14 @@ class ClusterType(Enum):
     SHARDED = 'Sharded Cluster'
     SHARDEDCLUSTER = 'Sharded Cluster'
     GEOSHARDED = 'Global Cluster'
+
+
+class ReadConcerns(Enum):
+    """Default level of acknowledgment requested from MongoDB for read operations set for this cluster.
+
+    """
+    local = "local"
+    available = "available"
+    majority = "majority"
+    linearizable = "linearizable"
+    snapshot = "snapshot"

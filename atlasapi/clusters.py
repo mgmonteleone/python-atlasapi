@@ -12,7 +12,7 @@ from datetime import datetime
 import pytz
 import uuid
 
-from atlasapi.lib import ProviderName, MongoDBMajorVersion, ClusterType
+from atlasapi.lib import ProviderName, MongoDBMajorVersion, ClusterType, ReadConcerns
 
 FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
@@ -580,6 +580,10 @@ class AdvancedOptions(object):
                 sampleSizeBIConnector: Number of documents per database to sample when gathering schema information.
                 sampleRefreshIntervalBIConnector: Interval in seconds at which the mongosqld process re-samples data to
                     create its relational schema.
+                defaultReadConcern (Optional[ReadConcerns):  Default level of acknowledgment requested from MongoDB for read operations
+                 set for this cluster.
+                defaultWriteConcern (str): Default level of acknowledgment requested from MongoDB for write operations
+                set for this cluster.
             """
     def __init__(self,
                  failIndexKeyTooLong: Optional[bool]  = None,
@@ -589,7 +593,7 @@ class AdvancedOptions(object):
                  oplogSizeMB: Optional[int] = None,
                  sampleSizeBIConnector: Optional[int] = None,
                  sampleRefreshIntervalBIConnector: Optional[int] = None,
-                 defaultReadConcern: Optional[str] = None,
+                 defaultReadConcern: Optional[ReadConcerns] = None,
                  defaultWriteConcern: Optional[str] = None):
 
         self.defaultWriteConcern = defaultWriteConcern
@@ -610,8 +614,11 @@ class AdvancedOptions(object):
         :param data_dict: A dict as returned from Atlas
         :return:
         """
+        if data_dict.get('defaultReadConcern'):
+            defaultReadConcern = ReadConcerns[data_dict.get('defaultReadConcern')]
+        else:
+            defaultReadConcern = None
         defaultWriteConcern = data_dict.get('defaultWriteConcern',None)
-        defaultReadConcern = data_dict.get('defaultReadConcern', None)
         failIndexKeyTooLong = data_dict.get('failIndexKeyTooLong', None)
         javascriptEnabled = data_dict.get('javascriptEnabled', None)
         minimumEnabledTlsProtocol = data_dict.get('minimumEnabledTlsProtocol', None)

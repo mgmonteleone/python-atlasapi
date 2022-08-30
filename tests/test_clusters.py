@@ -31,21 +31,6 @@ class ClusterTests(BaseTests):
 
     test_00_get_all_clusters.basic = True
 
-    def test_01_get_all_clusters_type(self):
-        cluster_list = list(self.a.Clusters.get_all_clusters(iterable=True))
-        for each_cluster in cluster_list:
-            logger.warning(each_cluster)
-            self.assertTrue(type(each_cluster) is dict)
-
-    test_01_get_all_clusters_type.basic = True
-
-    def test_02_get_a_cluster_as_obj(self):
-        cluster = self.a.Clusters.get_single_cluster_as_obj(self.TEST_CLUSTER_NAME)
-        self.assertTrue(type(cluster) is ClusterConfig)
-        self.assertEqual(cluster.name, self.TEST_CLUSTER_NAME)
-
-    test_02_get_a_cluster_as_obj.basic = True
-
     def test_03_get_a_cluster(self):
         cluster = self.a.Clusters.get_single_cluster(self.TEST_CLUSTER_NAME)
         self.assertTrue(type(cluster) is dict)

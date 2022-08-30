@@ -588,8 +588,12 @@ class AdvancedOptions(object):
                  noTableScan: Optional[bool] = None,
                  oplogSizeMB: Optional[int] = None,
                  sampleSizeBIConnector: Optional[int] = None,
-                 sampleRefreshIntervalBIConnector: Optional[int] = None):
+                 sampleRefreshIntervalBIConnector: Optional[int] = None,
+                 defaultReadConcern: Optional[str] = None,
+                 defaultWriteConcern: Optional[str] = None):
 
+        self.defaultWriteConcern = defaultWriteConcern
+        self.defaultReadConcern = defaultReadConcern
         self.sampleRefreshIntervalBIConnector = sampleRefreshIntervalBIConnector
         self.sampleSizeBIConnector = sampleSizeBIConnector
         self.oplogSizeMB = oplogSizeMB
@@ -606,6 +610,8 @@ class AdvancedOptions(object):
         :param data_dict: A dict as returned from Atlas
         :return:
         """
+        defaultWriteConcern = data_dict.get('defaultWriteConcern',None)
+        defaultReadConcern = data_dict.get('defaultReadConcern', None)
         failIndexKeyTooLong = data_dict.get('failIndexKeyTooLong', None)
         javascriptEnabled = data_dict.get('javascriptEnabled', None)
         minimumEnabledTlsProtocol = data_dict.get('minimumEnabledTlsProtocol', None)
@@ -617,7 +623,7 @@ class AdvancedOptions(object):
             minimumEnabledTlsProtocol = TLSProtocols[data_dict.get('minimumEnabledTlsProtocol', None)]
 
         return cls(failIndexKeyTooLong, javascriptEnabled, minimumEnabledTlsProtocol, noTableScan, oplogSizeMB,
-                   sampleSizeBIConnector, sampleRefreshIntervalBIConnector)
+                   sampleSizeBIConnector, sampleRefreshIntervalBIConnector, defaultReadConcernConcern, defaultWriteConcern)
 
     @property
     def as_dict(self) -> dict:

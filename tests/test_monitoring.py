@@ -51,7 +51,7 @@ class MeasurementTests(BaseTests):
     def test_02_fill_measurement(self):
         self.a.Hosts.fill_host_list()
         self.assertGreaterEqual(len(self.a.Hosts.host_list), 2)
-        self.a.Hosts.get_measurement_for_hosts()
+        self.a.Hosts.get_measurement_for_hosts(measurement=AtlasMeasurementTypes.connections)
         for each in self.a.Hosts.host_list_with_measurements:
             logger.warning(f"Host: {each.__dict__}")
             self.assertIsInstance(each, Host)
@@ -213,7 +213,7 @@ class MeasurementTests(BaseTests):
     def test_12_issue_90_get_measurement_for_host(self):
         self.a.Hosts.fill_host_list()
         for each_host in self.a.Hosts.host_list:
-            measurements = list(each_host.get_measurement_for_host(atlas_obj=self.a))
+            measurements = list(each_host.get_measurement_for_host(atlas_obj=self.a,measurement=AtlasMeasurementTypes.connections))
             each_host.add_measurements(measurements)
             self.assertIsInstance(each_host.measurements[0], AtlasMeasurement)
             pprint(each_host.measurements[0].measurement_stats.mean)

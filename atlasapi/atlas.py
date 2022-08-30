@@ -184,27 +184,21 @@ class Atlas:
 
             return return_correct_cluster_config(cluster_data)
 
-        def get_single_cluster_advanced_options(self, cluster: str, as_obj: bool = True) -> Union[dict,
-                                                                                                  AdvancedOptions]:
-            """
-            Retrieves advanced options from a cluster, either as a obj, or optionally as a dict.
+        def get_single_cluster_advanced_options(self, cluster: str) -> AdvancedOptions:
+            """ Retrieves advanced options from a cluster.
 
-            GET /groups/{GROUP-ID}/clusters/{CLUSTER-NAME}/processArgs
+            GET /groups/{groupId}/clusters/{clusterName}/processArgs
 
-            :param cluster:
-            :param as_obj: True to return, AdvancedOptions, false for a dict
-            :return: AdvancedOptions object or dict
+            :param cluster: the cluster name
+            :return (AdvancedOptions): AdvancedOptions object
             """
             uri = Settings.api_resources["Clusters"]["Advanced Configuration Options"].format(GROUP_ID=self.atlas.group,
                                                                                               CLUSTER_NAME=cluster)
             advanced_options = self.atlas.network.get(Settings.BASE_URL + uri)
 
-            if as_obj is True:
-                return_obj = AdvancedOptions.fill_from_dict(data_dict=advanced_options)
-            else:
-                return_obj = advanced_options
+            advanced_data = list(advanced_options)[0]
 
-            return return_obj
+            return AdvancedOptions(advanced_data)
 
         def get_single_cluster_as_obj(self, cluster) -> Union[ClusterConfig, ShardedClusterConfig]:
             """[DEPRECATED]Get a Single Cluster as data

@@ -119,9 +119,8 @@ class ClusterTests(BaseTests):
 
     def test_12_get_advanced_options(self):
         out_obj = self.a.Clusters.get_single_cluster_advanced_options(self.TEST_CLUSTER_NAME)
+        print(f'✅ received a {type(out_obj)} object, which looks like this {str(out_obj.__dict__)[0:80]} . . .')
         self.assertEqual(type(out_obj), AdvancedOptions, msg='Output should be and AdvancedOptions object')
-        out_dict = self.a.Clusters.get_single_cluster_advanced_options(self.TEST_CLUSTER_NAME, as_obj=False)
-        self.assertEqual(type(out_dict), dict, msg="output should be a dict")
 
     test_12_get_advanced_options.basic = True
 

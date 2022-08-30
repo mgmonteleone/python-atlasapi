@@ -623,7 +623,7 @@ class AdvancedOptions(object):
             minimumEnabledTlsProtocol = TLSProtocols[data_dict.get('minimumEnabledTlsProtocol', None)]
 
         return cls(failIndexKeyTooLong, javascriptEnabled, minimumEnabledTlsProtocol, noTableScan, oplogSizeMB,
-                   sampleSizeBIConnector, sampleRefreshIntervalBIConnector, defaultReadConcernConcern, defaultWriteConcern)
+                   sampleSizeBIConnector, sampleRefreshIntervalBIConnector, defaultReadConcern, defaultWriteConcern)
 
     @property
     def as_dict(self) -> dict:

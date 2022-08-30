@@ -137,6 +137,7 @@ class MongoDBMajorVersion(Enum):
     v4_2 = '4.2'
     v4_4 = '4.4'
     v5_0 = '5.0'
+    v6_0 = '6.0'
     vX_x = 'Unknown'
 
 

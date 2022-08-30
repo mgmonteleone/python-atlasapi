@@ -351,7 +351,7 @@ class Atlas:
 
         def modify_cluster_advanced_options(self, cluster: str,
                                             advanced_options: AdvancedOptions,
-                                            as_obj: bool = True) -> Union[AdvancedOptions, dict]:
+                                            ) -> AdvancedOptions:
             """
             Modifies cluster advanced options using a AdvancedOptions object.
 
@@ -367,34 +367,20 @@ class Atlas:
 
             value_returned = self.atlas.network.patch(uri=Settings.BASE_URL + uri, payload=advanced_options.as_dict)
 
-            if as_obj is True:
-                return_obj = AdvancedOptions.fill_from_dict(data_dict=value_returned)
-            else:
-                return_obj = value_returned
+            return AdvancedOptions.fill_from_dict(data_dict=value_returned)
 
-            return return_obj
+        def modify_cluster_tls(self, cluster: str, TLS_protocol: TLSProtocols) -> TLSProtocols:
+            """Modifies cluster TLS settings.
 
-        def modify_cluster_tls(self, cluster: str,
-                               TLS_protocol: TLSProtocols,
-                               as_obj: bool = True) -> TLSProtocols:
-            """
-            Modifies cluster TLS settings.
+            Helper class, just wraps modify_cluster_advanced_options.
 
 
             """
-            uri = Settings.api_resources["Clusters"]["Advanced Configuration Options"].format(GROUP_ID=self.atlas.group,
-                                                                                              CLUSTER_NAME=cluster)
-
             advanced_options = AdvancedOptions(minimumEnabledTlsProtocol=TLS_protocol)
 
-            value_returned = self.atlas.network.patch(uri=Settings.BASE_URL + uri, payload=advanced_options.as_dict)
+            return_val = self.modify_cluster_advanced_options(cluster=cluster,advanced_options=advanced_options)
+            return return_val.minimumEnabledTlsProtocol
 
-            if as_obj is True:
-                return_obj = AdvancedOptions.fill_from_dict(data_dict=value_returned)
-            else:
-                return_obj = value_returned
-
-            return return_obj
 
         def pause_cluster(self, cluster: str, toggle_if_paused: bool = False) -> dict:
             """

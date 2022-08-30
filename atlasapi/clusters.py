@@ -83,7 +83,7 @@ class TLSProtocols(Enum):
     TLS1_0 = 'TLS1_0'
     TLS1_1 = 'TLS1_1'
     TLS1_2 = 'TLS1_2'
-    TLS1_3 = 'TLS1_3'  # 4.0 And Above Only
+    # TLS1_3 = 'TLS1_3'  # TLS 1.3 is not yet supported in Atlas (as of September 2022)
 
 
 # Classes

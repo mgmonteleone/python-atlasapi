@@ -26,8 +26,9 @@ class ClusterTests(BaseTests):
     def test_00_get_all_clusters(self):
         cluster_list = self.a.Clusters.get_all_clusters()
         for each in cluster_list:
-            print(f"✅ Found a {each.providerSettings.instance_size_name.value} cluster of type {each.cluster_type.value}✅")
-            self.assertIsInstance(each,ClusterConfig)
+            print(
+                f"✅ Found a {each.providerSettings.instance_size_name.value} cluster of type {each.cluster_type.value}✅")
+            self.assertIsInstance(each, ClusterConfig)
 
     test_00_get_all_clusters.basic = True
 
@@ -139,7 +140,6 @@ class ClusterTests(BaseTests):
                          msg='in = {}: out= {}'.format(set_2.__dict__, out_set_2.__dict__))
         print(f"✅ Checked javascriptEnabled = {set_2.javascriptEnabled} ")
 
-
         set_3 = AdvancedOptions(minimumEnabledTlsProtocol=TLSProtocols.TLS1_2)
         out_set_3 = self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,
                                                                     advanced_options=set_3)
@@ -177,10 +177,14 @@ class ClusterTests(BaseTests):
         self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,
                                                         advanced_options=set_6_revert)
 
-
-
     test_13_set_advanced_options.basic = True
 
-
-
-
+    def test_14_set_tls(self):
+        new_TLS = TLSProtocols.TLS1_0
+        returned_val = self.a.Clusters.modify_cluster_tls(cluster=self.TEST_CLUSTER_NAME, TLS_protocol=new_TLS)
+        self.assertEqual(new_TLS, returned_val)
+        print(f"✅ Checked that TLS value matches {returned_val.name}")
+        revert_TLS = TLSProtocols.TLS1_2
+        returned_val = self.a.Clusters.modify_cluster_tls(cluster=self.TEST_CLUSTER_NAME, TLS_protocol=revert_TLS)
+        self.assertEqual(revert_TLS, returned_val)
+        print(f"✅ Checked that TLS value matches {returned_val.name}")

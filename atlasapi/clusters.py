@@ -12,7 +12,7 @@ from datetime import datetime
 import pytz
 import uuid
 
-from atlasapi.lib import ProviderName, MongoDBMajorVersion, ClusterType, ReadConcerns
+from atlasapi.lib import ProviderName, MongoDBMajorVersion, ClusterType, DefaultReadConcerns
 
 FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
@@ -593,7 +593,7 @@ class AdvancedOptions(object):
                  oplogSizeMB: Optional[int] = None,
                  sampleSizeBIConnector: Optional[int] = None,
                  sampleRefreshIntervalBIConnector: Optional[int] = None,
-                 defaultReadConcern: Optional[ReadConcerns] = None,
+                 defaultReadConcern: Optional[DefaultReadConcerns] = None,
                  defaultWriteConcern: Optional[str] = None):
 
         self.defaultWriteConcern = defaultWriteConcern
@@ -615,7 +615,7 @@ class AdvancedOptions(object):
         :return:
         """
         if data_dict.get('defaultReadConcern'):
-            defaultReadConcern = ReadConcerns[data_dict.get('defaultReadConcern')]
+            defaultReadConcern = DefaultReadConcerns[data_dict.get('defaultReadConcern')]
         else:
             defaultReadConcern = None
         defaultWriteConcern = data_dict.get('defaultWriteConcern',None)

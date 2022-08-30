@@ -11,7 +11,7 @@ from atlasapi.atlas import Atlas
 from atlasapi.lib import AtlasPeriods, AtlasUnits, AtlasGranularities
 from json import dumps
 from atlasapi.clusters import AtlasBasicReplicaSet, ClusterConfig
-from atlasapi.lib import MongoDBMajorVersion as mdb_version
+from atlasapi.lib import MongoDBMajorVersion as mdb_version, DefaultReadConcerns
 from atlasapi.clusters import ClusterConfig, ProviderSettings, ReplicationSpecs, InstanceSizeName
 from atlasapi.clusters import RegionConfig, AdvancedOptions, TLSProtocols
 from tests import BaseTests
@@ -132,10 +132,13 @@ class ClusterTests(BaseTests):
         #                                                            advanced_options=set_1)
 
         set_2 = AdvancedOptions(javascriptEnabled=True)
+
         out_set_2 = self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,
                                                                     advanced_options=set_2)
         self.assertEqual(set_2.javascriptEnabled, out_set_2.javascriptEnabled,
                          msg='in = {}: out= {}'.format(set_2.__dict__, out_set_2.__dict__))
+        print(f"✅ Checked javascriptEnabled = {set_2.javascriptEnabled} ")
+
 
         set_3 = AdvancedOptions(minimumEnabledTlsProtocol=TLSProtocols.TLS1_2)
         out_set_3 = self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,
@@ -143,17 +146,38 @@ class ClusterTests(BaseTests):
         self.assertEqual(set_3.minimumEnabledTlsProtocol, out_set_3.minimumEnabledTlsProtocol,
                          msg='in = {}: out= {}'.format(set_3.__dict__, out_set_3.__dict__))
 
+        print(f"✅ Checked minimumEnabledTlsProtocol = {set_3.minimumEnabledTlsProtocol} ")
+
         set_4 = AdvancedOptions(noTableScan=True)
         out_set_4 = self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,
                                                                     advanced_options=set_4)
         self.assertEqual(set_4.noTableScan, out_set_4.noTableScan,
                          msg='in = {}: out= {}'.format(set_4.__dict__, out_set_4.__dict__))
+        print(f"✅ Checked noTableScan = {set_4.noTableScan} ")
+        set_4_revert = AdvancedOptions(noTableScan=False)
+        print(f"↩️ Reverting noTableScan = {set_4_revert.noTableScan} ")
+        self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,
+                                                        advanced_options=set_4_revert)
 
         set_5 = AdvancedOptions(oplogSizeMB=1000)
         out_set_5 = self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,
                                                                     advanced_options=set_5)
         self.assertEqual(set_5.oplogSizeMB, out_set_5.oplogSizeMB,
                          msg='in = {}: out= {}'.format(set_5.__dict__, out_set_5.__dict__))
+        print(f"✅ Checked oplogSizeMB = {set_5.oplogSizeMB} ")
+
+        set_6 = AdvancedOptions(defaultReadConcern=DefaultReadConcerns.local)
+        out_set_6 = self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,
+                                                                    advanced_options=set_6)
+        self.assertEqual(set_6.defaultReadConcern, out_set_6.defaultReadConcern,
+                         msg='in = {}: out= {}'.format(set_6.__dict__, out_set_6.__dict__))
+        print(f"✅ Checked defaultReadConcern = {set_6.defaultReadConcern} ")
+        set_6_revert = AdvancedOptions(defaultReadConcern=DefaultReadConcerns.available)
+        print(f"↩️ Reverting defaultReadConcern = {set_6_revert.defaultReadConcern} ")
+        self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,
+                                                        advanced_options=set_6_revert)
+
+
 
     test_13_set_advanced_options.basic = True
 

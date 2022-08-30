@@ -153,12 +153,9 @@ class ClusterType(Enum):
     GEOSHARDED = 'Global Cluster'
 
 
-class ReadConcerns(Enum):
+class DefaultReadConcerns(Enum):
     """Default level of acknowledgment requested from MongoDB for read operations set for this cluster.
 
     """
     local = "local"
     available = "available"
-    majority = "majority"
-    linearizable = "linearizable"
-    snapshot = "snapshot"

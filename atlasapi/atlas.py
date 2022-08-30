@@ -55,6 +55,35 @@ logger = logging.getLogger('Atlas')
 
 
 # noinspection PyProtectedMember
+
+
+def return_correct_cluster_config(cluster_data: dict) -> ClusterConfig:
+    """Returns the correct ClusterConfig object given a cluster configuration dict.
+
+    Either ShardedClusterConfig or ClusterConfig, depending on the type of the cluster recieved.
+
+    Args:
+        cluster_data (dict):
+
+    Returns:
+        ClusterConfig: An object which is an instance of ClusterConfig
+    """
+    cluster_type = ClusterType[cluster_data.get('clusterType', None)]
+    if cluster_type == ClusterType.SHARDED:
+        logger.info("Cluster Type is SHARDED, Returning a ShardedClusterConfig")
+        out_obj = ShardedClusterConfig.fill_from_dict(data_dict=cluster_data)
+    elif cluster_type == ClusterType.REPLICASET:
+        logger.info("Cluster Type is REPLICASET, Returning a ClusterConfig")
+        out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
+    elif cluster_type == ClusterType.GEOSHARDED:
+        logger.info("Cluster Type is GEOSHARDED, Returning a ClusterConfig")
+        out_obj = ShardedClusterConfig.fill_from_dict(data_dict=cluster_data)
+    else:
+        logger.info(f"Cluster Type ({cluster_type}) is not recognized, Returning a REPLICASET")
+        out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
+    return out_obj
+
+
 class Atlas:
     """Atlas constructor
 
@@ -120,45 +149,25 @@ class Atlas:
             except ErrAtlasNotFound:
                 return False
 
-        def get_all_clusters(self):
-            """Get All Clusters
+        def get_all_clusters(self) -> Iterable[ClusterConfig]:
+            """Get All Clusters for a single Project.
+
+            Yields ClusterConfig objects.
 
             url: https://docs.atlas.mongodb.com/reference/api/clusters-get-all/
 
-            Keyword Args:
-                pageNum (int): Page number
-                itemsPerPage (int): Number of Users per Page
-                iterable (bool): To return an iterable high level object instead of a low level API response
-
             Returns:
-                AtlasPagination or dict: Iterable object representing this function OR Response payload
+                Iterable[ClusterConfig]: Iterable of ClusterConfigs (or ShardedClusterConfig)
 
-            Raises:
             """
 
             uri = Settings.api_resources["Clusters"]["Get All Clusters"].format(GROUP_ID=self.atlas.group)
             response = self.atlas.network.get(Settings.BASE_URL + uri)
             for page in response:
                 for each_cluster in page.get("results"):
-                    try:
-                        cluster_type = ClusterType[each_cluster.get('clusterType', None)]
-                        if cluster_type == ClusterType.SHARDED:
-                            logger.info("Cluster Type is SHARDED, Returning a ShardedClusterConfig")
-                            out_obj = ShardedClusterConfig.fill_from_dict(data_dict=each_cluster)
-                        elif cluster_type == ClusterType.REPLICASET:
-                            logger.info("Cluster Type is REPLICASET, Returning a ClusterConfig")
-                            out_obj = ClusterConfig.fill_from_dict(data_dict=each_cluster)
-                        elif cluster_type == ClusterType.GEOSHARDED:
-                            logger.info("Cluster Type is GEOSHARDED, Returning a ClusterConfig")
-                            out_obj = ShardedClusterConfig.fill_from_dict(data_dict=each_cluster)
-                        else:
-                            logger.info(f"Cluster Type ({cluster_type}) is not recognized, Returning a REPLICASET")
-                            out_obj = ClusterConfig.fill_from_dict(data_dict=each_cluster)
-                    except Exception as e:
-                        raise e
-                    yield out_obj
+                    yield return_correct_cluster_config(each_cluster)
 
-        def get_single_cluster(self, cluster: str) -> dict:
+        def get_single_cluster(self, cluster: str) -> ClusterConfig:
             """Get a Single Cluster
 
             url: https://docs.atlas.mongodb.com/reference/api/clusters-get-one/
@@ -167,11 +176,13 @@ class Atlas:
                 cluster (str): The cluster name
 
             Returns:
-                dict: Response payload
+                ClusterConfig: A single ClusterConfig Object
             """
-            uri = Settings.api_resources["Clusters"]["Get a Single Cluster"] % (self.atlas.group, cluster)
-            cluster_data = self.atlas.network.get(Settings.BASE_URL + uri)
-            return cluster_data
+            uri = Settings.api_resources["Clusters"]["Get a Single Cluster"].format(GROUP_ID=self.atlas.group,
+                                                                                    CLUSTER_NAME=cluster)
+            cluster_data = list(self.atlas.network.get(Settings.BASE_URL + uri))[0]
+
+            return return_correct_cluster_config(cluster_data)
 
         def get_single_cluster_advanced_options(self, cluster: str, as_obj: bool = True) -> Union[dict,
                                                                                                   AdvancedOptions]:
@@ -196,30 +207,17 @@ class Atlas:
             return return_obj
 
         def get_single_cluster_as_obj(self, cluster) -> Union[ClusterConfig, ShardedClusterConfig]:
-            """Get a Single Cluster as data
+            """[DEPRECATED]Get a Single Cluster as data
 
-            url: https://docs.atlas.mongodb.com/reference/api/clusters-get-one/
+            Legacy wrapper, now deprecated since we always return objects, never dicts.
 
             Args:
                 cluster (str): The cluster name
 
             Returns:
-                ClusterConfig: Response payload
+                ClusterConfig (ClusterConfig): A cluster config
             """
-            cluster_data = self.get_single_cluster(cluster=cluster)
-            try:
-                if cluster_data.get('clusterType', None) == 'SHARDED':
-                    logger.info("Cluster Type is SHARDED, Returning a ShardedClusterConfig")
-                    out_obj = ShardedClusterConfig.fill_from_dict(data_dict=cluster_data)
-                elif cluster_data.get('clusterType', None) == 'REPLICASET':
-                    logger.info("Cluster Type is REPLICASET, Returning a ClusterConfig")
-                    out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
-                else:
-                    logger.info("Cluster Type is not recognized, Returning a REPLICASET")
-                    out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
-            except Exception as e:
-                raise e
-            return out_obj
+            return self.get_single_cluster(cluster)
 
         def create_cluster(self, cluster: ClusterConfig) -> dict:
             """Create a cluster

@@ -62,7 +62,7 @@ class Settings:
         },
         "Clusters": {
             "Get All Clusters": URI_STUB + "/groups/{GROUP_ID}/clusters",
-            "Get a Single Cluster": URI_STUB + "/groups/%s/clusters/%s",
+            "Get a Single Cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}",
             "Delete a Cluster": URI_STUB + "/groups/%s/clusters/%s",
             "Create a Cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/",
             "Modify a Cluster": URI_STUB + "/{GROUP_ID}/clusters/{CLUSTER_NAME}",

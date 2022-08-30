@@ -33,8 +33,11 @@ class ClusterTests(BaseTests):
 
     def test_03_get_a_cluster(self):
         cluster = self.a.Clusters.get_single_cluster(self.TEST_CLUSTER_NAME)
-        self.assertTrue(type(cluster) is dict)
-        self.assertEqual(cluster['name'], self.TEST_CLUSTER_NAME)
+        print(f"✅ The cluster is of type {cluster.cluster_type.value}")
+        self.assertIsInstance(cluster, ClusterConfig)
+        print(f"✅ The cluster name is {cluster.name}")
+        self.assertEqual(cluster.name, self.TEST_CLUSTER_NAME)
+        # TODO: Add more data validation checks here, since we have a fixed configuration of the test cluster.
 
     test_03_get_a_cluster.basic = True
 

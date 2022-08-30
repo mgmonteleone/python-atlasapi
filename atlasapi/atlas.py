@@ -17,71 +17,38 @@ Atlas module
 
 Core module which provides access to MongoDB Atlas Cloud Provider APIs
 """
-from atlasapi.settings import Settings
 from atlasapi.network import Network
 from atlasapi.errors import *
 
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
-from atlasapi.specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, DatabaseUsersPermissionsSpecs, \
-    ReplicaSetTypes
-from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement, \
-    OptionalAtlasMeasurement
-from typing import Union, Iterator, List, Optional
-from atlasapi.atlas_types import OptionalInt, OptionalBool, ListofDict
+from atlasapi.specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, ReplicaSetTypes
+from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement
+from typing import List, Optional
 from atlasapi.clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
-    InstanceSizeName, AdvancedOptions, TLSProtocols
+    InstanceSizeName, AdvancedOptions, TLSProtocols, return_correct_cluster_config
 from atlasapi.events import atlas_event_factory, EventsIterable
 import logging
-from typing import Union, Iterable, Set, BinaryIO, Generator, Iterator
-from atlasapi.errors import ErrAtlasUnauthorized, ErrAtlasBadRequest
+from typing import Union, Iterable, Set, BinaryIO, Iterator
+from atlasapi.errors import ErrAtlasBadRequest
 from atlasapi.alerts import Alert
-from time import time
 from atlasapi.whitelist import WhitelistEntry
-from atlasapi.maintenance_window import MaintenanceWindow, Weekdays
-from atlasapi.lib import AtlasLogNames, LogLine, ProviderName, MongoDBMajorVersion, AtlasPeriods, AtlasGranularities, \
-    AtlasUnits, ClusterType
+from atlasapi.maintenance_window import MaintenanceWindow
+from atlasapi.lib import AtlasLogNames, LogLine, ProviderName, MongoDBMajorVersion, AtlasPeriods, AtlasGranularities
 from atlasapi.cloud_backup import CloudBackupSnapshot, CloudBackupRequest, SnapshotRestore, SnapshotRestoreResponse, \
     DeliveryType
 from atlasapi.projects import Project, ProjectSettings
-from atlasapi.teams import Team, TeamRoles
+from atlasapi.teams import TeamRoles
 from atlasapi.atlas_users import AtlasUser
 from atlasapi.organizations import Organization
-from requests import get
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 import gzip
+
 
 logger = logging.getLogger('Atlas')
 
 
 # noinspection PyProtectedMember
-
-
-def return_correct_cluster_config(cluster_data: dict) -> ClusterConfig:
-    """Returns the correct ClusterConfig object given a cluster configuration dict.
-
-    Either ShardedClusterConfig or ClusterConfig, depending on the type of the cluster recieved.
-
-    Args:
-        cluster_data (dict):
-
-    Returns:
-        ClusterConfig: An object which is an instance of ClusterConfig
-    """
-    cluster_type = ClusterType[cluster_data.get('clusterType', None)]
-    if cluster_type == ClusterType.SHARDED:
-        logger.info("Cluster Type is SHARDED, Returning a ShardedClusterConfig")
-        out_obj = ShardedClusterConfig.fill_from_dict(data_dict=cluster_data)
-    elif cluster_type == ClusterType.REPLICASET:
-        logger.info("Cluster Type is REPLICASET, Returning a ClusterConfig")
-        out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
-    elif cluster_type == ClusterType.GEOSHARDED:
-        logger.info("Cluster Type is GEOSHARDED, Returning a ClusterConfig")
-        out_obj = ShardedClusterConfig.fill_from_dict(data_dict=cluster_data)
-    else:
-        logger.info(f"Cluster Type ({cluster_type}) is not recognized, Returning a REPLICASET")
-        out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
-    return out_obj
 
 
 class Atlas:

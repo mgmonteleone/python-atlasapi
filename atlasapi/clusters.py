@@ -6,15 +6,21 @@ Supports the creation and configuration of Atlas clusters of various types.
 Enums are used in order to minimize invalid configuration values.
 
 """
+import logging
 from enum import Enum
 from typing import List, Optional
 from datetime import datetime
 import pytz
 import uuid
 
+
 from atlasapi.lib import ProviderName, MongoDBMajorVersion, ClusterType, DefaultReadConcerns
+from lib import ClusterType
+
+logger = logging.getLogger('clusters')
 
 FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+
 
 
 # Enums
@@ -86,6 +92,10 @@ class TLSProtocols(Enum):
     # TLS1_3 = 'TLS1_3'  # TLS 1.3 is not yet supported in Atlas (as of September 2022)
 
 
+# Functions
+
+
+
 # Classes
 
 class RegionConfig(object):
@@ -99,6 +109,7 @@ class RegionConfig(object):
                            read_only_node_count: Count of read_only nodes.
                            analytics_node_count:  Count of analytics nodes.
     """
+
     def __init__(self,
                  electable_node_count: int = 3,
                  priority: int = 7,
@@ -259,6 +270,7 @@ class ClusterConfig(object):
             links:
 
     """
+
     def __init__(self, backup_enabled: bool = False,
                  cluster_type: ClusterType = ClusterType.REPLICASET,
                  disk_size_gb: int = 32,
@@ -344,7 +356,7 @@ class ClusterConfig(object):
         return cls(backup_enabled, cluster_type, disk_size_gb, name, mongodb_major_version, mongodb_version,
                    num_shards, mongo_uri, mongo_uri_updated, mongo_uri_with_options, paused, pit_enabled,
                    replication_factor, state_name, autoscaling, replication_specs,
-                   srv_address, providerSettings, links,id)
+                   srv_address, providerSettings, links, id)
 
     def as_dict(self) -> dict:
         return_dict = self.__dict__
@@ -534,6 +546,7 @@ class AtlasBasicReplicaSet(object):
                 region: The region in the cloud provider
                 version: The MongoDB major version
             """
+
     def __init__(self, name: str,
                  size: InstanceSizeName = InstanceSizeName.M10,
                  disk_size: int = 10,
@@ -541,7 +554,6 @@ class AtlasBasicReplicaSet(object):
                  region: str = 'US_WEST_2',
                  version: MongoDBMajorVersion = MongoDBMajorVersion.v4_0,
                  ) -> None:
-
         provider_settings = ProviderSettings(size=size,
                                              provider=provider, region=region)
         regions_config = RegionConfig()
@@ -585,8 +597,9 @@ class AdvancedOptions(object):
                 defaultWriteConcern (str): Default level of acknowledgment requested from MongoDB for write operations
                 set for this cluster.
             """
+
     def __init__(self,
-                 failIndexKeyTooLong: Optional[bool]  = None,
+                 failIndexKeyTooLong: Optional[bool] = None,
                  javascriptEnabled: Optional[bool] = None,
                  minimumEnabledTlsProtocol: Optional[TLSProtocols] = None,
                  noTableScan: Optional[bool] = None,
@@ -618,7 +631,7 @@ class AdvancedOptions(object):
             defaultReadConcern = DefaultReadConcerns[data_dict.get('defaultReadConcern')]
         else:
             defaultReadConcern = None
-        defaultWriteConcern = data_dict.get('defaultWriteConcern',None)
+        defaultWriteConcern = data_dict.get('defaultWriteConcern', None)
         failIndexKeyTooLong = data_dict.get('failIndexKeyTooLong', None)
         javascriptEnabled = data_dict.get('javascriptEnabled', None)
         minimumEnabledTlsProtocol = data_dict.get('minimumEnabledTlsProtocol', None)
@@ -651,4 +664,28 @@ class AdvancedOptions(object):
         return return_dict
 
 
+def return_correct_cluster_config(cluster_data: dict) -> ClusterConfig:
+    """Returns the correct ClusterConfig object given a cluster configuration dict.
 
+    Either ShardedClusterConfig or ClusterConfig, depending on the type of the cluster recieved.
+
+    Args:
+        cluster_data (dict):
+
+    Returns:
+        ClusterConfig: An object which is an instance of ClusterConfig
+    """
+    cluster_type = ClusterType[cluster_data.get('clusterType', None)]
+    if cluster_type == ClusterType.SHARDED:
+        logger.info("Cluster Type is SHARDED, Returning a ShardedClusterConfig")
+        out_obj = ShardedClusterConfig.fill_from_dict(data_dict=cluster_data)
+    elif cluster_type == ClusterType.REPLICASET:
+        logger.info("Cluster Type is REPLICASET, Returning a ClusterConfig")
+        out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
+    elif cluster_type == ClusterType.GEOSHARDED:
+        logger.info("Cluster Type is GEOSHARDED, Returning a ClusterConfig")
+        out_obj = ShardedClusterConfig.fill_from_dict(data_dict=cluster_data)
+    else:
+        logger.info(f"Cluster Type ({cluster_type}) is not recognized, Returning a REPLICASET")
+        out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
+    return out_obj

@@ -45,7 +45,7 @@ class MeasurementTests(BaseTests):
     def test_02_fill_measurement(self):
         self.a.Hosts.fill_host_list()
         self.assertGreaterEqual(len(self.a.Hosts.host_list), 2)
-        self.a.Hosts.get_measurement_for_hosts()
+        self.a.Hosts.get_measurement_for_hosts(measurement=AtlasMeasurementTypes.connections)
         for each in self.a.Hosts.host_list_with_measurements:
             self.assertIsInstance(each, Host)
             self.assertGreaterEqual(len(each.measurements), 1)

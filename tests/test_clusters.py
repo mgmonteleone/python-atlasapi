@@ -13,10 +13,11 @@ from json import dumps
 from atlasapi.clusters import AtlasBasicReplicaSet, ClusterConfig
 from atlasapi.lib import MongoDBMajorVersion as mdb_version
 from atlasapi.clusters import ClusterConfig, ProviderSettings, ReplicationSpecs, InstanceSizeName
-from atlasapi.clusters import RegionConfig, AdvancedOptions, TLSProtocols
+from atlasapi.clusters import RegionConfig, AdvancedOptions, TLSProtocols, ClusterStates
 from tests import BaseTests
 import logging
-from time import sleep
+from time import sleep, time
+import humanfriendly
 
 logger = logging.getLogger('test')
 
@@ -75,13 +76,13 @@ class ClusterTests(BaseTests):
         sleep(20)
         print('-----------------------------------Done Sleeping -------------------------------------')
 
-    def test_06_delete_cluster(self):
+    def test_4a_delete_cluster(self):
         myoutput = self.a.Clusters.delete_cluster(cluster=self.TEST_CLUSTER2_NAME_UNIQUE, areYouSure=True)
         print('Successfully Deleted {}, output was '.format(self.TEST_CLUSTER2_NAME_UNIQUE, myoutput))
 
-    test_06_delete_cluster.advanced = True
+    test_4a_delete_cluster.advanced = True
 
-    def test_07_create_cluster(self):
+    def test_07_create_resize_delete(self):
         provider_settings: ProviderSettings = ProviderSettings()
         regions_config = RegionConfig()
         replication_specs = ReplicationSpecs(regions_config={provider_settings.region_name: regions_config.__dict__})
@@ -90,21 +91,27 @@ class ClusterTests(BaseTests):
                                        replication_specs=replication_specs)
 
         output = self.a.Clusters.create_cluster(cluster_config)
-        pprint(output)
 
-    test_07_create_cluster.advanced = True
+        cluster_3_config = self.a.Clusters.get_single_cluster(cluster=self.TEST_CLUSTER3_NAME_UNIQUE)
+        self.assertEqual(cluster_3_config.name, self.TEST_CLUSTER3_NAME_UNIQUE)
 
-    def test_08_resize_a_cluster(self):
+        self.wait_for_cluster_state(self.TEST_CLUSTER3_NAME_UNIQUE)
+        print(f"✅ Cluster {self.TEST_CLUSTER3_NAME_UNIQUE} created successfully in"
+              f" {humanfriendly.format_timespan(seconds_elapsed)}.")
+
+        printf(f"Will now resize {self.TEST_CLUSTER3_NAME_UNIQUE} to m20....")
         self.a.Clusters.modify_cluster_instance_size(cluster=self.TEST_CLUSTER3_NAME_UNIQUE,
                                                      new_cluster_size=InstanceSizeName.M20)
+        self.wait_for_cluster_state(self.TEST_CLUSTER3_NAME_UNIQUE,states_to_wait=[ClusterStates.UPDATING,ClusterStates.REPAIRING])
 
-    test_08_resize_a_cluster.advanced = True
-
-    def test_09_deleted_resized_cluster(self):
+        print(f"✅ Cluster Succesfully resized.")
+        print(f"Going to clean up by deleting this cluster ({self.TEST_CLUSTER3_NAME_UNIQUE})")
         output = self.a.Clusters.delete_cluster(cluster=self.TEST_CLUSTER3_NAME_UNIQUE, areYouSure=True)
-        print('Successfully Deleted resized cluster :{}, output was '.format(self.TEST_CLUSTER2_NAME_UNIQUE, output))
+        self.wait_for_cluster_state(cluster_name=self.TEST_CLUSTER3_NAME_UNIQUE)
+        print('Successfully Deleted resized cluster :{}, output was '.format(self.TEST_CLUSTER3_NAME_UNIQUE, output))
 
-    test_09_deleted_resized_cluster.advanced = True
+    test_07_create_resize_delete.advanced = True
+
 
     def test_10_pause_cluster(self):
         pprint('Pausing Cluster {}'.format(self.TEST_CLUSTER_NAME))

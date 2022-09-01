@@ -45,7 +45,7 @@ class MeasurementTests(BaseTests):
     def test_02_fill_measurement(self):
         self.a.Hosts.fill_host_list()
         self.assertGreaterEqual(len(self.a.Hosts.host_list), 2)
-        self.a.Hosts.get_measurement_for_hosts()
+        self.a.Hosts.get_measurement_for_hosts(measurement=AtlasMeasurementTypes.connections)
         for each in self.a.Hosts.host_list_with_measurements:
             self.assertIsInstance(each, Host)
             self.assertGreaterEqual(len(each.measurements), 1)
@@ -204,7 +204,8 @@ class MeasurementTests(BaseTests):
     def test_12_issue_90_get_measurement_for_host(self):
         self.a.Hosts.fill_host_list()
         for each_host in self.a.Hosts.host_list:
-            measurements = list(each_host.get_measurement_for_host(atlas_obj=self.a))
+            measurements = list(
+                each_host.get_measurement_for_host(atlas_obj=self.a, measurement=AtlasMeasurementTypes.connections))
             each_host.add_measurements(measurements)
             self.assertIsInstance(each_host.measurements[0], AtlasMeasurement)
             pprint(each_host.measurements[0].measurement_stats.mean)
@@ -361,7 +362,9 @@ class MeasurementTests(BaseTests):
         self.a.Hosts.fill_host_list(for_cluster=cluster_name)
         host = list(self.a.Hosts.host_list)[0]
         pprint(f"For Host: {host.hostname}")
-        output: AtlasMeasurement = host.get_measurements_for_disk(self.a,partition_name="data", granularity=AtlasGranularities.TEN_SECOND, period=AtlasPeriods.HOURS_24)
+        output: AtlasMeasurement = host.get_measurements_for_disk(self.a, partition_name="data",
+                                                                  granularity=AtlasGranularities.TEN_SECOND,
+                                                                  period=AtlasPeriods.HOURS_24)
         for each in output:
             print('Measurement'.center(80, '*'))
             print(f"Name: {each.name}: {each.measurement_stats_friendly.mean} {each.units} {each.granularity}")

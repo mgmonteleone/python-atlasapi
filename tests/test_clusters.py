@@ -57,7 +57,7 @@ class ClusterTests(BaseTests):
     test_04_create_basic_cluster.advanced = True
 
     def test_05_modify_cluster_disk(self):
-        existing = self.a.Clusters.get_single_cluster_as_obj(cluster=self.TEST_CLUSTER_NAME)
+        existing = self.a.Clusters.get_single_cluster(cluster=self.TEST_CLUSTER_NAME)
         old_size = existing.disk_size_gb
         new_size = existing.disk_size_gb + 1
         existing.disk_size_gb = new_size

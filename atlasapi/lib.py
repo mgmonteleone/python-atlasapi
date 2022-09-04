@@ -79,7 +79,6 @@ class AtlasGranularities(object):
     DAY = duration_isoformat(Duration(days=1))
 
 
-
 class AtlasPeriods(object):
     """Helper class to create ISO 8601 durations to send to the Atlas period parameter.
 
@@ -138,12 +137,13 @@ class MongoDBMajorVersion(Enum):
     v4_2 = '4.2'
     v4_4 = '4.4'
     v5_0 = '5.0'
+    v6_0 = '6.0'
     vX_x = 'Unknown'
 
 
 class ClusterType(Enum):
     """
-    The types of clusteres available in Atlas.
+    The types of clusters available in Atlas.
 
     GEOSHARDED is a Global write cluster sharded by geo information.
 
@@ -152,3 +152,11 @@ class ClusterType(Enum):
     SHARDED = 'Sharded Cluster'
     SHARDEDCLUSTER = 'Sharded Cluster'
     GEOSHARDED = 'Global Cluster'
+
+
+class DefaultReadConcerns(Enum):
+    """Default level of acknowledgment requested from MongoDB for read operations set for this cluster.
+
+    """
+    local = "local"
+    available = "available"

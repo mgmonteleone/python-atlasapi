@@ -26,17 +26,20 @@ class Settings:
     BASE_URL = getenv('BASE_URL', 'https://cloud.mongodb.com')
     URI_STUB = getenv('URI_STUB', '/api/atlas/v1.0')
 
+    # Pagination defaults
+    ITEMS_PER_PAGE: int = int(os.getenv('ITEMS_PER_PAGE', 500))
+
     api_resources = {
         "Project": {
             "Get One Project": URI_STUB + "/groups/{GROUP_ID}"
         },
         "Monitoring and Logs": {
-            "Get all processes for group": "/api/atlas/v1.0/groups/{group_id}/processes?pageNum={"
-                                           "page_num}&itemsPerPage={items_per_page}",
-            "Get information for process in group": "/api/atlas/v1.0/groups/%s/processes/%s:&s?pageNum=%d"
-                                                    "&itemsPerPage=%d",
-            "Get measurement for host": "/api/atlas/v1.0/groups/{group_id}/processes/{host}:{"
-                                        "port}/measurements?granularity={granularity}&period={period}&m={measurement}",
+            "Get all processes for group": URI_STUB + "/groups/{group_id}/processes",
+            "Get information for process in group": URI_STUB + "/groups/%s/processes/%s:&s?pageNum=%d"
+                                                               "&itemsPerPage=%d",
+            "Get measurement for host": URI_STUB + "/groups/{group_id}/processes/{host}:{"
+                                                   "port}/measurements?granularity={granularity}&period={period}"
+                                                   "&m={measurement}",
             "Get list of databases for host": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/databases",
             "Get measurements of database for host.": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{"
                                                       "PORT}/databases/{DATABASE-NAME}/measurements",
@@ -46,25 +49,20 @@ class Settings:
                                             "DISK-NAME}/measurements",
             "Get the log file for a host in the cluster": "/api/atlas/v1.0/groups/{group_id}/clusters/{"
                                                           "host}/logs/{logname}",
-            "Get Available Disks for Process": "/api/atlas/v1.0/groups/{group_id}/processes/"
-                                               "{host}:{port}/disks",
-            "Get Measurements of a Disk for Process": "/api/atlas/v1.0/groups/{group_id}/processes/{host}:{port}/disks/"
+            "Get Available Disks for Process": URI_STUB + "/groups/{group_id}/processes/{host}:{port}/disks",
+            "Get Measurements of a Disk for Process": URI_STUB + "/groups/{group_id}/processes/{host}:{port}/disks/"
                                                       "{disk_name}/measurements",
-            "Get Measurements of a Database for Process": "/api/atlas/v1.0/groups/{group_id}/processes/{host}:{port}/"
+            "Get Measurements of a Database for Process": URI_STUB + "/groups/{group_id}/processes/{host}:{port}/"
                                                           "databases/{database_name}/measurements",
-            "Get Available Databases for Process": "/api/atlas/v1.0/groups/{group_id}/processes/"
-                                                   "{host}:{port}/databases"
+            "Get Available Databases for Process": URI_STUB + "/groups/{group_id}/processes/{host}:{port}/databases"
         },
         "Events": {
-            "Get All Project Events": URI_STUB + "/groups/{group_id}/events??includeRaw=true&pageNum={page_num}"
-                                                 "&itemsPerPage={items_per_page}",
-            "Get Project Events Since Date": URI_STUB + "/groups/{group_id}/events?includeRaw=true&pageNum={"
-                                                        "page_num}&itemsPerPage={items_per_page}&minDate={"
-                                                        "min_date}"
+            "Get All Project Events": URI_STUB + "/groups/{group_id}/events?includeRaw=true" + f"&itemsPerPage={ITEMS_PER_PAGE}",
+            "Get Project Events Since Date": URI_STUB + "/groups/{group_id}/events?includeRaw=true&minDate={min_date}" + f"&itemsPerPage={ITEMS_PER_PAGE}"
         },
         "Clusters": {
-            "Get All Clusters": URI_STUB + "/groups/%s/clusters?pageNum=%d&itemsPerPage=%d",
-            "Get a Single Cluster": URI_STUB + "/groups/%s/clusters/%s",
+            "Get All Clusters": URI_STUB + "/groups/{GROUP_ID}/clusters",
+            "Get a Single Cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}",
             "Delete a Cluster": URI_STUB + "/groups/%s/clusters/%s",
             "Create a Cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/",
             "Modify a Cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}",

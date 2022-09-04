@@ -9,13 +9,43 @@ Enums are used in order to minimize invalid configuration values.
 from enum import Enum
 from typing import List, Optional
 from datetime import datetime
+import logging
+from lib import DefaultReadConcerns
 import pytz
 import uuid
+
+logger = logging.getLogger('clusters.py')
 
 from atlasapi.lib import ProviderName, MongoDBMajorVersion, ClusterType
 
 FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+## functions
 
+def return_correct_cluster_config(cluster_data: dict) -> 'ClusterConfig':
+    """Returns the correct ClusterConfig object given a cluster configuration dict.
+
+    Either ShardedClusterConfig or ClusterConfig, depending on the type of the cluster recieved.
+
+    Args:
+        cluster_data (dict):
+
+    Returns:
+        ClusterConfig: An object which is an instance of ClusterConfig
+    """
+    cluster_type = ClusterType[cluster_data.get('clusterType', None)]
+    if cluster_type == ClusterType.SHARDED:
+        logger.info("Cluster Type is SHARDED, Returning a ShardedClusterConfig")
+        out_obj = ShardedClusterConfig.fill_from_dict(data_dict=cluster_data)
+    elif cluster_type == ClusterType.REPLICASET:
+        logger.info("Cluster Type is REPLICASET, Returning a ClusterConfig")
+        out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
+    elif cluster_type == ClusterType.GEOSHARDED:
+        logger.info("Cluster Type is GEOSHARDED, Returning a ClusterConfig")
+        out_obj = ShardedClusterConfig.fill_from_dict(data_dict=cluster_data)
+    else:
+        logger.info(f"Cluster Type ({cluster_type}) is not recognized, Returning a REPLICASET")
+        out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
+    return out_obj
 
 # Enums
 class VolumeTypes(Enum):
@@ -580,16 +610,25 @@ class AdvancedOptions(object):
                 sampleSizeBIConnector: Number of documents per database to sample when gathering schema information.
                 sampleRefreshIntervalBIConnector: Interval in seconds at which the mongosqld process re-samples data to
                     create its relational schema.
+                defaultReadConcern (Optional[ReadConcerns):  Default level of acknowledgment requested from MongoDB for read operations
+                 set for this cluster.
+                defaultWriteConcern (str): Default level of acknowledgment requested from MongoDB for write operations
+                set for this cluster.
             """
+
     def __init__(self,
-                 failIndexKeyTooLong: Optional[bool]  = None,
+                 failIndexKeyTooLong: Optional[bool] = None,
                  javascriptEnabled: Optional[bool] = None,
                  minimumEnabledTlsProtocol: Optional[TLSProtocols] = None,
                  noTableScan: Optional[bool] = None,
                  oplogSizeMB: Optional[int] = None,
                  sampleSizeBIConnector: Optional[int] = None,
-                 sampleRefreshIntervalBIConnector: Optional[int] = None):
+                 sampleRefreshIntervalBIConnector: Optional[int] = None,
+                 defaultReadConcern: Optional[DefaultReadConcerns] = None,
+                 defaultWriteConcern: Optional[str] = None):
 
+        self.defaultWriteConcern = defaultWriteConcern
+        self.defaultReadConcern = defaultReadConcern
         self.sampleRefreshIntervalBIConnector = sampleRefreshIntervalBIConnector
         self.sampleSizeBIConnector = sampleSizeBIConnector
         self.oplogSizeMB = oplogSizeMB
@@ -606,6 +645,11 @@ class AdvancedOptions(object):
         :param data_dict: A dict as returned from Atlas
         :return:
         """
+        if data_dict.get('defaultReadConcern'):
+            defaultReadConcern = DefaultReadConcerns[data_dict.get('defaultReadConcern')]
+        else:
+            defaultReadConcern = None
+        defaultWriteConcern = data_dict.get('defaultWriteConcern', None)
         failIndexKeyTooLong = data_dict.get('failIndexKeyTooLong', None)
         javascriptEnabled = data_dict.get('javascriptEnabled', None)
         minimumEnabledTlsProtocol = data_dict.get('minimumEnabledTlsProtocol', None)
@@ -617,7 +661,7 @@ class AdvancedOptions(object):
             minimumEnabledTlsProtocol = TLSProtocols[data_dict.get('minimumEnabledTlsProtocol', None)]
 
         return cls(failIndexKeyTooLong, javascriptEnabled, minimumEnabledTlsProtocol, noTableScan, oplogSizeMB,
-                   sampleSizeBIConnector, sampleRefreshIntervalBIConnector)
+                   sampleSizeBIConnector, sampleRefreshIntervalBIConnector, defaultReadConcern, defaultWriteConcern)
 
     @property
     def as_dict(self) -> dict:
@@ -638,4 +682,28 @@ class AdvancedOptions(object):
         return return_dict
 
 
+def return_correct_cluster_config(cluster_data: dict) -> ClusterConfig:
+    """Returns the correct ClusterConfig object given a cluster configuration dict.
 
+    Either ShardedClusterConfig or ClusterConfig, depending on the type of the cluster recieved.
+
+    Args:
+        cluster_data (dict):
+
+    Returns:
+        ClusterConfig: An object which is an instance of ClusterConfig
+    """
+    cluster_type = ClusterType[cluster_data.get('clusterType', None)]
+    if cluster_type == ClusterType.SHARDED:
+        logger.info("Cluster Type is SHARDED, Returning a ShardedClusterConfig")
+        out_obj = ShardedClusterConfig.fill_from_dict(data_dict=cluster_data)
+    elif cluster_type == ClusterType.REPLICASET:
+        logger.info("Cluster Type is REPLICASET, Returning a ClusterConfig")
+        out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
+    elif cluster_type == ClusterType.GEOSHARDED:
+        logger.info("Cluster Type is GEOSHARDED, Returning a ClusterConfig")
+        out_obj = ShardedClusterConfig.fill_from_dict(data_dict=cluster_data)
+    else:
+        logger.info(f"Cluster Type ({cluster_type}) is not recognized, Returning a REPLICASET")
+        out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
+    return out_obj

@@ -17,36 +17,31 @@ Atlas module
 
 Core module which provides access to MongoDB Atlas Cloud Provider APIs
 """
-from atlasapi.settings import Settings
+import errors
 from atlasapi.network import Network
 from atlasapi.errors import *
 
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
-from atlasapi.specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, DatabaseUsersPermissionsSpecs, \
-    ReplicaSetTypes
-from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement, OptionalAtlasMeasurement
-from typing import Union, Iterator, List, Optional
-from atlasapi.atlas_types import OptionalInt, OptionalBool, ListofDict
+from atlasapi.specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, ReplicaSetTypes
+from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement
+from typing import List, Optional
 from atlasapi.clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
-    InstanceSizeName, AdvancedOptions, TLSProtocols
-from atlasapi.events import atlas_event_factory, ListOfEvents
+    InstanceSizeName, AdvancedOptions, TLSProtocols, return_correct_cluster_config
+from atlasapi.events import atlas_event_factory, EventsIterable
 import logging
-from typing import Union, Iterable, Set, BinaryIO, Generator, Iterator
-from atlasapi.errors import ErrAtlasUnauthorized, ErrAtlasBadRequest
+from typing import Union, Iterable, Set, BinaryIO, Iterator
+from atlasapi.errors import ErrAtlasBadRequest
 from atlasapi.alerts import Alert
-from time import time
 from atlasapi.whitelist import WhitelistEntry
-from atlasapi.maintenance_window import MaintenanceWindow, Weekdays
-from atlasapi.lib import AtlasLogNames, LogLine, ProviderName, MongoDBMajorVersion, AtlasPeriods, AtlasGranularities, \
-    AtlasUnits
+from atlasapi.maintenance_window import MaintenanceWindow
+from atlasapi.lib import AtlasLogNames, LogLine, ProviderName, MongoDBMajorVersion, AtlasPeriods, AtlasGranularities
 from atlasapi.cloud_backup import CloudBackupSnapshot, CloudBackupRequest, SnapshotRestore, SnapshotRestoreResponse, \
     DeliveryType
 from atlasapi.projects import Project, ProjectSettings
-from atlasapi.teams import Team, TeamRoles
+from atlasapi.teams import TeamRoles
 from atlasapi.atlas_users import AtlasUser
 from atlasapi.organizations import Organization
-from requests import get
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 import gzip
 
@@ -54,6 +49,8 @@ logger = logging.getLogger('Atlas')
 
 
 # noinspection PyProtectedMember
+
+
 class Atlas:
     """Atlas constructor
 
@@ -119,33 +116,25 @@ class Atlas:
             except ErrAtlasNotFound:
                 return False
 
-        def get_all_clusters(self, pageNum=Settings.pageNum, itemsPerPage=Settings.itemsPerPage, iterable=False):
-            """Get All Clusters
+        def get_all_clusters(self) -> Iterable[ClusterConfig]:
+            """Get All Clusters for a single Project.
+
+            Yields ClusterConfig objects.
 
             url: https://docs.atlas.mongodb.com/reference/api/clusters-get-all/
 
-            Keyword Args:
-                pageNum (int): Page number
-                itemsPerPage (int): Number of Users per Page
-                iterable (bool): To return an iterable high level object instead of a low level API response
-
             Returns:
-                AtlasPagination or dict: Iterable object representing this function OR Response payload
+                Iterable[ClusterConfig]: Iterable of ClusterConfigs (or ShardedClusterConfig)
 
-            Raises:
-                ErrPaginationLimits: Out of limits
             """
 
-            # Check limits and raise an Exception if needed
-            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+            uri = Settings.api_resources["Clusters"]["Get All Clusters"].format(GROUP_ID=self.atlas.group)
+            response = self.atlas.network.get(Settings.BASE_URL + uri)
+            for page in response:
+                for each_cluster in page.get("results"):
+                    yield return_correct_cluster_config(each_cluster)
 
-            if iterable:
-                return ClustersGetAll(self.atlas, pageNum, itemsPerPage)
-
-            uri = Settings.api_resources["Clusters"]["Get All Clusters"] % (self.atlas.group, pageNum, itemsPerPage)
-            return self.atlas.network.get(Settings.BASE_URL + uri)
-
-        def get_single_cluster(self, cluster: str) -> dict:
+        def get_single_cluster(self, cluster: str) -> ClusterConfig:
             """Get a Single Cluster
 
             url: https://docs.atlas.mongodb.com/reference/api/clusters-get-one/
@@ -154,59 +143,42 @@ class Atlas:
                 cluster (str): The cluster name
 
             Returns:
-                dict: Response payload
+                ClusterConfig: A single ClusterConfig Object
             """
-            uri = Settings.api_resources["Clusters"]["Get a Single Cluster"] % (self.atlas.group, cluster)
-            cluster_data = self.atlas.network.get(Settings.BASE_URL + uri)
-            return cluster_data
+            uri = Settings.api_resources["Clusters"]["Get a Single Cluster"].format(GROUP_ID=self.atlas.group,
+                                                                                    CLUSTER_NAME=cluster)
+            cluster_data = list(self.atlas.network.get(Settings.BASE_URL + uri))[0]
 
-        def get_single_cluster_advanced_options(self, cluster: str, as_obj: bool = True) -> Union[dict,
-                                                                                                  AdvancedOptions]:
-            """
-            Retrieves advanced options from a cluster, either as a obj, or optionally as a dict.
+            return return_correct_cluster_config(cluster_data)
 
-            GET /groups/{GROUP-ID}/clusters/{CLUSTER-NAME}/processArgs
+        def get_single_cluster_advanced_options(self, cluster: str) -> AdvancedOptions:
+            """ Retrieves advanced options from a cluster.
 
-            :param cluster:
-            :param as_obj: True to return, AdvancedOptions, false for a dict
-            :return: AdvancedOptions object or dict
+            GET /groups/{groupId}/clusters/{clusterName}/processArgs
+
+            :param cluster: the cluster name
+            :return (AdvancedOptions): AdvancedOptions object
             """
             uri = Settings.api_resources["Clusters"]["Advanced Configuration Options"].format(GROUP_ID=self.atlas.group,
                                                                                               CLUSTER_NAME=cluster)
             advanced_options = self.atlas.network.get(Settings.BASE_URL + uri)
 
-            if as_obj is True:
-                return_obj = AdvancedOptions.fill_from_dict(data_dict=advanced_options)
-            else:
-                return_obj = advanced_options
+            advanced_data = list(advanced_options)[0]
 
-            return return_obj
+            return AdvancedOptions(advanced_data)
 
         def get_single_cluster_as_obj(self, cluster) -> Union[ClusterConfig, ShardedClusterConfig]:
-            """Get a Single Cluster as data
+            """[DEPRECATED]Get a Single Cluster as data
 
-            url: https://docs.atlas.mongodb.com/reference/api/clusters-get-one/
+            Legacy wrapper, now deprecated since we always return objects, never dicts.
 
             Args:
                 cluster (str): The cluster name
 
             Returns:
-                ClusterConfig: Response payload
+                ClusterConfig (ClusterConfig): A cluster config
             """
-            cluster_data = self.get_single_cluster(cluster=cluster)
-            try:
-                if cluster_data.get('clusterType', None) == 'SHARDED':
-                    logger.info("Cluster Type is SHARDED, Returning a ShardedClusterConfig")
-                    out_obj = ShardedClusterConfig.fill_from_dict(data_dict=cluster_data)
-                elif cluster_data.get('clusterType', None) == 'REPLICASET':
-                    logger.info("Cluster Type is REPLICASET, Returning a ClusterConfig")
-                    out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
-                else:
-                    logger.info("Cluster Type is not recognized, Returning a REPLICASET")
-                    out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
-            except Exception as e:
-                raise e
-            return out_obj
+            return self.get_single_cluster(cluster)
 
         def create_cluster(self, cluster: ClusterConfig) -> dict:
             """Create a cluster
@@ -346,7 +318,7 @@ class Atlas:
 
         def modify_cluster_advanced_options(self, cluster: str,
                                             advanced_options: AdvancedOptions,
-                                            as_obj: bool = True) -> Union[AdvancedOptions, dict]:
+                                            ) -> AdvancedOptions:
             """
             Modifies cluster advanced options using a AdvancedOptions object.
 
@@ -359,60 +331,71 @@ class Atlas:
             """
             uri = Settings.api_resources["Clusters"]["Advanced Configuration Options"].format(GROUP_ID=self.atlas.group,
                                                                                               CLUSTER_NAME=cluster)
-
+            print(f"The advanced options {advanced_options.as_dict}")
             value_returned = self.atlas.network.patch(uri=Settings.BASE_URL + uri, payload=advanced_options.as_dict)
+            advanced_options_obj = AdvancedOptions.fill_from_dict(data_dict=value_returned)
+            return advanced_options_obj
 
-            if as_obj is True:
-                return_obj = AdvancedOptions.fill_from_dict(data_dict=value_returned)
-            else:
-                return_obj = value_returned
+        def modify_cluster_tls(self, cluster: str, TLS_protocol: TLSProtocols) -> TLSProtocols:
+            """Modifies cluster TLS settings.
 
-            return return_obj
-
-        def modify_cluster_tls(self, cluster: str,
-                               TLS_protocol: TLSProtocols,
-                               as_obj: bool = True) -> TLSProtocols:
-            """
-            Modifies cluster TLS settings.
+            Helper class, just wraps modify_cluster_advanced_options.
 
 
             """
-            uri = Settings.api_resources["Clusters"]["Advanced Configuration Options"].format(GROUP_ID=self.atlas.group,
-                                                                                              CLUSTER_NAME=cluster)
-
             advanced_options = AdvancedOptions(minimumEnabledTlsProtocol=TLS_protocol)
 
-            value_returned = self.atlas.network.patch(uri=Settings.BASE_URL + uri, payload=advanced_options.as_dict)
+            return_val = self.modify_cluster_advanced_options(cluster=cluster, advanced_options=advanced_options)
+            return return_val.minimumEnabledTlsProtocol
 
-            if as_obj is True:
-                return_obj = AdvancedOptions.fill_from_dict(data_dict=value_returned)
-            else:
-                return_obj = value_returned
-
-            return return_obj
-
-        def pause_cluster(self, cluster: str, toggle_if_paused: bool = False) -> dict:
+        def pause_cluster(self, cluster: str) -> bool:
             """
             Pauses/Unpauses a cluster.
 
-            If you wish to unpause, set the toggle_if_paused param to True.
+            If you wish to unpause (resume) use the resume_cluster method.
             :rtype: dict
             :param cluster: The name of the cluster
-            :param toggle_if_paused: Set to true to unpause a paused clsuter.
-            :return: dict: The updated config
+            :return: bool: paused status
             """
-            existing_config = self.get_single_cluster_as_obj(cluster=cluster)
-            logger.info('The cluster state is currently Paused= {}'.format(existing_config.paused))
-            if existing_config.paused is True and toggle_if_paused is False:
-                logger.error("The cluster is already paused. Use unpause instead.")
-                raise ErrAtlasBadRequest(400,
-                                         {'msg': 'The cluster is already paused. Use toggle_if_paused to unpause.'})
-            elif existing_config.paused is True and toggle_if_paused is True:
-                logger.warning('Cluster is paused, will toggle to unpaused, since toggle_if paused is true')
-                new_config = dict(paused=False)
-            else:
+            existing_config = self.get_single_cluster(cluster=cluster)
+            logger.info(f'The cluster state is currently Paused= {existing_config.paused}')
+            if existing_config.paused is True:
+                logger.warning("The cluster is already paused. Use unpause instead.")
+                result = existing_config.paused
+            elif existing_config.paused is False:
+                logger.warning(f'Cluster is not paused, we will proceed with pausing')
                 new_config = dict(paused=True)
-            return self.modify_cluster(cluster=cluster, cluster_config=new_config)
+                try:
+                    self.modify_cluster(cluster=cluster, cluster_config=new_config)
+                    result = True
+                except ErrAtlasConflict as e:
+                    logger.warning(f'We tried to pause the cluster, but it was recently resumed, so we are not '
+                                   f'allowed to.')
+                    raise e
+            return result
+
+        def resume_cluster(self, cluster: str) -> bool:
+            """
+            Pauses/Unpauses a cluster.
+
+            :rtype: dict
+            :param cluster: The name of the cluster
+            :return: bool: The paused status
+            """
+            existing_config = self.get_single_cluster(cluster=cluster)
+            logger.info(f'The cluster state is currently Paused= {existing_config.paused}')
+            if existing_config.paused is True:
+                logger.info("The cluster is paused. Will proceed with resuming")
+                try:
+                    new_config = dict(paused=False)
+                    result = self.modify_cluster(cluster=cluster, cluster_config=new_config)
+                    return result.get('paused')
+                except ErrAtlasConflict:
+                    logger.warning(f'We tried to resume the cluster, but it was resumed already in flight.')
+                    return False
+            elif existing_config.paused is False:
+                logger.warning(f'The cluster {cluster} is already resumed, no need to resume')
+                return False
 
         def test_failover(self, cluster: str) -> Optional[dict]:
             """
@@ -446,52 +429,31 @@ class Atlas:
             self.host_list_with_measurements: Optional[List[Host]] = list()
             self.host_list: Optional[List[Host]] = list()
 
-        def _get_all_hosts(self, pageNum=Settings.pageNum,
-                           itemsPerPage=Settings.itemsPerPage,
-                           iterable=False):
+        def _get_all_hosts(self):
             """Get All Hosts (actually processes)
 
             Internal use only, actual data retrieval comes from properties host_list and host_names
-            url: https://docs.atlas.mongodb.com/reference/api/alerts-get-all-alerts/
+            url: https://www.mongodb.com/docs/atlas/reference/api/processes-get-all/
 
             Keyword Args:
-                pageNum (int): Page number
-                itemsPerPage (int): Number of Users per Page
-                iterable (bool): To return an iterable high level object instead of a low level API response
+
 
             Returns:
-                ListOfHosts or dict: Iterable object representing this function OR Response payload
-
-            Raises:
-                ErrPaginationLimits: Out of limits
-                :rtype: Union[ListOfHosts, dict]
-                :type iterable: OptionalBool
-                :type itemsPerPage: OptionalInt
-                :type pageNum: OptionalInt
+                ListOfHosts: Iterable object representing this function
 
             """
+            uri = Settings.api_resources["Monitoring and Logs"]["Get all processes for group"].format(
+                group_id=self.atlas.group)
 
-            # Check limits and raise an Exception if needed
-            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+            try:
+                response = self.atlas.network.get(Settings.BASE_URL + uri)
+                for page in response:
+                    for each_process in page.get("results"):
+                        yield Host(each_process)
+            except Exception as e:
+                raise e
 
-            if iterable:
-                item_list = list(HostsGetAll(self.atlas, pageNum, itemsPerPage))
-                obj_list = list()
-                for item in item_list:
-                    obj_list.append(Host(item))
-
-                return_val = obj_list
-            else:
-                uri = Settings.api_resources["Monitoring and Logs"]["Get all processes for group"].format(
-                    group_id=self.atlas.group,
-                    page_num=pageNum,
-                    items_per_page=itemsPerPage)
-
-                return_val = self.atlas.network.get(Settings.BASE_URL + uri)
-
-            return return_val
-
-        def fill_host_list(self, for_cluster: Optional[str] = None) -> List[Host]:
+        def fill_host_list(self, for_cluster: Optional[str] = None) -> Iterable[Host]:
             """
             Fills the `self.hostname` property with the current hosts for the project/group.
 
@@ -502,9 +464,9 @@ class Atlas:
                 for_cluster (str): The name of the cluster for filter the host list.
 
             Returns:
-                List[Host]: A lost of  `Host` objects
+                Iterable[Host]: Yields `Host` objects
             """
-            host_list = self._get_all_hosts(iterable=True)
+            host_list = self._get_all_hosts()
             if for_cluster:
                 out_list = list()
                 for host in host_list:
@@ -514,7 +476,7 @@ class Atlas:
                         out_list.append(host)
                 self.host_list = out_list
             else:
-                self.host_list = self._get_all_hosts(iterable=True)
+                self.host_list = list(self._get_all_hosts())
 
             return self.host_list
 
@@ -667,6 +629,7 @@ class Atlas:
             if date_to is None and date_from is None:
                 logger.info('No dates passed so we are not going to send date params, API default will be used.')
                 uri = Settings.BASE_URL + uri
+            # TODO: refator to use params instead of hand crafting the uri for the dates
             elif date_to is None and date_from is not None:
                 logger.info('Received only a date_from, so sending only startDate')
                 uri = Settings.BASE_URL + uri + f'?startDate={int(round(date_from.timestamp()))}'
@@ -769,10 +732,8 @@ class Atlas:
         def _get_measurement_for_host(self, host_obj: Host,
                                       granularity: Optional[AtlasGranularities] = None,
                                       period: Optional[AtlasPeriods] = None,
-                                      measurement: Optional[AtlasMeasurementTypes] = None,
-                                      pageNum: int = Settings.pageNum,
-                                      itemsPerPage: int = Settings.itemsPerPage,
-                                      iterable: bool = True) -> Union[dict, Iterable[AtlasMeasurement]]:
+                                      measurement: Optional[AtlasMeasurementTypes] = None
+                                      ) -> Iterable[AtlasMeasurement]:
             """Get  measurement(s) for a host
 
             Internal use only, should come from the host obj itself.
@@ -803,9 +764,6 @@ class Atlas:
                 ErrPaginationLimits: Out of limits
 
                 :rtype: List[measurements.AtlasMeasurement]
-                :type iterable: OptionalBool
-                :type itemsPerPage: OptionalInt
-                :type pageNum: OptionalInt
                 :type period: AtlasPeriods
                 :type granularity: AtlasGranularities
                 :type host_obj: Host
@@ -813,15 +771,14 @@ class Atlas:
 
             """
 
-            # Check limits and raise an Exception if needed
-            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+            #  Set default measurement, period and granularity if none are sent
             if measurement is None:
                 measurement = AtlasMeasurementTypes.Cache.dirty
             if period is None:
                 period = AtlasPeriods.WEEKS_1
-
             if granularity is None:
                 granularity = AtlasGranularities.HOUR
+
             # Check to see if we received a leaf or branch of the measurements
             logger.debug(f'Measurement is: {measurement}')
             logger.debug(f'Measurement object type is {type(measurement)}')
@@ -857,9 +814,18 @@ class Atlas:
             logger.debug(f'The URI used will be {uri}')
             # Build the request
             return_val = self.atlas.network.get(Settings.BASE_URL + uri)
+            for each_host in return_val:
+                try:
+                    measurements = each_host.get('measurements')
+                except Exception as e:
+                    logger.error(f"Error getting measurements from results")
 
-            if iterable:
-                measurements = return_val.get('measurements')
+                    logger.error(e)
+                    logger.error(f"The results look like {results}")
+                    logger.error(f"The results have length {len(list(results))}")
+                    for each in results:
+                        logger.error(f"Results are: {each}")
+                    raise e
                 measurements_count = len(measurements)
                 self.logger.info('There are {} measurements.'.format(measurements_count))
 
@@ -871,9 +837,6 @@ class Atlas:
                         measurement_obj.measurements = AtlasMeasurementValue(each_and_every)
 
                 yield measurement_obj
-
-            else:
-                return return_val
 
     class _Events:
         """Events API
@@ -890,78 +853,49 @@ class Atlas:
             self.atlas = atlas  # type: Atlas
             self.logger = logging.getLogger('Atlas.Events')  # type: logging
 
-        def _get_all_project_events(self, since_datetime: datetime = None, pageNum: int = Settings.pageNum,
-                                    itemsPerPage: int = Settings.itemsPerPage,
-                                    iterable: bool = False) -> ListOfEvents:
+        def _get_all_project_events(self, since_datetime: datetime = None):
             """Get All Project Events
 
             Internal use only, actual data retrieval comes from properties all
             url: https://docs.atlas.mongodb.com/reference/api/events-projects-get-all/
 
             Keyword Args:
-                pageNum (int): Page number
-                itemsPerPage (int): Number of Users per Page
-                iterable (bool): To return an iterable high level object instead of a low level API response
+                since_datetime (datetime): Date and time from when Atlas starts returning events.
 
-            Returns:
-                ListOfEvents or dict: Iterable object representing this function OR Response payload
-
-            Raises:
-                ErrPaginationLimits: Out of limits
-                :rtype: Union[ListOfEvents, dict]
-                :type iterable: OptionalBool
-                :type itemsPerPage: OptionalInt
-                :type pageNum: OptionalInt
-
+            Yields:
+                AtlasEvent: An Atlas Event
             """
-
-            # Check limits and raise an Exception if needed
-            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
-
-            if iterable:
-                item_list = list(EventsGetForProject(self.atlas, since_datetime, pageNum, itemsPerPage))
-                obj_list: ListOfEvents = list()
-                for item in item_list:
-                    obj_list.append(atlas_event_factory(item))
-                return obj_list
-
             if since_datetime:
                 uri = Settings.api_resources["Events"]["Get Project Events Since Date"].format(
                     min_date=since_datetime.isoformat(),
-                    group_id=self.atlas.group,
-                    page_num=pageNum,
-                    items_per_page=itemsPerPage)
-
-                return_val = self.atlas.network.get(Settings.BASE_URL + uri)
-
+                    group_id=self.atlas.group)
             else:
                 uri = Settings.api_resources["Events"]["Get All Project Events"].format(
-                    group_id=self.atlas.group,
-                    page_num=pageNum,
-                    items_per_page=itemsPerPage)
-
-                return_val = self.atlas.network.get(Settings.BASE_URL + uri)
-            return return_val
+                    group_id=self.atlas.group)
+            response = self.atlas.network.get(Settings.BASE_URL + uri)
+            for page in response:
+                for event in page["results"]:
+                    yield atlas_event_factory(event)
 
         @property
-        def all(self) -> ListOfEvents:
+        def all(self) -> EventsIterable:
             """
-            Returns all events for the current project/group.
+            Returns an iterable of all events for the current project/group.
 
-            Returns:
-                ListOfEvents: A list of event objects.
+            Yields:
+                EventsIterable: An iterable of event objects.
 
             """
-            return self._get_all_project_events(iterable=True)
+            yield from self._get_all_project_events()
 
-        def since(self, since_datetime: datetime) -> ListOfEvents:
+        def since(self, since_datetime: datetime) -> EventsIterable:
             """
-            Returns all events since the passed datetime. (UTC)
+            Returns an iterable of all events since the passed datetime. (UTC)
 
-            Returns:
-                ListOfEvents:
+            Yields:
+                EventsIterable: An iterable of event objects.
             """
-            return self._get_all_project_events(iterable=True, since_datetime=since_datetime)
+            yield from self._get_all_project_events(since_datetime=since_datetime)
 
     class _DatabaseUsers:
         """Database Users API
@@ -2056,7 +1990,7 @@ class Atlas:
             uri: str = Settings.api_resources["Organizations"]["Projects associated with the Org"].format(
                 ORG_ID=org_id)
 
-            response = self.atlas.network.get_big(Settings.BASE_URL + uri)
+            response = self.atlas.network.get(Settings.BASE_URL + uri)
             for entry in response.get('results', []):
                 yield Project.from_dict(entry)
 
@@ -2120,42 +2054,7 @@ class AtlasPagination:
             pageNum += 1
 
 
-class ClustersGetAll(AtlasPagination):
-    """Pagination for Clusters : Get All"""
-
-    def __init__(self, atlas, pageNum, itemsPerPage):
-        super().__init__(atlas, atlas.Clusters.get_all_clusters, pageNum, itemsPerPage)
-
-
 # noinspection PyProtectedMember
-class HostsGetAll(AtlasPagination):
-    """Pagination for Processes : Get All"""
-
-    def __init__(self, atlas: Atlas, pageNum: int, itemsPerPage: int):
-        super().__init__(atlas, atlas.Hosts._get_all_hosts, pageNum, itemsPerPage)
-
-
-# noinspection PyProtectedMember
-class EventsGetForProject(AtlasPagination):
-
-    def __init__(self, atlas: Atlas, since_datetime: datetime, pageNum: int, itemsPerPage: int):
-        super().__init__(atlas, self.fetch, pageNum, itemsPerPage)
-        self._get_all_project_events = atlas.Events._get_all_project_events
-        self.since_datetime = since_datetime
-
-    def fetch(self, pageNum, itemsPerPage):
-        """Intermediate fetching
-
-        Args:
-            pageNum (int): Page number
-            itemsPerPage (int): Number of Events per Page
-
-        Returns:
-            dict: Response payload
-        """
-        return self._get_all_project_events(self.since_datetime, pageNum, itemsPerPage)
-
-
 class DatabaseUsersGetAll(AtlasPagination):
     """Pagination for Database User : Get All"""
 

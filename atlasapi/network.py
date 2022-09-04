@@ -18,6 +18,7 @@ Network module
 Module which handles the basic network operations with the Atlas API>
 """
 
+from math import ceil
 import requests
 from requests.auth import HTTPDigestAuth, HTTPBasicAuth
 from atlasapi.settings import Settings
@@ -125,43 +126,54 @@ class Network:
             if r:
                 r.connection.close()
 
-    def get(self, uri):
-        """Get request
+    def _paginate(self, method , url, **kwargs):
+        """(Internal) Paginate requests
         
         Args:
-            uri (str): URI
-            
-        Returns:
-            Json: API response
-            
-        Raises:
-            Exception: Network issue
+            method (str): method for the Request object: GET, OPTIONS, HEAD, POST, PUT, PATCH, or DELETE.
+            url (str): URL for the Request object
+
+        Yields:
+            dict: Response payload
         """
-        r = None
+        session = None
 
         try:
-            r = requests.get(uri,
-                             allow_redirects=True,
-                             timeout=Settings.requests_timeout,
-                             headers={},
-                             auth=self.auth_method(self.user, self.password))
-            logger.debug("Auth information = {} {}".format(self.user, self.password))
-
-            return self.answer(r.status_code, r.json())
+            logger.debug(f"{method} - URI Being called is {url}")
+            session = requests.Session()
+            request = session.request(method=method, url=url, **kwargs)
+            logger.debug("Request arguments: {}".format(str(kwargs)))
+            first_page = self.answer(request.status_code, request.json())
+            yield first_page
+            total_count = first_page.get("totalCount", 0)
+            items_per_page = Settings.itemsPerPage
+            if total_count > items_per_page:
+                logger.warning(f"More than on page required, proceeding . . .")
+                for page_number in range(2, ceil(total_count / items_per_page) + 1):
+                    # Need to ensure that any params sent in kwargs are merged with the pageNum param.
+                    if kwargs.get('params'):
+                        existing_params: dict = kwargs.get('params')
+                        logger.debug(f"Existing params are: {existing_params}")
+                        existing_params.update(dict(pageNum=page_number))
+                        logger.debug(f"New params are {existing_params}")
+                        kwargs["params"] = existing_params
+                        logger.debug(f"Fully updated kwargs is now... {kwargs}")
+                    request = session.request(method=method, url=url, **kwargs)
+                    logger.debug("Request arguments: {}".format(str(kwargs)))
+                    next_page = self.answer(request.status_code, request.json())
+                    yield next_page
         except Exception as e:
-            logger.warning('Request: {}'.format(r.request.__dict__))
-            logger.warning('Response: {}'.format(r.__dict__))
+            logger.error('Error in Request: {}'.format(request.__dict__))
             raise e
         finally:
-            if r:
-                r.connection.close()
+            if session:
+                session.close()
 
-    def get_big(self, uri, params: dict = None):
-        """Get request (max results)
-
-        This is a temporary fix until we re-factor pagination.
+    def get(self, uri, **kwargs):
+        """Get request
 
         Args:
+            call_params:
             uri (str): URI
 
         Returns:
@@ -170,31 +182,16 @@ class Network:
         Raises:
             Exception: Network issue
         """
-        r = None
-        print(f"Revieved the following parameters {params}")
-        if params:
-            logger.warning(f"Revieved the following parameters {params}")
-            merge({'itemsPerPage': Settings.itemsPerPage},params)
-            logger.warning(f"The parameters are now {params}")
-        else:
-            params = {'itemsPerPage': Settings.itemsPerPage}
-
-        try:
-            logger.warning(f"The parameters object is {params}")
-            r = requests.get(uri,
-                             allow_redirects=True,
-                             params=params,
-                             timeout=Settings.requests_timeout,
-                             headers={},
-                             auth=self.auth_method(self.user, self.password))
-            logger.debug("Auth information = {} {}".format(self.user, self.password))
-
-            return self.answer(r.status_code, r.json())
-        except Exception as e:
-            raise e
-        finally:
-            if r:
-                r.connection.close()
+        if kwargs is not None:
+            logger.info(f"kwargs are: {kwargs}")
+        yield from self._paginate(
+                method='GET',
+                url=uri,
+                allow_redirects=True,
+                timeout=Settings.requests_timeout,
+                headers={},
+                auth=self.auth_method(self.user, self.password),
+                **kwargs)
 
     def post(self, uri, payload):
         """Post request

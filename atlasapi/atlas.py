@@ -1890,7 +1890,7 @@ class Atlas:
         def __init__(self, atlas):
             self.atlas = atlas
 
-        def _get_orgs(self, org_name: str = None, org_id: str = None) -> tuple:
+        def _get_orgs(self, org_name: str = None, org_id: str = None) -> Iterator[dict]:
             """Helper method for returning Org info from the API
 
             Args:
@@ -1913,13 +1913,12 @@ class Atlas:
                 raise e
 
             if not org_id:
-                result_list = response.get("results", [])
-                total_count = response.get("TotalCount", 0)
+                for page in response:
+                    for each in page.get("results"):
+                        yield each
             else:
-                result_list = [response]
-                total_count = 1
-
-            return result_list, total_count
+                for each in response:
+                    yield each
 
         @property
         def organizations(self) -> Iterable[Organization]:
@@ -1930,8 +1929,7 @@ class Atlas:
             Returns (Iterable[Organization]): Yields Organization Objects.
 
             """
-            result_list = self._get_orgs()[0]
-            for each in result_list:
+            for each in self._get_orgs():
                 yield Organization.from_dict(each)
 
         def organization_by_name(self, org_name: str) -> Organization:
@@ -1944,11 +1942,10 @@ class Atlas:
             Returns (Organization): a single Organization object.
 
             """
-            result = self._get_orgs(org_name=org_name)[0]
-            if isinstance(result, list):
-                return Organization.from_dict(result[0])
-            else:
-                return Organization.from_dict(result)
+            return_list = []
+            for each in self._get_orgs(org_name=org_name):
+                return_list.append(each)
+            return Organization.from_dict(return_list[0])
 
         def organization_by_id(self, org_id: str) -> Organization:
             """Single organization searched by org_id.
@@ -1958,12 +1955,12 @@ class Atlas:
             Returns (Organization): a single Organization object.
 
             """
-            result = self._get_orgs(org_id=org_id)
-            if isinstance(result[0], list):
-                logger.error("returning a list?")
-                return Organization.from_dict(result[0][0])
-            else:
-                return Organization.from_dict(result[0])
+
+            return_list = []
+            for each in self._get_orgs(org_id=org_id):
+                return_list.append(each)
+
+            return Organization.from_dict(return_list[0])
 
         @property
         def count(self) -> int:
@@ -1972,7 +1969,10 @@ class Atlas:
             Returns (int):
 
             """
-            return self._get_orgs()[1]
+            count = 0
+            for each in self.organizations:
+                count += 1
+            return count
 
         def get_all_projects_for_org(self, org_id: str) -> Iterable[Project]:
             """Get projects related to the current Org
@@ -1991,8 +1991,9 @@ class Atlas:
                 ORG_ID=org_id)
 
             response = self.atlas.network.get(Settings.BASE_URL + uri)
-            for entry in response.get('results', []):
-                yield Project.from_dict(entry)
+            for page in response:
+                for each_project in page.get("results"):
+                    yield Project.from_dict(each_project)
 
 
 class AtlasPagination:
@@ -2095,26 +2096,3 @@ class CloudBackupSnapshotsGetAll(AtlasPagination):
 
     def __init__(self, atlas, pageNum, itemsPerPage):
         super().__init__(atlas, atlas.CloudBackups.get_all_backup_snapshots, pageNum, itemsPerPage)
-
-
-class OrganizationProjectsGetAll(AtlasPagination):
-    """Pagination for Database User : Get All"""
-
-    def __init__(self, atlas: Atlas, org_id: str, pageNum, itemsPerPage):
-        super().__init__(atlas, self.fetch, pageNum, itemsPerPage)
-        print(f"Got to init")
-        self._get_all_projects_for_org = atlas.Organizations.get_all_projects_for_org
-        self.org_id = org_id
-
-    def fetch(self, pageNum, itemsPerPage):
-        """Intermediate fetching
-
-        Args:
-            pageNum (int): Page number
-            itemsPerPage (int): Number of Events per Page
-
-        Returns:
-            dict: Response payload
-        """
-        print("Got to fetch")
-        return self._get_all_projects_for_org(self.org_id, pageNum, itemsPerPage)

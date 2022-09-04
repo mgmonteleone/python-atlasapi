@@ -11,12 +11,14 @@ from atlasapi.atlas import Atlas
 from atlasapi.lib import AtlasPeriods, AtlasUnits, AtlasGranularities
 from json import dumps
 from atlasapi.clusters import AtlasBasicReplicaSet, ClusterConfig
-from atlasapi.lib import MongoDBMajorVersion as mdb_version, DefaultReadConcerns
+from atlasapi.lib import MongoDBMajorVersion as mdb_version
+from atlasapi.lib import DefaultReadConcerns
 from atlasapi.clusters import ClusterConfig, ProviderSettings, ReplicationSpecs, InstanceSizeName
-from atlasapi.clusters import RegionConfig, AdvancedOptions, TLSProtocols
+from atlasapi.clusters import RegionConfig, AdvancedOptions, TLSProtocols, ClusterStates
 from tests import BaseTests
 import logging
-from time import sleep
+from time import sleep, time
+import humanfriendly
 
 logger = logging.getLogger('test')
 
@@ -46,10 +48,11 @@ class ClusterTests(BaseTests):
         myoutput = self.a.Clusters.create_basic_rs(name=self.TEST_CLUSTER2_NAME_UNIQUE, version=mdb_version.v4_2,
                                                    size=InstanceSizeName.M10)
         self.assertEqual(type(myoutput), AtlasBasicReplicaSet)
-        pprint(myoutput.config.as_dict)
-        print('-------------------Waiting a bit to allow the cluster to be created......-------------')
-        sleep(30)
-        print('-----------------------------------Done Sleeping -------------------------------------')
+        self.wait_for_cluster_state(self.TEST_CLUSTER2_NAME_UNIQUE, states_desired=[ClusterStates.CREATING,
+                                                                                    ClusterStates.UPDATING],
+                                    states_to_wait=[ClusterStates.IDLE, ClusterStates.REPAIRING,
+                                                    ClusterStates.DELETING])
+        sleep(10)
 
     test_04_create_basic_cluster.advanced = True
 
@@ -59,19 +62,37 @@ class ClusterTests(BaseTests):
         new_size = existing.disk_size_gb + 1
         existing.disk_size_gb = new_size
         new_config = self.a.Clusters.modify_cluster(self.TEST_CLUSTER_NAME, existing)
-        pprint('Old Size: {}.  New Size {}'.format(old_size, new_size))
+        print('Old Size: {}.  New Size {}'.format(old_size, new_size))
         self.assertEquals(new_config.get('diskSizeGB', 0), new_size), new_config
-        print('-------------------Waiting a bit to allow the cluster to be modified......-------------')
-        sleep(20)
-        print('-----------------------------------Done Sleeping -------------------------------------')
+        print(f'Disk size is now {new_config.get("diskSizeGB")}')
 
-    def test_06_delete_cluster(self):
-        myoutput = self.a.Clusters.delete_cluster(cluster=self.TEST_CLUSTER2_NAME_UNIQUE, areYouSure=True)
-        print('Successfully Deleted {}, output was '.format(self.TEST_CLUSTER2_NAME_UNIQUE, myoutput))
+    test_05_modify_cluster_disk.advanced = True
 
-    test_06_delete_cluster.advanced = True
+    def test_4a_delete_cluster(self):
+        if self.a.Clusters.is_existing_cluster(self.TEST_CLUSTER2_NAME_UNIQUE):
+            print(f"✓ Cluster {self.TEST_CLUSTER2_NAME_UNIQUE} exists, testing deleting it....")
+            my_output = self.a.Clusters.delete_cluster(cluster=self.TEST_CLUSTER2_NAME_UNIQUE, areYouSure=True)
+            print('Successfully Deleted {}, output was '.format(self.TEST_CLUSTER2_NAME_UNIQUE, my_output))
 
-    def test_07_create_cluster(self):
+        else:
+            print(f"𐄂 Cluster {self.TEST_CLUSTER2_NAME_UNIQUE} does not exist (test sequencing issue? "
+                  f"Will Create it before deleting")
+            my_output = self.a.Clusters.create_basic_rs(name=self.TEST_CLUSTER2_NAME_UNIQUE, version=mdb_version.v4_2,
+                                                        size=InstanceSizeName.M10)
+            created_cluster_name = my_output.config.name
+            print(f"The newly created cluster is named {created_cluster_name}")
+            self.wait_for_cluster_state(created_cluster_name, states_desired=[ClusterStates.CREATING,
+                                                                              ClusterStates.UPDATING],
+                                        states_to_wait=[ClusterStates.IDLE, ClusterStates.REPAIRING,
+                                                        ClusterStates.DELETING])
+            my_output = self.a.Clusters.delete_cluster(cluster=created_cluster_name, areYouSure=True)
+            self.wait_for_cluster_state(created_cluster_name,
+                                        states_desired=[ClusterStates.DELETING, ClusterStates.DELETED])
+            print('Successfully Deleted {}, output was '.format(created_cluster_name, my_output))
+
+    test_4a_delete_cluster.advanced = True
+
+    def test_07_create_resize(self):
         provider_settings: ProviderSettings = ProviderSettings()
         regions_config = RegionConfig()
         replication_specs = ReplicationSpecs(regions_config={provider_settings.region_name: regions_config.__dict__})
@@ -80,33 +101,48 @@ class ClusterTests(BaseTests):
                                        replication_specs=replication_specs)
 
         output = self.a.Clusters.create_cluster(cluster_config)
-        pprint(output)
 
-    test_07_create_cluster.advanced = True
+        cluster_3_config = self.a.Clusters.get_single_cluster(cluster=self.TEST_CLUSTER3_NAME_UNIQUE)
+        self.assertEqual(cluster_3_config.name, self.TEST_CLUSTER3_NAME_UNIQUE)
 
-    def test_08_resize_a_cluster(self):
+        self.wait_for_cluster_state(self.TEST_CLUSTER3_NAME_UNIQUE)
+        print(f"✅ Cluster {self.TEST_CLUSTER3_NAME_UNIQUE} created successfully.")
+
+        print(f"Will now resize {self.TEST_CLUSTER3_NAME_UNIQUE} to m20....")
         self.a.Clusters.modify_cluster_instance_size(cluster=self.TEST_CLUSTER3_NAME_UNIQUE,
                                                      new_cluster_size=InstanceSizeName.M20)
+        new_size = self.a.Clusters.get_single_cluster(self.TEST_CLUSTER3_NAME_UNIQUE).providerSettings.instance_size_name
+        self.assertEqual(new_size.name,InstanceSizeName.M20.name)
+        print(f"✅ Cluster Successfully resized.")
 
-    test_08_resize_a_cluster.advanced = True
-
-    def test_09_deleted_resized_cluster(self):
-        output = self.a.Clusters.delete_cluster(cluster=self.TEST_CLUSTER3_NAME_UNIQUE, areYouSure=True)
-        print('Successfully Deleted resized cluster :{}, output was '.format(self.TEST_CLUSTER2_NAME_UNIQUE, output))
-
-    test_09_deleted_resized_cluster.advanced = True
+    test_07_create_resize.advanced = True
 
     def test_10_pause_cluster(self):
-        pprint('Pausing Cluster {}'.format(self.TEST_CLUSTER_NAME))
+        print('Pausing Cluster {}'.format(self.TEST_CLUSTER_NAME))
         try:
-            out = self.a.Clusters.pause_cluster(cluster=self.TEST_CLUSTER_NAME, toggle_if_paused=True)
+            out = self.a.Clusters.pause_cluster(cluster=self.TEST_CLUSTER_NAME)
             self.assertTrue(type(out), dict), "Out Type is {}".format(type(out))
         except Exception as e:
             if e.details.get('errorCode') == 'CANNOT_PAUSE_RECENTLY_RESUMED_CLUSTER':
                 print("We are working to fast. {}".format(e.details.get('detail')))
                 pass
+            else:
+                raise e
 
     test_10_pause_cluster.advanced = True
+
+    def test_10a_resume_cluster(self):
+        print('Resuming Cluster {}'.format(self.TEST_CLUSTER_NAME))
+        try:
+            out = self.a.Clusters.resume_cluster(cluster=self.TEST_CLUSTER_NAME)
+            self.assertFalse(out)
+        except Exception as e:
+            print(e)
+            if e.details.get('errorCode') == 'CANNOT_PAUSE_RECENTLY_RESUMED_CLUSTER':
+                print("We are working to fast. {}".format(e.details.get('detail')))
+                pass
+
+    test_10a_resume_cluster.advanced = True
 
     def test_11_test_failover(self):
         try:
@@ -121,7 +157,7 @@ class ClusterTests(BaseTests):
     def test_12_get_advanced_options(self):
         out_obj = self.a.Clusters.get_single_cluster_advanced_options(self.TEST_CLUSTER_NAME)
         print(f'✅ received a {type(out_obj)} object, which looks like this {str(out_obj.__dict__)[0:80]} . . .')
-        self.assertEqual(type(out_obj), AdvancedOptions, msg='Output should be and AdvancedOptions object')
+        self.assertEqual(type(out_obj), AdvancedOptions, msg='Output should be an AdvancedOptions object')
 
     test_12_get_advanced_options.basic = True
 
@@ -169,8 +205,8 @@ class ClusterTests(BaseTests):
         set_6 = AdvancedOptions(defaultReadConcern=DefaultReadConcerns.local)
         out_set_6 = self.a.Clusters.modify_cluster_advanced_options(cluster=self.TEST_CLUSTER_NAME,
                                                                     advanced_options=set_6)
-        self.assertEqual(set_6.defaultReadConcern, out_set_6.defaultReadConcern,
-                         msg='in = {}: out= {}'.format(set_6.__dict__, out_set_6.__dict__))
+        self.assertEqual(set_6.defaultReadConcern.name, out_set_6.defaultReadConcern.name,
+                         msg=f'in = {set_6}: out= {out_set_6}')
         print(f"✅ Checked defaultReadConcern = {set_6.defaultReadConcern} ")
         set_6_revert = AdvancedOptions(defaultReadConcern=DefaultReadConcerns.available)
         print(f"↩️ Reverting defaultReadConcern = {set_6_revert.defaultReadConcern} ")

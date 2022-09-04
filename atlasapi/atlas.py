@@ -17,6 +17,7 @@ Atlas module
 
 Core module which provides access to MongoDB Atlas Cloud Provider APIs
 """
+import errors
 from atlasapi.network import Network
 from atlasapi.errors import *
 
@@ -43,7 +44,6 @@ from atlasapi.atlas_users import AtlasUser
 from atlasapi.organizations import Organization
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 import gzip
-
 
 logger = logging.getLogger('Atlas')
 
@@ -331,10 +331,10 @@ class Atlas:
             """
             uri = Settings.api_resources["Clusters"]["Advanced Configuration Options"].format(GROUP_ID=self.atlas.group,
                                                                                               CLUSTER_NAME=cluster)
-
+            print(f"The advanced options {advanced_options.as_dict}")
             value_returned = self.atlas.network.patch(uri=Settings.BASE_URL + uri, payload=advanced_options.as_dict)
-
-            return AdvancedOptions.fill_from_dict(data_dict=value_returned)
+            advanced_options_obj = AdvancedOptions.fill_from_dict(data_dict=value_returned)
+            return advanced_options_obj
 
         def modify_cluster_tls(self, cluster: str, TLS_protocol: TLSProtocols) -> TLSProtocols:
             """Modifies cluster TLS settings.
@@ -345,32 +345,57 @@ class Atlas:
             """
             advanced_options = AdvancedOptions(minimumEnabledTlsProtocol=TLS_protocol)
 
-            return_val = self.modify_cluster_advanced_options(cluster=cluster,advanced_options=advanced_options)
+            return_val = self.modify_cluster_advanced_options(cluster=cluster, advanced_options=advanced_options)
             return return_val.minimumEnabledTlsProtocol
 
-
-        def pause_cluster(self, cluster: str, toggle_if_paused: bool = False) -> dict:
+        def pause_cluster(self, cluster: str) -> bool:
             """
             Pauses/Unpauses a cluster.
 
-            If you wish to unpause, set the toggle_if_paused param to True.
+            If you wish to unpause (resume) use the resume_cluster method.
             :rtype: dict
             :param cluster: The name of the cluster
-            :param toggle_if_paused: Set to true to unpause a paused clsuter.
-            :return: dict: The updated config
+            :return: bool: paused status
             """
-            existing_config = self.get_single_cluster_as_obj(cluster=cluster)
-            logger.info('The cluster state is currently Paused= {}'.format(existing_config.paused))
-            if existing_config.paused is True and toggle_if_paused is False:
-                logger.error("The cluster is already paused. Use unpause instead.")
-                raise ErrAtlasBadRequest(400,
-                                         {'msg': 'The cluster is already paused. Use toggle_if_paused to unpause.'})
-            elif existing_config.paused is True and toggle_if_paused is True:
-                logger.warning('Cluster is paused, will toggle to unpaused, since toggle_if paused is true')
-                new_config = dict(paused=False)
-            else:
+            existing_config = self.get_single_cluster(cluster=cluster)
+            logger.info(f'The cluster state is currently Paused= {existing_config.paused}')
+            if existing_config.paused is True:
+                logger.warning("The cluster is already paused. Use unpause instead.")
+                result = existing_config.paused
+            elif existing_config.paused is False:
+                logger.warning(f'Cluster is not paused, we will proceed with pausing')
                 new_config = dict(paused=True)
-            return self.modify_cluster(cluster=cluster, cluster_config=new_config)
+                try:
+                    self.modify_cluster(cluster=cluster, cluster_config=new_config)
+                    result = True
+                except ErrAtlasConflict as e:
+                    logger.warning(f'We tried to pause the cluster, but it was recently resumed, so we are not '
+                                   f'allowed to.')
+                    raise e
+            return result
+
+        def resume_cluster(self, cluster: str) -> bool:
+            """
+            Pauses/Unpauses a cluster.
+
+            :rtype: dict
+            :param cluster: The name of the cluster
+            :return: bool: The paused status
+            """
+            existing_config = self.get_single_cluster(cluster=cluster)
+            logger.info(f'The cluster state is currently Paused= {existing_config.paused}')
+            if existing_config.paused is True:
+                logger.info("The cluster is paused. Will proceed with resuming")
+                try:
+                    new_config = dict(paused=False)
+                    result = self.modify_cluster(cluster=cluster, cluster_config=new_config)
+                    return result.get('paused')
+                except ErrAtlasConflict:
+                    logger.warning(f'We tried to resume the cluster, but it was resumed already in flight.')
+                    return False
+            elif existing_config.paused is False:
+                logger.warning(f'The cluster {cluster} is already resumed, no need to resume')
+                return False
 
         def test_failover(self, cluster: str) -> Optional[dict]:
             """

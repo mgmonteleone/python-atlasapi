@@ -65,7 +65,7 @@ class Settings:
             "Get a Single Cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}",
             "Delete a Cluster": URI_STUB + "/groups/%s/clusters/%s",
             "Create a Cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/",
-            "Modify a Cluster": URI_STUB + "/{GROUP_ID}/clusters/{CLUSTER_NAME}",
+            "Modify a Cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}",
             "Test Failover": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}/restartPrimaries",
             "Advanced Configuration Options": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}/processArgs",
 

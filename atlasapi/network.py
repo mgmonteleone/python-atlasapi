@@ -162,9 +162,6 @@ class Network:
                     logger.debug("Request arguments: {}".format(str(kwargs)))
                     next_page = self.answer(request.status_code, request.json())
                     yield next_page
-        except Exception as e:
-            logger.error('Error in Request: {}'.format(request.__dict__))
-            raise e
         finally:
             if session:
                 session.close()

@@ -92,7 +92,7 @@ class ClusterTests(BaseTests):
 
     test_4a_delete_cluster.advanced = True
 
-    def test_07_create_resize_delete(self):
+    def test_07_create_resize(self):
         provider_settings: ProviderSettings = ProviderSettings()
         regions_config = RegionConfig()
         replication_specs = ReplicationSpecs(regions_config={provider_settings.region_name: regions_config.__dict__})
@@ -106,18 +106,16 @@ class ClusterTests(BaseTests):
         self.assertEqual(cluster_3_config.name, self.TEST_CLUSTER3_NAME_UNIQUE)
 
         self.wait_for_cluster_state(self.TEST_CLUSTER3_NAME_UNIQUE)
-        print(f"✅ Cluster {self.TEST_CLUSTER3_NAME_UNIQUE} created successfully in"
-              f" {humanfriendly.format_timespan(seconds_elapsed)}.")
+        print(f"✅ Cluster {self.TEST_CLUSTER3_NAME_UNIQUE} created successfully.")
 
-        printf(f"Will now resize {self.TEST_CLUSTER3_NAME_UNIQUE} to m20....")
+        print(f"Will now resize {self.TEST_CLUSTER3_NAME_UNIQUE} to m20....")
         self.a.Clusters.modify_cluster_instance_size(cluster=self.TEST_CLUSTER3_NAME_UNIQUE,
                                                      new_cluster_size=InstanceSizeName.M20)
-        self.wait_for_cluster_state(self.TEST_CLUSTER3_NAME_UNIQUE,
-                                    states_to_wait=[ClusterStates.UPDATING, ClusterStates.REPAIRING])
-
+        new_size = self.a.Clusters.get_single_cluster(self.TEST_CLUSTER3_NAME_UNIQUE).providerSettings.instance_size_name
+        self.assertEqual(new_size.name,InstanceSizeName.M20.name)
         print(f"✅ Cluster Successfully resized.")
 
-    test_07_create_resize_delete.advanced = True
+    test_07_create_resize.advanced = True
 
     def test_10_pause_cluster(self):
         print('Pausing Cluster {}'.format(self.TEST_CLUSTER_NAME))

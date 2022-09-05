@@ -725,7 +725,7 @@ class Availability(Enum):
 
     This parameter returns `available` when all nodes are accessible, `warning` only when some nodes in the cluster
     can be accessed, `unavailable` when the cluster can't be accessed, or `dead` when the cluster has been deactivated.
-    (imported)
+    (OpenAPI 1.0 Imported with Pydantic)
     """
     available = 'available'
     dead = 'dead'
@@ -737,7 +737,7 @@ class SimpleClusterType(Enum):
     """
     Human-readable label that indicates the cluster type.
 
-    (imported)
+    (OpenAPI 1.0 Imported with Pydantic)
     """
 
     replica_set = 'replica set'
@@ -751,9 +751,8 @@ class CamelModel(BaseModel):
 
 
 class ClusterView(CamelModel):
-    """
-    Settings that describe the clusters in each project that the API key is authorized to view.
-    (imported)
+    """Settings that describe the clusters in each project that the API key is authorized to view.
+    (OpenAPI 1.0 Imported with Pydantic)
     """
 
     alert_count: Optional[int] = Field(
@@ -821,6 +820,9 @@ class ClusterView(CamelModel):
 
 
 class OrgGroupView(CamelModel):
+    """Container for Org and group data for cross org/cross group get all clusters.
+        (OpenAPI 1.0 Imported with Pydantic)
+        """
     clusters: Optional[List[ClusterView]] = Field(
         None,
         description='Settings that describe the clusters in each project that the API key is authorized to view.',

@@ -13,13 +13,20 @@ import logging
 from atlasapi.lib import DefaultReadConcerns
 import pytz
 import uuid
+from pydantic import BaseModel, Field, constr
+from humps import camelize
 
 logger = logging.getLogger('clusters.py')
 
 from atlasapi.lib import ProviderName, MongoDBMajorVersion, ClusterType
 
 FORMAT = '%Y-%m-%dT%H:%M:%SZ'
+
+
 ## functions
+def to_camel(string):
+    return camelize(string)
+
 
 def return_correct_cluster_config(cluster_data: dict) -> 'ClusterConfig':
     """Returns the correct ClusterConfig object given a cluster configuration dict.
@@ -46,6 +53,7 @@ def return_correct_cluster_config(cluster_data: dict) -> 'ClusterConfig':
         logger.info(f"Cluster Type ({cluster_type}) is not recognized, Returning a REPLICASET")
         out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
     return out_obj
+
 
 # Enums
 class VolumeTypes(Enum):
@@ -129,6 +137,7 @@ class RegionConfig(object):
                            read_only_node_count: Count of read_only nodes.
                            analytics_node_count:  Count of analytics nodes.
     """
+
     def __init__(self,
                  electable_node_count: int = 3,
                  priority: int = 7,
@@ -289,6 +298,7 @@ class ClusterConfig(object):
             links:
 
     """
+
     def __init__(self, backup_enabled: bool = False,
                  cluster_type: ClusterType = ClusterType.REPLICASET,
                  disk_size_gb: int = 32,
@@ -374,7 +384,7 @@ class ClusterConfig(object):
         return cls(backup_enabled, cluster_type, disk_size_gb, name, mongodb_major_version, mongodb_version,
                    num_shards, mongo_uri, mongo_uri_updated, mongo_uri_with_options, paused, pit_enabled,
                    replication_factor, state_name, autoscaling, replication_specs,
-                   srv_address, providerSettings, links,id)
+                   srv_address, providerSettings, links, id)
 
     def as_dict(self) -> dict:
         return_dict = self.__dict__
@@ -564,6 +574,7 @@ class AtlasBasicReplicaSet(object):
                 region: The region in the cloud provider
                 version: The MongoDB major version
             """
+
     def __init__(self, name: str,
                  size: InstanceSizeName = InstanceSizeName.M10,
                  disk_size: int = 10,
@@ -571,7 +582,6 @@ class AtlasBasicReplicaSet(object):
                  region: str = 'US_WEST_2',
                  version: MongoDBMajorVersion = MongoDBMajorVersion.v4_0,
                  ) -> None:
-
         provider_settings = ProviderSettings(size=size,
                                              provider=provider, region=region)
         regions_config = RegionConfig()
@@ -707,3 +717,158 @@ def return_correct_cluster_config(cluster_data: dict) -> ClusterConfig:
         logger.info(f"Cluster Type ({cluster_type}) is not recognized, Returning a REPLICASET")
         out_obj = ClusterConfig.fill_from_dict(data_dict=cluster_data)
     return out_obj
+
+
+class Availability(Enum):
+    """
+    Term that expresses how many nodes of the cluster can be accessed when MongoDB Cloud receives this request.
+
+    This parameter returns `available` when all nodes are accessible, `warning` only when some nodes in the cluster
+    can be accessed, `unavailable` when the cluster can't be accessed, or `dead` when the cluster has been deactivated.
+    (OpenAPI 1.0 Imported with Pydantic)
+    """
+    available = 'available'
+    dead = 'dead'
+    unavailable = 'unavailable'
+    warning = 'warning'
+
+
+class SimpleClusterType(Enum):
+    """
+    Human-readable label that indicates the cluster type.
+
+    (OpenAPI 1.0 Imported with Pydantic)
+    """
+
+    replica_set = 'replica set'
+    sharded_cluster = 'sharded cluster'
+
+
+class CamelModel(BaseModel):
+    class Config:
+        alias_generator = to_camel
+        allow_population_by_field_name = True
+
+
+class ClusterView(CamelModel):
+    """Settings that describe the clusters in each project that the API key is authorized to view.
+    (OpenAPI 1.0 Imported with Pydantic)
+    """
+
+    alert_count: Optional[int] = Field(
+        None,
+        alias='alertCount',
+        description='Whole number that indicates the quantity of alerts open on the cluster.',
+    )
+    auth_enabled: Optional[bool] = Field(
+        None,
+        alias='authEnabled',
+        description='Flag that indicates whether authentication is required to access the nodes in this cluster.',
+    )
+    availability: Optional[Availability] = Field(
+        None,
+        description="Term that expresses how many nodes of the cluster can be accessed when MongoDB Cloud receives "
+                    "this request. This parameter returns `available` when all nodes are accessible, `warning` only "
+                    "when some nodes in the cluster can be accessed, `unavailable` when the cluster can't be accessed,"
+                    " or `dead` when the cluster has been deactivated.",
+    )
+    backup_enabled: Optional[bool] = Field(
+        None,
+        alias='backupEnabled',
+        description="Flag that indicates whether the cluster can perform backups. If set to `true`, the cluster can "
+                    "perform backups. You must set this value to `true` for NVMe clusters. Backup uses Cloud Backups "
+                    "for dedicated clusters and Shared Cluster Backups for tenant clusters. If set to `false`, "
+                    "the cluster doesn't use MongoDB Cloud backups.",
+    )
+    cluster_id: Optional[
+        constr(regex=r'^([a-f0-9]{24})$', min_length=24, max_length=24)
+    ] = Field(
+        None,
+        alias='clusterId',
+        description='Unique 24-hexadecimal character string that identifies the cluster.',
+    )
+    data_size_bytes: Optional[float] = Field(
+        None,
+        alias='dataSizeBytes',
+        description='Total size of the data stored on each node in the cluster. '
+                    'The resource expresses this value in bytes.',
+    )
+    name: Optional[
+        constr(
+            regex=r'^([a-zA-Z0-9]([a-zA-Z0-9-]){0,21}(?<!-)([\w]{0,42}))$',
+            min_length=1,
+            max_length=64,
+        )
+    ] = Field(None, description='Human-readable label that identifies the cluster.')
+    node_count: Optional[float] = Field(
+        None,
+        alias='nodeCount',
+        description='Whole number that indicates the quantity of nodes that comprise the cluster.',
+    )
+    ssl_enabled: Optional[bool] = Field(
+        None,
+        alias='sslEnabled',
+        description='Flag that indicates whether TLS authentication is required to access the nodes in this cluster.',
+    )
+    type: Optional[SimpleClusterType] = Field(
+        None, description='Human-readable label that indicates the cluster type.'
+    )
+    versions: Optional[List[str]] = Field(
+        None,
+        description='List that contains the versions of MongoDB that each node in the cluster runs.',
+    )
+
+
+class OrgGroupView(CamelModel):
+    """Container for Org and group data for cross org/cross group get all clusters.
+        (OpenAPI 1.0 Imported with Pydantic)
+        """
+    clusters: Optional[List[ClusterView]] = Field(
+        None,
+        description='Settings that describe the clusters in each project that the API key is authorized to view.',
+    )
+    group_id: Optional[
+        constr(regex=r'^([a-f0-9]{24})$',
+               min_length=24, max_length=24)
+    ] = Field(
+        None,
+        alias='groupId',
+        description='Unique 24-hexadecimal character string that identifies the project.',
+    )
+    group_name: Optional[
+        constr(
+            # regex=r'^[\p{L}\p{N}\-_.(),:&@+\']{1,64}$',
+            min_length=1, max_length=64)
+    ] = Field(
+        None,
+        alias='groupName',
+        description='Human-readable label that identifies the project.',
+    )
+    org_id: Optional[
+        constr(regex=r'^([a-f0-9]{24})$',
+               min_length=24, max_length=24)
+    ] = Field(
+        None,
+        alias='orgId',
+        description='Unique 24-hexadecimal character string that identifies'
+                    ' the organization that contains the project.',
+    )
+    org_name: Optional[
+        constr(
+            # regex=r'^[\p{L}\p{N}\-_.(),:&@+\']{1,64}$',
+            min_length=1, max_length=64)
+    ] = Field(
+        None,
+        alias='orgName',
+        description='Human-readable label that identifies the organization that contains the project.',
+    )
+    plan_type: Optional[str] = Field(
+        None,
+        alias='planType',
+        description='Human-readable label that indicates the plan type.',
+    )
+    tags: Optional[List[Optional[str]]] = Field(
+        None,
+        description='List of human-readable labels that categorize the specified project. '
+                    'MongoDB Cloud returns an empty array.',
+    )

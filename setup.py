@@ -6,7 +6,8 @@ setup(
     version='2.0.3',
     python_requires='>=3.7',
     packages=find_packages(exclude=("tests",)),
-    install_requires=['requests', 'python-dateutil', 'isodate', 'future', 'pytz','coolname', 'humanfriendly', 'nose'],
+    install_requires=['requests', 'python-dateutil', 'isodate', 'future', 'pytz','coolname',
+                      'humanfriendly', 'pydantic', 'humps', 'nose'],
     setup_requires=['wheel'],
     # Metadata
     author="Matthew G. Monteleone",

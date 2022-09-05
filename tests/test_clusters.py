@@ -13,7 +13,7 @@ from json import dumps
 from atlasapi.clusters import AtlasBasicReplicaSet, ClusterConfig
 from atlasapi.lib import MongoDBMajorVersion as mdb_version
 from atlasapi.lib import DefaultReadConcerns
-from atlasapi.clusters import ClusterConfig, ProviderSettings, ReplicationSpecs, InstanceSizeName
+from atlasapi.clusters import ClusterConfig, ProviderSettings, ReplicationSpecs, InstanceSizeName, OrgGroupView, ClusterView
 from atlasapi.clusters import RegionConfig, AdvancedOptions, TLSProtocols, ClusterStates
 from tests import BaseTests
 import logging
@@ -33,6 +33,21 @@ class ClusterTests(BaseTests):
             self.assertIsInstance(each, ClusterConfig)
 
     test_00_get_all_clusters.basic = True
+
+    def test_01_get_all_clusters_for_key(self):
+        cluster_list = self.a.Clusters.get_all_authorized_clusters()
+
+        if not cluster_list:
+            print(f"No Clusters returned.")
+            self.assertTrue(True)
+            return
+        else:
+            for each_summary in cluster_list:
+                self.assertIsInstance(each_summary, OrgGroupView)
+                for each_cluster_view in each_summary.clusters:
+                    self.assertIsInstance(each_cluster_view,ClusterView)
+
+    test_01_get_all_clusters_for_key.basic = True
 
     def test_03_get_a_cluster(self):
         cluster = self.a.Clusters.get_single_cluster(self.TEST_CLUSTER_NAME)

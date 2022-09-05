@@ -7,3 +7,5 @@ coolname
 nose
 awspublicranges
 humanfriendly
+pydantic
+pyhumps

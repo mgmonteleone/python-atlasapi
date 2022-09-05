@@ -17,7 +17,6 @@ Atlas module
 
 Core module which provides access to MongoDB Atlas Cloud Provider APIs
 """
-import errors
 from atlasapi.network import Network
 from atlasapi.errors import *
 

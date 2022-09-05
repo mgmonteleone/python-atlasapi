@@ -132,6 +132,7 @@ class Atlas:
             for page in response:
                 for each_cluster in page.get("results"):
                     yield return_correct_cluster_config(each_cluster)
+
         def get_all_authorized_clusters(self) -> Iterable[ClusterConfig]:
             """Get All Clusters which the current key is authorized
 
@@ -165,10 +166,10 @@ class Atlas:
                         cluster = ClusterView.parse_obj(each_cluster)
                         cluster_list.append(cluster)
                     group_data = OrgGroupView(clusters=cluster_list, group_id=groupId, group_name=groupName,
-                                              org_id=orgId,org_name=orgName,plan_type=planType)
+                                              org_id=orgId, org_name=orgName, plan_type=planType)
 
                     yield group_data
-                    #yield return_correct_cluster_config(each_cluster)
+
         def get_single_cluster(self, cluster: str) -> ClusterConfig:
             """Get a Single Cluster
 

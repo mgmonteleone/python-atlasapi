@@ -1699,6 +1699,8 @@ class Atlas:
 
         The groups resource provides access to retrieve or create Atlas projects.
 
+        groups is a synonym for projects throughout Atlas.
+
         Args:
             atlas (Atlas): Atlas instance
         """
@@ -1722,10 +1724,10 @@ class Atlas:
                 response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
             except Exception as e:
                 raise e
-            result_list = response["results"]
 
-            for each in result_list:
-                yield Project.from_dict(each)
+            for each_page in response:
+                for each_project in each_page.get('results'):
+                    yield Project.from_dict(each_project)
 
         def _get_project(self, group_id: str = None, group_name: str = None) -> Project:
             """Returns a single Project
@@ -1755,8 +1757,10 @@ class Atlas:
                 response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
             except Exception as e:
                 raise e
-
-            return Project.from_dict(response)
+            return_list = list()
+            for each_page in response:
+                return_list.append(Project.from_dict(each_page))
+            return return_list[0]
 
         def project_by_name(self, project_name: str) -> Project:
             """Return project by name
@@ -1820,10 +1824,10 @@ class Atlas:
                 response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
             except Exception as e:
                 raise e
-            result_list = response["results"]
 
-            for each in result_list:
-                yield TeamRoles(each.get("teamId"), each.get("roleNames"))
+            for each_page in response:
+                for each in each_page.get('results'):
+                    yield TeamRoles(each.get("teamId"), each.get("roleNames"))
 
         @staticmethod
         def _process_user_options(uri: str, flatten_teams: bool, include_org_users: bool) -> str:
@@ -1849,9 +1853,13 @@ class Atlas:
             """Yields all users (AtlasUser objects) associated with the group_id.
 
             Args:
-                group_id (str): The group id to search, will use the configured group for the Atlas instance if instantiated in this way.
-                flatten_teams (bool): Flag that indicates whether the returned list should include users who belong to a team that is assigned a role in this project. You might not have assigned the individual users a role in this project.
-                include_org_users (bool): Flag that indicates whether the returned list should include users with implicit access to the project through the Organization Owner or Organization Read Only role. You might not have assigned the individual users a role in this project.
+                group_id (str): The group id to search, will use the configured group for the Atlas instance if
+                 instantiated in this way. flatten_teams (bool): Flag that indicates whether the returned list should
+                 include users who belong to a team that is assigned a role in this project. You might not have
+                 assigned the individual users a role in this project.
+                include_org_users (bool): Flag that indicates whether the returned list should include users with
+                 implicit access to the project through the Organization Owner or Organization Read Only role.
+                 You might not have assigned the individual users a role in this project.
 
 
             Returns (Iterable[AtlasUser]: An iterable of AtlasUser objects.
@@ -1864,11 +1872,9 @@ class Atlas:
                 response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
             except Exception as e:
                 raise e
-            user_count: int = response["totalCount"]
-            logger.error(f"The user count is {user_count}")
-            result_list: List[dict] = response["results"]
-            for each in result_list:
-                yield AtlasUser.from_dict(each)
+            for each_page in response:
+                for each in each_page.get('results'):
+                    yield AtlasUser.from_dict(each)
 
         def user_count(self, group_id: str = None, flatten_teams: Optional[bool] = None,
                        include_org_users: Optional[bool] = None,
@@ -1897,7 +1903,10 @@ class Atlas:
                 response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
             except Exception as e:
                 raise e
-            user_count: int = response["totalCount"]
+            user_count = 0
+            for each_page in response:
+                for _ in each_page.get('results'):
+                    user_count += 1
             logger.info(f"The user count is {user_count}")
             return user_count
 
@@ -1910,7 +1919,11 @@ class Atlas:
                 response = self.atlas.network.get(uri=Settings.BASE_URL + uri)
             except Exception as e:
                 raise e
-            return ProjectSettings.from_dict(response)
+
+            return_list = list()
+            for each_page in response:
+                return_list.append(ProjectSettings.from_dict(each_page))
+            return return_list[0]
 
     class _Organizations:
         """Atlas Organizations

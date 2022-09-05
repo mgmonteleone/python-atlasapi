@@ -25,7 +25,8 @@ class ProjectTests(BaseTests):
             # pprint(each.__dict__)
             self.assertIsInstance(each, Project, "An Atlas <Project should be returned>")
             count += 1
-        self.assertEqual(count, 3, "There should be exactly 3 projects returned when for this test Organization")
+        self.assertEqual(count, 4, "There should be exactly 4 projects returned when for this test Organization")
+        print(f"✅ Found the expected 4 projects.")
 
     test_00_get_projects_all_for_org_key.basic = True
 
@@ -36,7 +37,7 @@ class ProjectTests(BaseTests):
             self.assertIsInstance(each, Project, "An Atlas <Project should be returned>")
             count += 1
         self.assertEqual(count, 1, "There should be exactly 1 projects returned when for this test Project")
-
+        print(f"✅ Found the expected 1 project.")
     test_01_get_projects_all_for_proj_key.basic = True
 
     def test_02_get_project_by_id(self):
@@ -47,9 +48,8 @@ class ProjectTests(BaseTests):
             self.assertIsInstance(each.org_id, str, "OrgID should be an str")
 
         out = self.a.Projects.project_by_id(group_id)
-        # pprint(out.__dict__)
         self.assertIsInstance(out, Project, "An Atlas <Project> should be returned")
-
+        print(f"✅ Found the expected 1 Project by id.")
     test_02_get_project_by_id.basic = True
 
     def test_03_get_project_by_name(self):
@@ -62,7 +62,7 @@ class ProjectTests(BaseTests):
         out = self.a.Projects.project_by_name(group_name)
         # pprint(out.__dict__)
         self.assertIsInstance(out, Project, "An Atlas <Project> should be returned")
-
+        print(f"✅ Found the expected 1 project by name.")
     test_03_get_project_by_name.basic = True
 
     def test_04_get_project_by_both_fail(self):
@@ -77,10 +77,10 @@ class ProjectTests(BaseTests):
         out = self.a.Projects.get_project_teams()
         for each in out:
             self.assertIsInstance(each, TeamRoles)
-            self.assertIsInstance(each.roles,list,"Roles should be a list of strings")
+            self.assertIsInstance(each.roles,list,"❌Roles should be a list of strings")
             for each_role in each.roles:
-                self.assertIsInstance(each_role,str, "Each listed role should be a string.")
-            #pprint(each.__dict__)
+                self.assertIsInstance(each_role,str, "❌Each listed role should be a string.")
+        pprint(f"👍Successfully validated project getting project teams")
 
     test_05_get_project_teams_basic.basic = True
 
@@ -88,9 +88,9 @@ class ProjectTests(BaseTests):
         out = self.a_owner.Projects.get_project_teams(group_id=self.a.group)
         for each in out:
             self.assertIsInstance(each, TeamRoles)
-            self.assertIsInstance(each.roles,list,"Roles should be a list of strings")
+            self.assertIsInstance(each.roles,list,"❌Roles should be a list of strings")
             for each_role in each.roles:
-                self.assertIsInstance(each_role,str, "Each listed role should be a string.")
+                self.assertIsInstance(each_role,str, "❌Each listed role should be a string.")
             #pprint(each.__dict__)
 
     test_06_get_project_teams_pass_id.basic = True
@@ -116,15 +116,15 @@ class ProjectTests(BaseTests):
 
     def test_09_get_project_user_count(self):
         out = self.a.Projects.user_count()
+        self.assertIsInstance(out, int, "❌The count should be a in integer!")
+        self.assertGreaterEqual(out, 1, "❌Should have more than one user!")
         pprint(f"👍 The count is {out}")
-        self.assertIsInstance(out, int, "The count should be a in integer!")
-        self.assertGreaterEqual(out, 1, "Should have more than one user!")
 
     test_09_get_project_user_count.basic = True
 
     def test_10_get_project_settings(self):
         out = self.a.Projects.settings
         #pprint(f"👍 The settings are {out.__dict__}")
-        self.assertIsInstance(out, ProjectSettings, "The response must be a ProjectSettings obj")
+        self.assertIsInstance(out, ProjectSettings, "❌The response must be a ProjectSettings obj")
 
     test_10_get_project_settings.basic = True

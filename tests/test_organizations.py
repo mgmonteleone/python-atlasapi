@@ -22,6 +22,7 @@ class ProjectTests(BaseTests):
 
     def test_00_get_organizations(self):
         for each in self.a.Organizations.organizations:
+            pprint(each.__dict__)
             self.assertIsInstance(each, Organization, "An Atlas <Organization> should be returned")
 
     test_00_get_organizations.basic = True
@@ -31,7 +32,7 @@ class ProjectTests(BaseTests):
             org_name = each.name
 
         result = self.a.Organizations.organization_by_name(org_name=org_name)
-        #pprint(result.__dict__)
+        print(f"✅Found organization {org_name}")
         self.assertIsInstance(result, Organization, "An Atlas <Organization> should be returned")
         self.assertEqual(org_name, result.name, "Returned result was not the same.")
 
@@ -42,14 +43,15 @@ class ProjectTests(BaseTests):
             org_id = each.id
 
         result = self.a.Organizations.organization_by_id(org_id)
-        #pprint(result.__dict__)
         self.assertIsInstance(result, Organization, "An Atlas <Organization> should be returned")
         self.assertEqual(org_id, result.id, "Returned result was not the same.")
+        print(f"✅Found a {type(result)} with id {result.id}, when searching bu {org_id} ({result.name})")
 
     test_02_get_organization_by_id.basic = True
 
     def test_03_get_organization_count(self):
         result = self.a.Organizations.count
+        print(f"✅THere are {result} organizations.")
         self.assertIsInstance(result, int, "The count should be an int")
 
     test_03_get_organization_count.basic = True
@@ -58,14 +60,12 @@ class ProjectTests(BaseTests):
         org_id = '5ac52173d383ad0caf52e11c'
         project_count = 0
         for each_project in self.a_owner.Organizations.get_all_projects_for_org(org_id=org_id):
-            print(f"Found Project :{each_project.name}, {type(each_project)}")
-            self.assertIsInstance(each_project, Project, f"The return type was not <Project>, it was {type(each_project)}")
-            project_count +=1
+            print(f"✅Found Project :{each_project.name}, {type(each_project)}")
+            self.assertIsInstance(each_project, Project,
+                                  f"The return type was not <Project>, it was {type(each_project)}")
+            project_count += 1
 
-        self.assertGreater(project_count,0, "Did not find any projects, this is a bug, or the test org is not set up "
-                                            "correctly.")
+        self.assertGreater(project_count, 0, "Did not find any projects, this is a bug, or the test org is not set up "
+                                             "correctly.")
 
     test_04_get_all_projects_for_org.basic = True
-
-
-

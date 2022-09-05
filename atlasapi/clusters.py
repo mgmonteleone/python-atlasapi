@@ -10,7 +10,7 @@ from enum import Enum
 from typing import List, Optional
 from datetime import datetime
 import logging
-from lib import DefaultReadConcerns
+from atlasapi.lib import DefaultReadConcerns
 import pytz
 import uuid
 

@@ -19,14 +19,14 @@ Core module which provides access to MongoDB Atlas Cloud Provider APIs
 """
 from atlasapi.network import Network
 from atlasapi.errors import *
-
+from pprint import pprint
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 from atlasapi.specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, ReplicaSetTypes
 from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement
 from typing import List, Optional
 from atlasapi.clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicReplicaSet, \
-    InstanceSizeName, AdvancedOptions, TLSProtocols, return_correct_cluster_config
+    InstanceSizeName, AdvancedOptions, TLSProtocols, return_correct_cluster_config, ClusterView, OrgGroupView
 from atlasapi.events import atlas_event_factory, EventsIterable
 import logging
 from typing import Union, Iterable, Set, BinaryIO, Iterator
@@ -132,7 +132,43 @@ class Atlas:
             for page in response:
                 for each_cluster in page.get("results"):
                     yield return_correct_cluster_config(each_cluster)
+        def get_all_authorized_clusters(self) -> Iterable[ClusterConfig]:
+            """Get All Clusters which the current key is authorized
 
+            Yields ClusterConfig objects.
+
+            url: https://www.mongodb.com/docs/atlas/reference/api-resources-spec/#operation/returnAllAuthorizedClustersInAllProjects
+
+            Returns:
+                Iterable[ClusterConfig]: Iterable of ClusterConfigs (or ShardedClusterConfig)
+                "groupId": "5fe75f61bc4b503859856896",
+            "groupName": "AtlasApi",
+            "orgId": "5ac52173d383ad0caf52e11c",
+            "orgName": "MGM_Atlas",
+            "planType": "Atlas",
+            "tags": []
+
+            """
+
+            uri = Settings.api_resources["Clusters"]["Return All Authorized Clusters in All Projects"]
+            response = self.atlas.network.get(Settings.BASE_URL + uri)
+            for page in response:
+                for each_group in page.get("results"):
+                    groupId = each_group.get('groupId', None)
+                    groupName = each_group.get('groupName', None)
+                    orgId = each_group.get('orgId', None)
+                    orgName = each_group.get('orgId', None)
+                    planType = each_group.get('orgId', None)
+                    tags = each_group.get('orgId', [])
+                    cluster_list = []
+                    for each_cluster in each_group.get('clusters', []):
+                        cluster = ClusterView.parse_obj(each_cluster)
+                        cluster_list.append(cluster)
+                    group_data = OrgGroupView(clusters=cluster_list, group_id=groupId, group_name=groupName,
+                                              org_id=orgId,org_name=orgName,plan_type=planType)
+
+                    yield group_data
+                    #yield return_correct_cluster_config(each_cluster)
         def get_single_cluster(self, cluster: str) -> ClusterConfig:
             """Get a Single Cluster
 

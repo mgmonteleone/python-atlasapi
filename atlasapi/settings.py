@@ -68,6 +68,7 @@ class Settings:
             "Modify a Cluster": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}",
             "Test Failover": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}/restartPrimaries",
             "Advanced Configuration Options": URI_STUB + "/groups/{GROUP_ID}/clusters/{CLUSTER_NAME}/processArgs",
+            "Return All Authorized Clusters in All Projects": URI_STUB + "/clusters"
 
         },
         "Database Users": {

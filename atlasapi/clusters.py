@@ -15,15 +15,16 @@ import pytz
 import uuid
 from pydantic import BaseModel, Field, constr
 from humps import camelize
+from pprint import pprint
+from atlasapi.lib import ProviderName, MongoDBMajorVersion, ClusterType
 
 logger = logging.getLogger('clusters.py')
-
-from atlasapi.lib import ProviderName, MongoDBMajorVersion, ClusterType
 
 FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
 
-## functions
+# functions
+
 def to_camel(string):
     return camelize(string)
 
@@ -391,12 +392,17 @@ class ClusterConfig(object):
         try:
             return_dict['clusterType'] = self.cluster_type.name
             return_dict.__delitem__('cluster_type')
-            return_dict['mongoDBMajorVersion'] = self.mongodb_major_version.value
+            try:
+                return_dict['mongoDBMajorVersion'] = self.mongodb_major_version.value
+            except Exception as e:
+                return_dict['mongoDBMajorVersion'] = self.mongodb_major_version
             return_dict.__delitem__('mongodb_major_version')
+
             return_dict['replicationSpecs'] = [self.replication_specs[0].as_dict()]
             return_dict.__delitem__('replication_specs')
-
-        except (KeyError, AttributeError):
+        except (KeyError, AttributeError) as e:
+            print("Error when trying to serialize")
+            raise e
             pass
 
         try:
@@ -464,6 +470,7 @@ class ClusterConfig(object):
             pass
         try:
             out_dict['replicationSpecs'][0].__delitem__('id')
+            print(out_dict['replicationSpecs'][0])
         except KeyError:
             pass
         return out_dict
@@ -498,7 +505,7 @@ class ShardedClusterConfig(ClusterConfig):
                  cluster_type: ClusterType = ClusterType.REPLICASET,
                  disk_size_gb: int = 32,
                  name: str = None,
-                 mongodb_major_version: MongoDBMajorVersion = MongoDBMajorVersion.v4_0,
+                 mongodb_major_version: MongoDBMajorVersion = MongoDBMajorVersion.v4_4,
                  mongodb_version: Optional[str] = None,
                  num_shards: int = 1,
                  mongo_uri: Optional[str] = None,

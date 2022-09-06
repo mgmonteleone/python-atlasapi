@@ -230,7 +230,6 @@ class Atlas:
             uri = Settings.api_resources["Clusters"]["Create a Cluster"].format(GROUP_ID=self.atlas.group)
             logger.info("Initiating Call to Atlas API at {}".format(Settings.BASE_URL + uri))
             logger.info("Cluster Config = {}".format(cluster))
-
             cluster_data = self.atlas.network.post(Settings.BASE_URL + uri, payload=cluster.as_create_dict())
             return cluster_data
 
@@ -1382,13 +1381,11 @@ class Atlas:
             self.atlas = atlas
 
         def create_snapshot_for_cluster(self, cluster_name: str, retention_days: int = 7,
-                                        description: str = None, as_obj: bool = True) -> Union[
-            CloudBackupSnapshot, dict]:
+                                        description: str = None) -> CloudBackupSnapshot:
             """
             Creates and on demand snapshot for the passed cluster
 
             Args:
-                as_obj:
                 cluster_name:
                 retention_days:
                 description:
@@ -1408,15 +1405,10 @@ class Atlas:
                               "a snapshot request before a previous request has "
                               "completed.")
             logger.warning(f'Create response: {response}')
-            if as_obj:
-                logger.warning(f'Create response: {response}')
-                return CloudBackupSnapshot(response)
+            return CloudBackupSnapshot(response)
 
-            if not as_obj:
-                return response
 
-        def get_backup_snapshots_for_cluster(self, cluster_name: str, as_obj: bool = True) -> Union[
-            Iterable[CloudBackupSnapshot], Iterable[dict]]:
+        def get_backup_snapshots_for_cluster(self, cluster_name: str) -> Iterable[CloudBackupSnapshot]:
             """Get  backup snapshots for a cluster.
 
 
@@ -1427,7 +1419,7 @@ class Atlas:
                 cluster_name (str) : The cluster name to fetch
 
             Returns:
-                AtlasPagination or dict: Iterable object representing this function OR Response payload
+                AtlasPagination : Iterable object representing this function
             """
 
             uri = Settings.api_resources["Cloud Backup"]["Get all Cloud Backups for cluster"] \
@@ -1437,23 +1429,13 @@ class Atlas:
 
             response = self.atlas.network.get(Settings.BASE_URL + uri)
             try:
-                response_results: List[dict] = response['results']
+                for each_page in response:
+                    for each_bu in each_page.get("results"):
+                        yield CloudBackupSnapshot.from_dict(each_bu)
+            except KeyError as e:
+                raise e
 
-            except KeyError:
-                return_list = list()
-                return_list.append(response)
-                response_results: List[dict] = return_list
-
-            if not as_obj:
-                for entry in response_results:
-                    yield entry
-            if as_obj:
-                for entry in response_results:
-                    yield CloudBackupSnapshot.from_dict(entry)
-
-        def get_backup_snapshot_for_cluster(self, cluster_name: str,
-                                            snapshot_id: str, as_obj: bool = True) -> Union[
-            Iterable[CloudBackupSnapshot], Iterable[dict]]:
+        def get_backup_snapshot_for_cluster(self, cluster_name: str, snapshot_id: str) -> CloudBackupSnapshot:
             """Get  singe backup snapshot for a cluster.
 
             Retrieves
@@ -1463,7 +1445,7 @@ class Atlas:
                 cluster_name (str) : The cluster name to fetch
 
             Returns:
-                AtlasPagination or dict: Iterable object representing this function OR Response payload
+                Iterable[CloudBackupSnapshot]: Iterable object representing this function.
 
             """
             logger.info('Getting by snapshotid')
@@ -1474,26 +1456,29 @@ class Atlas:
 
             response = self.atlas.network.get(Settings.BASE_URL + uri)
             try:
-                response_results: List[dict] = response['results']
-            except KeyError:
                 return_list = list()
-                return_list.append(response)
-                response_results: List[dict] = return_list
-
-            if not as_obj:
-                return list(response_results)
-
-            if as_obj:
-                for entry in response_results:
-                    logger.debug(f'This is the cloud backup {entry}')
-                    yield CloudBackupSnapshot.from_dict(entry)
+                for each_page in response:
+                    return_list.append(CloudBackupSnapshot.from_dict(each_page))
+                return return_list[0]
+            except KeyError as e:
+                raise e
 
         def is_existing_snapshot(self, cluster_name: str, snapshot_id: str) -> bool:
+            """Returns true if the snaphost_id exists for the cluster
+
+            Args:
+                cluster_name:
+                snapshot_id:
+
+            Returns (bool):
+
+            """
             try:
                 out = self.atlas.CloudBackups.get_backup_snapshot_for_cluster(cluster_name, snapshot_id)
-                for each in out:
-                    assert each
-                return True
+                if out:
+                    return True
+                else:
+                    return False
             except (ErrAtlasNotFound, ErrAtlasBadRequest):
                 return False
 
@@ -1621,15 +1606,16 @@ class Atlas:
             return response_obj
 
         # Get all Cloud Backup restore jobs by cluster
-        def get_snapshot_restore_requests(self, cluster_name: str, restore_id: str = None, as_obj: bool = True) \
-                -> Union[List[Union[dict, SnapshotRestoreResponse]], SnapshotRestoreResponse, dict]:
+        def get_snapshot_restore_requests(self, cluster_name: str, restore_id: str = None) \
+                -> Iterator[SnapshotRestoreResponse]:
 
             if not restore_id:
+                logger.warning("No restore_id passed, will return all restore jobs for this cluster.")
                 uri = Settings.api_resources["Cloud Backup Restore Jobs"][
                     "Get all Cloud Backup restore jobs by cluster"] \
                     .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name)
             else:
-                logger.info('Getting by restore_id')
+                logger.warning('Getting by restore_id')
                 uri = Settings.api_resources["Cloud Backup Restore Jobs"]["Get Cloud Backup restore job by cluster"] \
                     .format(GROUP_ID=self.atlas.group, CLUSTER_NAME=cluster_name, JOB_ID=restore_id)
 
@@ -1638,22 +1624,17 @@ class Atlas:
             response = self.atlas.network.get(Settings.BASE_URL + uri)
 
             try:
-                response_results: List[dict] = response['results']
-            except KeyError:
-                return_list = list()
-                return_list.append(response)
-                response_results: List[dict] = return_list
+                for each_page in response:
+                    try:
+                        for each_restore in each_page.get("results"):
+                            yield SnapshotRestoreResponse.from_dict(each_restore)
+                    except TypeError as e:
+                        logger.warning("There was no results property, so should have gotten a single result")
+                        yield SnapshotRestoreResponse.from_dict(each_page)
 
-            if not as_obj:
-                if restore_id:
-                    return list(response_results)
-                else:
-                    for entry in response_results:
-                        yield entry
-            if as_obj:
-                for entry in response_results:
-                    logger.debug(f'This is the {entry}')
-                    yield SnapshotRestoreResponse.from_dict(entry)
+
+            except KeyError as e:
+                raise e
 
         def cancel_snapshot_restore_request(self, cluster_name: str, restore_id: str):
             """

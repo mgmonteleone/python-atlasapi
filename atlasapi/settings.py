@@ -56,7 +56,7 @@ class Settings:
                                                    "{host}:{port}/databases"
         },
         "Events": {
-            "Get All Project Events": URI_STUB + "/groups/{group_id}/events??includeRaw=true&pageNum={page_num}"
+            "Get All Project Events": URI_STUB + "/groups/{group_id}/events?includeRaw=true&pageNum={page_num}"
                                                  "&itemsPerPage={items_per_page}",
             "Get Project Events Since Date": URI_STUB + "/groups/{group_id}/events?includeRaw=true&pageNum={"
                                                         "page_num}&itemsPerPage={items_per_page}&minDate={"

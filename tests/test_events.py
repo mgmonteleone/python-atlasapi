@@ -14,6 +14,7 @@ from tests import BaseTests
 import logging
 from time import sleep
 from datetime import datetime, timedelta, timezone
+from atlasapi.events import AtlasEventTypes, AtlasEvent, _AtlasBaseEvent
 
 USER = getenv('ATLAS_USER', None)
 API_KEY = getenv('ATLAS_KEY', None)
@@ -48,7 +49,6 @@ class EventsTests(BaseTests):
 
     test_01_get_project_events_since.basic = True
 
-
     def test_02_since(self):
         test_datetime = datetime.utcnow() - timedelta(hours=12)
         verbose_logger.info(f'Events Since (public) {test_datetime.isoformat()}')
@@ -71,5 +71,27 @@ class EventsTests(BaseTests):
         self.assertIsInstance(out, list)
         for each in out:
             if type(each) == events.AtlasCPSEvent:
-                self.assertIsInstance(each,events.AtlasCPSEvent)
+                self.assertIsInstance(each, events.AtlasCPSEvent)
+
     test_04_CPS.basic = True
+
+    def test_05_All_Events_By_Type(self):
+        out = self.a.Events.all_by_type(event_type=AtlasEventTypes.CLUSTER_UPDATE_COMPLETED)
+        count = 0
+        for each_event in out:
+            count += 1
+            self.assertIsInstance(each_event, _AtlasBaseEvent)
+        pprint(f"Found {count} events.")
+
+    test_05_All_Events_By_Type.basic = True
+
+    def test_06_Events_Since_By_Type(self):
+        out = self.a.Events.since_by_type(event_type=AtlasEventTypes.CLUSTER_UPDATE_COMPLETED,
+                                          since_datetime=datetime(2022, 1, 1))
+        count = 0
+        for each_event in out:
+            count += 1
+            self.assertIsInstance(each_event, _AtlasBaseEvent)
+        pprint(f"Found {count} events.")
+
+    test_06_Events_Since_By_Type.basic = True

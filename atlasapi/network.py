@@ -34,6 +34,7 @@ logger.setLevel(logging.WARNING)
 def merge(dict1, dict2):
     return dict2.update(dict1)
 
+
 class Network:
     """Network constructor
     
@@ -162,6 +163,7 @@ class Network:
         This is a temporary fix until we re-factor pagination.
 
         Args:
+            params: dict of parameters that should be sent on the path
             uri (str): URI
 
         Returns:
@@ -171,16 +173,15 @@ class Network:
             Exception: Network issue
         """
         r = None
-        print(f"Revieved the following parameters {params}")
         if params:
-            logger.warning(f"Revieved the following parameters {params}")
-            merge({'itemsPerPage': Settings.itemsPerPage},params)
-            logger.warning(f"The parameters are now {params}")
+            logger.debug(f"Recieved the following parameters to the get_big method : {params}")
+            merge({'itemsPerPage': Settings.itemsPerPage}, params)
+            logger.debug(f"The parameters are now {params}")
         else:
             params = {'itemsPerPage': Settings.itemsPerPage}
 
         try:
-            logger.warning(f"The parameters object is {params}")
+            logger.debug(f"The parameters object is {params}")
             r = requests.get(uri,
                              allow_redirects=True,
                              params=params,

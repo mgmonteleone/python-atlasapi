@@ -3,10 +3,10 @@ from setuptools import find_packages, setup
 
 setup(
     name='atlasapi',
-    version='2.0.4',
+    version='2.0.5',
     python_requires='>=3.7',
     packages=find_packages(exclude=("tests",)),
-    install_requires=['requests', 'python-dateutil', 'isodate', 'future', 'pytz','coolname', 'humanfriendly', 'nose'],
+    install_requires=['requests', 'python-dateutil', 'isodate', 'future', 'pytz', 'coolname', 'humanfriendly', 'nose'],
     setup_requires=['wheel'],
     # Metadata
     author="Matthew G. Monteleone",
@@ -40,7 +40,6 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            #final script name:local package name:local function name
             'atlascli=atlascli.cli:main',
         ]
     },

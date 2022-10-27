@@ -113,7 +113,7 @@ class Network:
             for chunk in r.iter_content(chunk_size=1024):
                 # writing one chunk at a time to  file
                 if chunk:
-                    logger.warning("Writing 1 Kbyte chunk to the file like object")
+                    logger.debug("Writing 1 Kbyte chunk to the file like object")
                     file_obj.write(chunk)
             logger.info("---- Completed downloading the file. ----")
             return self.answer(r.status_code, file_obj)

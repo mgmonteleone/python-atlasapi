@@ -64,9 +64,10 @@ class Project:
         Returns: None
 
         """
+        created_date = isodatetime.parse_datetime(data_dict.get("created"))
         return cls(id=data_dict.get("id"), name=data_dict.get("name"),
                    links=data_dict.get("links", []), org_id=data_dict.get("orgId"),
-                   created_date=data_dict.get("created"), cluster_count=data_dict.get("clusterCount"))
+                   created_date=created_date, cluster_count=data_dict.get("clusterCount"))
 
     @property
     def create_dict(self) -> dict:

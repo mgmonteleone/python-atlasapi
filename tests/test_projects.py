@@ -3,6 +3,7 @@ Nose2 Unit Tests for the clusters module.
 
 
 """
+import datetime
 from pprint import pprint
 from os import environ, getenv
 from atlasapi.atlas import Atlas
@@ -128,3 +129,11 @@ class ProjectTests(BaseTests):
         self.assertIsInstance(out, ProjectSettings, "The response must be a ProjectSettings obj")
 
     test_10_get_project_settings.basic = True
+
+
+    def test_11_get_project_create_date(self):
+        out = self.a.Projects.project_by_id(self.a.group)
+        pprint(out.__dict__)
+        self.assertIsInstance(out.created_date, datetime.datetime, "An datetime should be returned")
+
+    test_02_get_project_by_id.basic = True

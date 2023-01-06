@@ -278,8 +278,10 @@ class ClusterConfig(object):
                  srv_address: Optional[str] = None,
                  providerSettings: Optional[ProviderSettings] = None,
                  links: list = None,
-                 id: Optional[str] = None
+                 id: Optional[str] = None,
+                 create_date: Optional[datetime] = None
                  ) -> None:
+        self.create_date: Optional[datetime] = create_date
         self.id: Optional[str] = id
         self.providerSettings: Optional[ProviderSettings] = providerSettings
         self.backup_enabled: bool = backup_enabled
@@ -341,10 +343,11 @@ class ClusterConfig(object):
         providerSettings = ProviderSettings.from_dict(provider_settings_dict)
         links = data_dict.get('links', [])
         id = data_dict.get('id', None)
+        create_date = datetime.strptime(data_dict.get('createDate', None), FORMAT).astimezone(tz=pytz.UTC)
         return cls(backup_enabled, cluster_type, disk_size_gb, name, mongodb_major_version, mongodb_version,
                    num_shards, mongo_uri, mongo_uri_updated, mongo_uri_with_options, paused, pit_enabled,
                    replication_factor, state_name, autoscaling, replication_specs,
-                   srv_address, providerSettings, links,id)
+                   srv_address, providerSettings, links,id, create_date)
 
     def as_dict(self) -> dict:
         return_dict = self.__dict__

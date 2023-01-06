@@ -107,17 +107,3 @@ class ProjectSettings:
             bool(data_dict.get("isRealtimePerformancePanelEnabled", False)),
             bool(data_dict.get("isSchemaAdvisorEnabled", False)),
         )
-
-
-"""
-test_dict = {
-    "clusterCount": 2,
-    "created": "2016-07-14T14:19:33Z",
-    "id": "5a0a1e7e0f2912c554080ae6",
-    "links": [],
-    "name": "DocsFeedbackGroup",
-    "orgId": "5a0a1e7e0f2912c554080adc"
-}
-
-print(Project.for_create(org_id='34', name='test_project').as_create_dict)
-"""

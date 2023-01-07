@@ -15,6 +15,7 @@ import logging
 from time import sleep
 from datetime import datetime, timedelta, timezone
 from types import GeneratorType
+from atlasapi.events import AtlasEventTypes, AtlasEvent, _AtlasBaseEvent
 
 USER = getenv('ATLAS_USER', None)
 API_KEY = getenv('ATLAS_KEY', None)
@@ -52,7 +53,6 @@ class EventsTests(BaseTests):
         verbose_logger.warning(f'The count of since events is {len}')
 
     test_01_get_project_events_since.basic = True
-
 
     def test_02_since(self):
         test_datetime = datetime.utcnow() - timedelta(hours=12)

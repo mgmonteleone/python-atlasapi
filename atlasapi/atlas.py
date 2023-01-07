@@ -912,6 +912,62 @@ class Atlas:
                 for event in page["results"]:
                     yield atlas_event_factory(event)
 
+        def _get_project_events_by_type(self, event_type: AtlasEventTypes, since_datetime: datetime = None,
+                                        pageNum: int = Settings.pageNum,
+                                        itemsPerPage: int = Settings.itemsPerPage,
+                                        iterable: bool = False) -> Union[List[dict], Iterable[AtlasEvent]]:
+            """Get All Project Events For A Single type
+
+            Internal use only, actual data retrieval comes from properties all
+            url: https://docs.atlas.mongodb.com/reference/api/events-projects-get-all/
+
+            Keyword Args:
+                event_type (AtlasEventType):
+                since_datetime (datetime):
+                pageNum (int): Page number
+                itemsPerPage (int): Number of Users per Page
+                iterable (bool): To return an iterable high level object instead of a low level API response
+
+            Returns:
+                ListOfEvents or dict: Iterable object representing this function OR Response payload
+
+            Raises:
+                ErrPaginationLimits: Out of limits
+                :rtype: Union[ListOfEvents, dict]
+                :type iterable: OptionalBool
+                :type itemsPerPage: OptionalInt
+                :type pageNum: OptionalInt
+
+            """
+
+            # Check limits and raise an Exception if needed
+            ErrPaginationLimits.checkAndRaise(pageNum, itemsPerPage)
+
+            if iterable:
+                item_list = list(EventsGetForProjectAndType(self.atlas, event_type, since_datetime,
+                                                            pageNum, itemsPerPage))
+                obj_list: ListOfEvents = list()
+                for item in item_list:
+                    obj_list.append(atlas_event_factory(item))
+                return obj_list
+
+            if since_datetime:
+                uri = Settings.api_resources["Events"]["Get Project Events Since Date"].format(
+                    min_date=since_datetime.isoformat(),
+                    group_id=self.atlas.group,
+                    page_num=pageNum,
+                    items_per_page=itemsPerPage) + f'&eventType={event_type.name}'
+
+                return_val = self.atlas.network.get(Settings.BASE_URL + uri)
+
+            else:
+                uri = Settings.api_resources["Events"]["Get All Project Events"].format(
+                    group_id=self.atlas.group,
+                    page_num=pageNum,
+                    items_per_page=itemsPerPage) + f'&eventType={event_type.name}'
+                return_val = self.atlas.network.get(Settings.BASE_URL + uri)
+            return return_val
+
         @property
         def all(self) -> EventsIterable:
             """
@@ -931,6 +987,18 @@ class Atlas:
                 EventsIterable: An iterable of event objects.
             """
             yield from self._get_all_project_events(since_datetime=since_datetime)
+
+        def since_by_type(self, since_datetime: datetime, event_type: AtlasEventTypes):
+            """Returns all events since the passed detetime (UTC) for the passed AtlasEvent Type
+
+            Args:
+                since_datetime (datetime):
+                event_type (AtlasEventTypes):
+
+            Returns:
+
+            """
+            return self._get_project_events_by_type(event_type=event_type, since_datetime=since_datetime, iterable=True)
 
     class _DatabaseUsers:
         """Database Users API

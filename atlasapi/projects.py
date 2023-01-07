@@ -64,9 +64,10 @@ class Project:
         Returns: None
 
         """
+        created_date = isodatetime.parse_datetime(data_dict.get("created"))
         return cls(id=data_dict.get("id"), name=data_dict.get("name"),
                    links=data_dict.get("links", []), org_id=data_dict.get("orgId"),
-                   created_date=data_dict.get("created"), cluster_count=data_dict.get("clusterCount"))
+                   created_date=created_date, cluster_count=data_dict.get("clusterCount"))
 
     @property
     def create_dict(self) -> dict:
@@ -107,17 +108,3 @@ class ProjectSettings:
             bool(data_dict.get("isRealtimePerformancePanelEnabled", False)),
             bool(data_dict.get("isSchemaAdvisorEnabled", False)),
         )
-
-
-"""
-test_dict = {
-    "clusterCount": 2,
-    "created": "2016-07-14T14:19:33Z",
-    "id": "5a0a1e7e0f2912c554080ae6",
-    "links": [],
-    "name": "DocsFeedbackGroup",
-    "orgId": "5a0a1e7e0f2912c554080adc"
-}
-
-print(Project.for_create(org_id='34', name='test_project').as_create_dict)
-"""

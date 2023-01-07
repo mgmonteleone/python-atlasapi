@@ -42,6 +42,8 @@ from atlasapi.teams import TeamRoles
 from atlasapi.atlas_users import AtlasUser
 from atlasapi.organizations import Organization
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
+from atlasapi.events_event_types import AtlasEventTypes
+from atlasapi.events import AtlasEvent
 import gzip
 
 logger = logging.getLogger('Atlas')

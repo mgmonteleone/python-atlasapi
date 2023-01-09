@@ -153,6 +153,12 @@ class Settings:
             "Atlas Users associated to Org": URI_STUB + "/orgs/{ORGS_ID}/users/",
             "Projects associated with the Org": URI_STUB + "/orgs/{ORG_ID}/groups"
         }
+        ,
+        "Invoices": {
+            "Get All Invoices for One Organization": URI_STUB + "/orgs/{ORG_ID}/invoices",
+            "Get One Organization Invoice": URI_STUB + "/orgs/{ORG_ID}/invoices/{INVOICE_ID}",
+            "Get All Pending Invoices for One Organization": URI_STUB + "/orgs/{ORGS_ID}/invoices/pending",
+        }
 
     }
     #

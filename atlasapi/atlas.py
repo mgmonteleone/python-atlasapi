@@ -44,6 +44,7 @@ from atlasapi.organizations import Organization
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 from atlasapi.events_event_types import AtlasEventTypes
 from atlasapi.events import AtlasEvent
+from atlasapi.invoices import Invoice
 import gzip
 
 logger = logging.getLogger('Atlas')
@@ -2096,7 +2097,22 @@ class Atlas:
                 for each_project in page.get("results"):
                     yield Project.from_dict(each_project)
 
+    class _Invoices:
+        """INvoices API
 
+        see: https://docs.atlas.mongodb.com/reference/api/invoices/
+
+        Constructor
+
+        Args:
+            atlas (Atlas): Atlas instance
+        """
+
+        def __init__(self, atlas):
+            self.atlas = atlas
+
+        def _get_all(self):
+            self.atlas.network.get()
 class AtlasPagination:
     """Atlas Pagination Generic Implementation
 

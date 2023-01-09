@@ -242,10 +242,9 @@ class ClusterTests(BaseTests):
         print(f"✅ Checked that TLS value matches {returned_val.name}")
 
     def test_14_issue_154_additional_data(self):
-        cluster = self.a.Clusters.get_single_cluster_as_obj(self.TEST_CLUSTER_NAME)
+        cluster = self.a.Clusters.get_single_cluster(self.TEST_CLUSTER_NAME)
         self.assertTrue(type(cluster) is ClusterConfig)
         self.assertEqual(cluster.name, self.TEST_CLUSTER_NAME)
         self.assertIsInstance(cluster.create_date, datetime)
         pprint(cluster.as_dict())
 
-    test_02_get_a_cluster_as_obj.basic = True

@@ -12,6 +12,7 @@ from json import dumps
 from tests import BaseTests
 import logging
 from time import sleep
+from nose.tools import *
 
 logger = logging.getLogger('test')
 
@@ -31,6 +32,7 @@ class MaintTests(BaseTests):
 
     test_00_test_object.basic = True
 
+    @raises(DeprecationWarning)
     def test_01_get_maint_window(self):
         # Test as Object
         output = self.a.MaintenanceWindows._get_maint_window()
@@ -39,9 +41,6 @@ class MaintTests(BaseTests):
         output2 = self.a.MaintenanceWindows._get_maint_window(as_obj=False)
         self.assertEquals(type(output2), dict)
 
-        output = self.a.MaintenanceWindows.current_config()
-        self.assertEquals(type(output), MaintenanceWindow)
-        self.assertEquals(type(output.dayOfWeek), Weekdays)
 
     test_01_get_maint_window.basic = True
 

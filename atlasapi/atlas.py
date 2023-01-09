@@ -1359,9 +1359,10 @@ class Atlas:
                 GROUP_ID=self.atlas.group)
             response = self.atlas.network.get(Settings.BASE_URL + uri)
             if as_obj is False:
-                return response
-            else:
-                return MaintenanceWindow.from_dict(response)
+                logger.error("V3 always returns objects")
+                raise DeprecationWarning("V3 Always returns objects, the as_obj=False setting is deprecated.")
+            response_obj = list(response)[0]
+            return MaintenanceWindow.from_dict(response_obj)
 
         def _update_maint_window(self, new_config: MaintenanceWindow) -> bool:
             """

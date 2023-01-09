@@ -3,11 +3,11 @@ from setuptools import find_packages, setup
 
 setup(
     name='atlasapi',
-    version='2.0.3',
+    version='3.0.1b1',
     python_requires='>=3.7',
     packages=find_packages(exclude=("tests",)),
     install_requires=['requests', 'python-dateutil', 'isodate', 'future', 'pytz','coolname',
-                      'humanfriendly', 'pydantic', 'humps', 'nose'],
+                      'humanfriendly', 'pydantic', 'pyhumps', 'nose'],
     setup_requires=['wheel'],
     # Metadata
     author="Matthew G. Monteleone",
@@ -22,7 +22,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 5 - Production/Stable',
+        'Development Status :: 4 - Beta',
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',

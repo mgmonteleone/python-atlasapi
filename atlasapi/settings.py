@@ -157,7 +157,7 @@ class Settings:
         "Invoices": {
             "Get All Invoices for One Organization": URI_STUB + "/orgs/{ORG_ID}/invoices",
             "Get One Organization Invoice": URI_STUB + "/orgs/{ORG_ID}/invoices/{INVOICE_ID}",
-            "Get All Pending Invoices for One Organization": URI_STUB + "/orgs/{ORGS_ID}/invoices/pending",
+            "Get All Pending Invoices for One Organization": URI_STUB + "/orgs/{ORG_ID}/invoices/pending",
         }
 
     }

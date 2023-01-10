@@ -82,6 +82,7 @@ class Atlas:
         self.CloudBackups = Atlas._CloudBackups(self)
         self.Projects = Atlas._Projects(self)
         self.Organizations = Atlas._Organizations(self)
+        self.Invoices = Atlas._Invoices(self)
         if not self.group:
             self.logger.warning("Note! The Atlas client has been initialized without a Group/Project, some endpoints"
                                 "will not function without a Group or project.")
@@ -2111,8 +2112,20 @@ class Atlas:
         def __init__(self, atlas):
             self.atlas = atlas
 
-        def _get_all(self):
-            self.atlas.network.get()
+        def count_for_org_id(self, org_id: str) -> int:
+            uri = Settings.BASE_URL + Settings.api_resources["Invoices"]["Get All Invoices for One Organization"].format(ORG_ID=org_id)
+            response = self.atlas.network.get(uri=uri,params={'includeCount': True})
+            for page in response:
+                logger.info(f"Total of {page.get('totalCount')} invoices to be returned")
+                return page.get('totalCount')
+
+        def get_all_for_org_id(self, org_id: str):
+            uri = Settings.BASE_URL + Settings.api_resources["Invoices"]["Get All Invoices for One Organization"].format(ORG_ID=org_id)
+            response = self.atlas.network.get(uri=uri)
+            for page in response:
+                logger.info(f"Total of {page.get('totalCount')} invoices to be returned")
+                for each_invoice in page.get("results"):
+                    yield Invoice.from_dict(each_invoice)
 class AtlasPagination:
     """Atlas Pagination Generic Implementation
 

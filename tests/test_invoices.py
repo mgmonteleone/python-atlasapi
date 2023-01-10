@@ -37,6 +37,7 @@ class InvoiceTests(BaseTests):
                              "The number of returned invoices should match the expencted number"
                              "of invoices sent in the totalCount response")
             break
+    test_01_get_invoices_for_org.basic = True
 
     def test_02_get_one_invoice_for_org(self):
         for each in self.a.Organizations.organizations:
@@ -48,6 +49,7 @@ class InvoiceTests(BaseTests):
                 pprint(detail_invoice)
                 break
             break
+    test_02_get_one_invoice_for_org.basic = True
 
     def test_03_get_pending_invoice_for_org(self):
         for each in self.a.Organizations.organizations:
@@ -61,3 +63,4 @@ class InvoiceTests(BaseTests):
                 self.assertIsInstance(each_line, ApiLineItemView)
 
             break
+    test_03_get_pending_invoice_for_org.basic = True

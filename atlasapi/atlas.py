@@ -57,19 +57,19 @@ class Atlas:
     """Atlas constructor
 
     Args:
-        user (str): Atlas user
-        password (str): Atlas password
+        key (str): Atlas user
+        secret (str): Atlas password
         group (str): Atlas group
         auth_method (Union[HTTPBasicAuth,HTTPDigestAuth]) : Authentication method to use, defaults to digest, but you
         can override to Basic if needed for use with a Proxy.
     """
 
-    def __init__(self, user: str, password: str, group: str = None,
+    def __init__(self, key: str, secret: str, group: str = None,
                  auth_method: Union[HTTPBasicAuth, HTTPDigestAuth] = HTTPDigestAuth):
         self.group = group
 
         # Network calls which will handled user/password for auth
-        self.network = Network(user, password, auth_method)
+        self.network = Network(key, secret, auth_method)
         # APIs
         self.DatabaseUsers = Atlas._DatabaseUsers(self)
         self.Clusters = Atlas._Clusters(self)
@@ -2112,6 +2112,15 @@ class Atlas:
             self.atlas = atlas
 
         def count_for_org_id(self, org_id: str) -> int:
+            """Returns the number of invoices available for the organization
+
+            Args:
+                org_id:
+
+            Returns:
+                int: count of invoices
+
+            """
             uri = Settings.BASE_URL + Settings.api_resources["Invoices"][
                 "Get All Invoices for One Organization"].format(ORG_ID=org_id)
             response = self.atlas.network.get(uri=uri, params={'includeCount': True})
@@ -2119,7 +2128,17 @@ class Atlas:
                 logger.info(f"Total of {page.get('totalCount')} invoices to be returned")
                 return page.get('totalCount')
 
-        def get_all_for_org_id(self, org_id: str):
+        def get_all_for_org_id(self, org_id: str) -> Iterable[ApiInvoiceView]:
+            """Returns all invoices available for the organization.
+
+            Does not include detail for each invoice, you must get each invoice individually in get line items,
+            and full details.
+            Args:
+                org_id:
+
+            Returns:
+                Iterable[ApiInvoiceView]: yields ApiInvoiceView objects
+            """
             uri = Settings.BASE_URL + Settings.api_resources["Invoices"][
                 "Get All Invoices for One Organization"].format(ORG_ID=org_id)
             response = self.atlas.network.get(uri=uri)
@@ -2129,6 +2148,15 @@ class Atlas:
                     yield ApiInvoiceView.parse_obj(each_invoice)
 
         def get_pending_for_org_id(self, org_id: str) -> ApiInvoiceView:
+            """Returns the single pending invoice for the organization.
+
+            Args:
+                org_id:
+
+            Returns:
+                ApiInvoiceView: A single Invoice
+
+            """
             uri = Settings.BASE_URL + Settings.api_resources["Invoices"][
                 "Get All Pending Invoices for One Organization"].format(ORG_ID=org_id)
             response = self.atlas.network.get(uri=uri)
@@ -2136,6 +2164,16 @@ class Atlas:
                 return ApiInvoiceView.parse_obj(page)
 
         def get_single_invoice_for_org(self, org_id: str, invoice_id=str) -> ApiInvoiceView:
+            """Returns a single invoice with all line items (Full Data).
+
+            Args:
+                org_id:
+                invoice_id:
+
+            Returns:
+                ApiInvoiceView: A single invoice with all line items (Full Data).
+
+            """
             uri = Settings.BASE_URL + Settings.api_resources["Invoices"][
                 "Get One Organization Invoice"].format(ORG_ID=org_id, INVOICE_ID=invoice_id)
             response = self.atlas.network.get(uri=uri)

@@ -3,7 +3,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='atlasapi',
-    version='3.0.1b1',
+    version='3.0.1b2',
     python_requires='>=3.7',
     packages=find_packages(exclude=("tests",)),
     install_requires=['requests', 'python-dateutil', 'isodate', 'future', 'pytz','coolname',

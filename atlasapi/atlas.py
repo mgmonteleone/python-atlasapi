@@ -44,6 +44,7 @@ from atlasapi.organizations import Organization
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 from atlasapi.events_event_types import AtlasEventTypes
 from atlasapi.events import AtlasEvent
+from atlasapi.invoices_pydantic import ApiInvoiceView
 import gzip
 
 logger = logging.getLogger('Atlas')
@@ -81,6 +82,7 @@ class Atlas:
         self.CloudBackups = Atlas._CloudBackups(self)
         self.Projects = Atlas._Projects(self)
         self.Organizations = Atlas._Organizations(self)
+        self.Invoices = Atlas._Invoices(self)
         if not self.group:
             self.logger.warning("Note! The Atlas client has been initialized without a Group/Project, some endpoints"
                                 "will not function without a Group or project.")
@@ -1478,7 +1480,6 @@ class Atlas:
             logger.warning(f'Create response: {response}')
             return CloudBackupSnapshot(response)
 
-
         def get_backup_snapshots_for_cluster(self, cluster_name: str) -> Iterable[CloudBackupSnapshot]:
             """Get  backup snapshots for a cluster.
 
@@ -2095,6 +2096,51 @@ class Atlas:
             for page in response:
                 for each_project in page.get("results"):
                     yield Project.from_dict(each_project)
+
+    class _Invoices:
+        """INvoices API
+
+        see: https://docs.atlas.mongodb.com/reference/api/invoices/
+
+        Constructor
+
+        Args:
+            atlas (Atlas): Atlas instance
+        """
+
+        def __init__(self, atlas):
+            self.atlas = atlas
+
+        def count_for_org_id(self, org_id: str) -> int:
+            uri = Settings.BASE_URL + Settings.api_resources["Invoices"][
+                "Get All Invoices for One Organization"].format(ORG_ID=org_id)
+            response = self.atlas.network.get(uri=uri, params={'includeCount': True})
+            for page in response:
+                logger.info(f"Total of {page.get('totalCount')} invoices to be returned")
+                return page.get('totalCount')
+
+        def get_all_for_org_id(self, org_id: str):
+            uri = Settings.BASE_URL + Settings.api_resources["Invoices"][
+                "Get All Invoices for One Organization"].format(ORG_ID=org_id)
+            response = self.atlas.network.get(uri=uri)
+            for page in response:
+                logger.info(f"Total of {page.get('totalCount')} invoices to be returned")
+                for each_invoice in page.get("results"):
+                    yield ApiInvoiceView.parse_obj(each_invoice)
+
+        def get_pending_for_org_id(self, org_id: str) -> ApiInvoiceView:
+            uri = Settings.BASE_URL + Settings.api_resources["Invoices"][
+                "Get All Pending Invoices for One Organization"].format(ORG_ID=org_id)
+            response = self.atlas.network.get(uri=uri)
+            for page in response:
+                return ApiInvoiceView.parse_obj(page)
+
+        def get_single_invoice_for_org(self, org_id: str, invoice_id=str) -> ApiInvoiceView:
+            uri = Settings.BASE_URL + Settings.api_resources["Invoices"][
+                "Get One Organization Invoice"].format(ORG_ID=org_id, INVOICE_ID=invoice_id)
+            response = self.atlas.network.get(uri=uri)
+            for page in response:
+                return ApiInvoiceView.parse_obj(page)
 
 
 class AtlasPagination:

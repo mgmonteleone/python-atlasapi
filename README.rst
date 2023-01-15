@@ -68,14 +68,14 @@ Get All Database Users
 
     from atlasapi.atlas import Atlas
     
-    a = Atlas("<user>","<password>","<groupid>")
+    a = Atlas("<key>","<secret>","<groupid>")
     
     # Low level Api
     details = a.DatabaseUsers.get_all_database_users(pageNum=1, itemsPerPage=100)
     
     # Iterable
-    for user in a.DatabaseUsers.get_all_database_users(iterable=True):
-        print(user["username"])
+    for key in a.DatabaseUsers.get_all_database_users(iterable=True):
+        print(key["username"])
 
 Create a Database User
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -85,9 +85,9 @@ Create a Database User
     from atlasapi.atlas import Atlas
     from atlasapi.specs import DatabaseUsersPermissionsSpecs, RoleSpecs
 
-    a = Atlas("<user>","<password>","<groupid>")
+    a = Atlas("<key>","<secret>","<groupid>")
 
-    p = DatabaseUsersPermissionsSpecs("test", "password for test user")
+    p = DatabaseUsersPermissionsSpecs("test", "secret for test key")
     p.add_roles("test-db",
                 [RoleSpecs.dbAdmin,
                 RoleSpecs.readWrite])
@@ -103,10 +103,10 @@ Update a Database User
     from atlasapi.atlas import Atlas
     from atlasapi.specs import DatabaseUsersUpdatePermissionsSpecs, RoleSpecs
 
-    a = Atlas("<user>","<password>","<groupid>")
+    a = Atlas("<key>","<secret>","<groupid>")
     
-    # Update roles and password
-    p = DatabaseUsersUpdatePermissionsSpecs("password for test user")
+    # Update roles and secret
+    p = DatabaseUsersUpdatePermissionsSpecs("secret for test key")
     p.add_role("test-db", RoleSpecs.read, "a_collection")
     
     details = a.DatabaseUsers.update_a_database_user("test", p)
@@ -118,7 +118,7 @@ Delete a Database User
 
     from atlasapi.atlas import Atlas
     
-    a = Atlas("<user>","<password>","<groupid>")
+    a = Atlas("<key>","<secret>","<groupid>")
     
     details = a.DatabaseUsers.delete_a_database_user("test")
     
@@ -129,7 +129,7 @@ Get a Single Database User
     
     from atlasapi.atlas import Atlas
     
-    a = Atlas("<user>","<password>","<groupid>")
+    a = Atlas("<key>","<secret>","<groupid>")
     
     details = a.DatabaseUsers.get_a_single_database_user("test")
 
@@ -141,7 +141,7 @@ Clusters
     from atlasapi.atlas import Atlas
     from atlasapi.clusters import  AdvancedOptions
 
-    a = Atlas("<user>","<password>","<groupid>")
+    a = Atlas("<key>","<secret>","<groupid>")
     
     # Is existing cluster ?
     a.Clusters.is_existing_cluster("cluster-dev")
@@ -208,7 +208,7 @@ Alerts
     from atlasapi.atlas import Atlas
     from atlasapi.specs import AlertStatusSpec
     
-    a = Atlas("<user>","<password>","<groupid>")
+    a = Atlas("<key>","<secret>","<groupid>")
     
     # Get All Alerts in OPEN status
     for alert in a.Alerts.get_all_alerts(AlertStatusSpec.OPEN, iterable=True):
@@ -244,7 +244,7 @@ Logs
     from atlasapi.atlas import Atlas
     from atlasapi.specs import AlertStatusSpec
 
-    atlas = Atlas("<user>","<password>","<groupid>")
+    atlas = Atlas("<key>","<secret>","<groupid>")
 
     atlas.Hosts.fill_host_list()
     test_host = atlas.Hosts.host_list[0]

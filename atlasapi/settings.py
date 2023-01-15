@@ -159,6 +159,16 @@ class Settings:
             "Get One Organization Invoice": URI_STUB + "/orgs/{ORG_ID}/invoices/{INVOICE_ID}",
             "Get All Pending Invoices for One Organization": URI_STUB + "/orgs/{ORG_ID}/invoices/pending",
         }
+        ,
+        "Serverless": {
+            "Return One Serverless Instance": URI_STUB + "/groups/{GROUP_ID}/serverless/{INSTANCE_NAME}",
+            "Return All Serverless Instances": URI_STUB + "/groups/{GROUP_ID}/serverless/",
+            "Create One Serverless Instance": URI_STUB + "/groups/{GROUP_ID}/serverless/",
+            "Update One Serverless Instance": URI_STUB + "/groups/{GROUP_ID}/serverless/[INSTANCE_NAME]",
+            "Remove One Serverless Instance": URI_STUB + "/groups/{GROUP_ID}/serverless/[INSTANCE_NAME]",
+
+
+        }
 
     }
     #

@@ -45,6 +45,7 @@ from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 from atlasapi.events_event_types import AtlasEventTypes
 from atlasapi.events import AtlasEvent
 from atlasapi.invoices_pydantic import ApiInvoiceView
+from atlasapi.serverless_pydantic import ServerlessCluster, ServerlessInstanceProviderSettings
 import gzip
 
 logger = logging.getLogger('Atlas')
@@ -83,6 +84,7 @@ class Atlas:
         self.Projects = Atlas._Projects(self)
         self.Organizations = Atlas._Organizations(self)
         self.Invoices = Atlas._Invoices(self)
+        self.Serverless = Atlas._Serverless(self)
         if not self.group:
             self.logger.warning("Note! The Atlas client has been initialized without a Group/Project, some endpoints"
                                 "will not function without a Group or project.")
@@ -2098,7 +2100,7 @@ class Atlas:
                     yield Project.from_dict(each_project)
 
     class _Invoices:
-        """INvoices API
+        """Invoices API
 
         see: https://docs.atlas.mongodb.com/reference/api/invoices/
 
@@ -2179,6 +2181,58 @@ class Atlas:
             response = self.atlas.network.get(uri=uri)
             for page in response:
                 return ApiInvoiceView.parse_obj(page)
+
+    class _Serverless:
+        """Serverless API
+
+        see: https://docs.atlas.mongodb.com/reference/api/serverless/
+
+        Constructor
+
+        Args:
+            atlas (Atlas): Atlas instance
+        """
+
+        def __init__(self, atlas):
+            self.atlas = atlas
+
+        def count_for_group_id(self, group_id: str) -> int:
+            """Returns the number of serverless instances available for the project
+
+            Args:
+                group_id:
+
+            Returns:
+                int: count of serverless instances
+
+            """
+            uri = Settings.BASE_URL + Settings.api_resources["Serverless"][
+                "Return All Serverless Instances"].format(GROUP_ID=group_id)
+            response = self.atlas.network.get(uri=uri, params={'includeCount': True})
+            for page in response:
+                logger.info(f"Total of {page.get('totalCount')} serverless instances to be returned")
+                return page.get('totalCount')
+
+        def get_all_for_project(self, group_id: str) -> Iterable[ServerlessCluster]:
+            """Returns all serverless instances for the passed group.
+
+            Args:
+                group_id:
+
+            Returns:
+                Iterable[ServerlessCluster]: yields ApiInvoiceView objects
+            """
+            uri = Settings.BASE_URL + Settings.api_resources["Serverless"][
+                "Return All Serverless Instances"].format(GROUP_ID=group_id)
+            response = self.atlas.network.get(uri=uri)
+            for page in response:
+                logger.info(f"Total of {page.get('totalCount')} serverless instances to be returned")
+                for each_instance in page.get("results"):
+                    yield ServerlessCluster.parse_obj(each_instance)
+
+
+
+
 
 
 class AtlasPagination:
@@ -2274,10 +2328,3 @@ class WhitelistGetAll(AtlasPagination):
 
     def __init__(self, atlas, pageNum, itemsPerPage):
         super().__init__(atlas, atlas.Whitelist.get_all_whitelist_entries, pageNum, itemsPerPage)
-
-
-class CloudBackupSnapshotsGetAll(AtlasPagination):
-    """Pagination for Database User : Get All"""
-
-    def __init__(self, atlas, pageNum, itemsPerPage):
-        super().__init__(atlas, atlas.CloudBackups.get_all_backup_snapshots, pageNum, itemsPerPage)

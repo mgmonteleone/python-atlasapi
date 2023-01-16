@@ -28,3 +28,4 @@ class Organization:
         """
         return cls(data_dict.get("name"), data_dict.get("isDeleted", False), data_dict.get("links", []),
                    data_dict.get("id", None))
+

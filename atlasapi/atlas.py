@@ -2213,6 +2213,22 @@ class Atlas:
                 logger.info(f"Total of {page.get('totalCount')} serverless instances to be returned")
                 return page.get('totalCount')
 
+        @property
+        def count(self) -> int:
+            """Count of serverless instances for current project/group.
+
+            Will only work if the Atlas object has been instantiated with a group/project id
+
+            Returns:
+                int:
+
+            """
+            if self.atlas.group is None:
+                raise AttributeError(
+                    'The Atlas object must be initialized with a project/group in order to use the `count` method.')
+            else:
+                return self.count_for_group_id(self.atlas.group)
+
         def get_all_for_project(self, group_id: str) -> Iterable[ServerlessCluster]:
             """Returns all serverless instances for the passed group.
 
@@ -2222,6 +2238,7 @@ class Atlas:
             Returns:
                 Iterable[ServerlessCluster]: yields ApiInvoiceView objects
             """
+            logger.info(f"The Atlas instance has a group defined {self.atlas.group}")
             uri = Settings.BASE_URL + Settings.api_resources["Serverless"][
                 "Return All Serverless Instances"].format(GROUP_ID=group_id)
             response = self.atlas.network.get(uri=uri)
@@ -2230,9 +2247,55 @@ class Atlas:
                 for each_instance in page.get("results"):
                     yield ServerlessCluster.parse_obj(each_instance)
 
+        @property
+        def instances(self) -> Iterable[ServerlessCluster]:
+            """Returns all serverless instances for the current project/group id.
+
+            Will only work if the Atlas object has been instantiated with a group/project id.
+            Returns:
+                Iterable[ServerlessCluster]:
+            """
+            if self.atlas.group is None:
+                raise AttributeError('The Atlas object must be initialized with a project/group in order to use the '
+                                     '`instances` method.')
+            else:
+                return self.get_all_for_project(group_id=self.atlas.group)
+
+        def get_one_for_project(self, group_id: str, instance_name: str) -> ServerlessCluster:
+            """Returns a single Serverless Instance.
+
+            Args:
+                group_id:
+                instance_name:
+
+            Returns:
+                ApiInvoiceView: A single invoice with all line items (Full Data).
+
+            """
+            uri = Settings.BASE_URL + Settings.api_resources["Serverless"][
+                "Return One Serverless Instance"].format(GROUP_ID=group_id, INSTANCE_NAME=instance_name)
+            response = self.atlas.network.get(uri=uri)
+            for page in response:
+                return ServerlessCluster.parse_obj(page)
+
+        def instance(self, instance_name: str) -> ServerlessCluster:
+            """Returns a single instance by instance_name
+
+            Will only work if the Atlas object has been instantiated with a group/project id.
 
 
+            Args:
+                instance_name:
 
+            Returns:
+                ServerlessCluster:
+
+            """
+            if self.atlas.group is None:
+                raise AttributeError('The Atlas object must be initialized with a project/group in order to use the '
+                                     '`instance` method.')
+            else:
+                return self.get_one_for_project(group_id=self.atlas.group, instance_name=instance_name)
 
 
 class AtlasPagination:

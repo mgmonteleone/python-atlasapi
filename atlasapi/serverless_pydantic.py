@@ -9,6 +9,17 @@ from uuid import UUID
 from pydantic import BaseModel, EmailStr, Extra, Field, confloat, conint, constr
 
 
+class ServerlessRegionName(Enum):
+    US_EAST_1 = "US_EAST_1"
+    US_EAST_2 = "US_EAST_2"
+    US_WEST_2 = "US_WEST_2"
+    AP_SOUTHEAST_1 = "AP_SOUTHEAST_1"
+    AP_SOUTHEAST_2 = "AP_SOUTHEAST_2"
+    AP_SOUTHEAST_3 = "AP_SOUTHEAST_3"
+    AP_SOUTH_1 = "AP_SOUTH_1"
+    EU_WEST_1 = "EU_WEST_1"
+
+
 class Type(Enum):
     """
     MongoDB process type to which your application connects. Use `MONGOD` for replica sets and
@@ -19,7 +30,7 @@ class Type(Enum):
     mongos = 'MONGOS'
 
 
-class ProviderName(Enum):
+class ServerlessProviderName(Enum):
     """
     Cloud service provider that serves the requested network peering containers.
     """
@@ -65,6 +76,7 @@ class EndpointStatus(Enum):
     initiating = 'INITIATING'
     deleting = 'DELETING'
     failed = 'FAILED'
+
 
 class Link(BaseModel):
     href: Optional[str] = Field(
@@ -274,12 +286,12 @@ class ServerlessInstanceProviderSettings(BaseModel):
         alias='backingProviderName',
         description='Cloud service provider on which MongoDB Cloud provisioned the serverless instance.',
     )
-    provider_name: ProviderName = Field(
+    provider_name: ServerlessProviderName = Field(
         None,
         alias='providerName',
         description='Human-readable label that identifies the cloud service provider.',
     )
-    region_name: Optional[str] = Field(
+    region_name: Optional[ServerlessRegionName] = Field(
         None,
         alias='regionName',
         description='Human-readable label that identifies the geographic location of your '
@@ -287,7 +299,9 @@ class ServerlessInstanceProviderSettings(BaseModel):
                     'latency for clients accessing your databases. For a complete list of region names,'
                     ' see [AWS](https://docs.atlas.mongodb.com/reference/amazon-aws/#std-label-amazon-aws),'
                     ' [GCP](https://docs.atlas.mongodb.com/reference/google-gcp/), '
-                    'and [Azure](https://docs.atlas.mongodb.com/reference/microsoft-azure/).',
+                    'and [Azure](https://docs.atlas.mongodb.com/reference/microsoft-azure/).'
+                    'An Enum is maintained in this library, which allows only supported regions.'
+                    'This Enum is updated over time.',
     )
 
 
@@ -344,76 +358,17 @@ class ServerlessCluster(BaseModel):
         alias='stateName',
         description='Human-readable label that indicates the current operating condition of the serverless instance.',
     )
-
-"""
-{
-  "links": [
-    {
-      "href": "https://mms.mongodb.com/api/atlas/v1.0/groups/{groupId}/serverless/{instanceName1}/backup/snapshots",
-      "rel": "https://mms.mongodb.com/snapshots"
-    }
-  ],
-  "results": [
-    {
-      "connectionStrings": {
-        "privateEndpoint": [
-          {
-            "endpoints": [
-              {
-                "endpointId": "string",
-                "providerName": "AWS",
-                "region": "string"
-              }
-            ],
-            "srvConnectionString": "string",
-            "type": "MONGOS"
-          }
-        ],
-        "standardSrv": "string"
-      },
-      "createDate": "2019-08-24T14:15:22Z",
-      "groupId": "32b6e34b3d91647abb20e7b8",
-      "id": "5faec72692cee15b51eb22a4",
-      "links": [
-        {
-          "href": "https://mms.mongodb.com/api/atlas/v1.0/groups/{groupId}/serverless/{instanceName1}/backup/snapshots",
-          "rel": "https://mms.mongodb.com/snapshots"
-        }
-      ],
-      "mongoDBVersion": "string",
-      "name": "string",
-      "providerSettings": {
-        "backingProviderName": "AWS",
-        "providerName": "SERVERLESS",
-        "regionName": "string"
-      },
-      "serverlessBackupOptions": {
-        "serverlessContinuousBackupEnabled": true
-      },
-      "stateName": "IDLE",
-      "terminationProtectionEnabled": false
-    }
-  ],
-  "totalCount": 0
-}
-
-
-"""
-
-
-"""
-create
-
-{
-  "name": "string",
-  "providerSettings": {
-    "backingProviderName": "AWS",
-    "providerName": "SERVERLESS",
-    "regionName": "string"
-  },
-  "serverlessBackupOptions": {
-    "serverlessContinuousBackupEnabled": true
-  },
-  "terminationProtectionEnabled": false
-}
-"""
+    backup_options: Optional[dict] = Field(
+        {"serverlessContinuousBackupEnabled": False},
+        alias="serverlessBackupOptions",
+        description="Flag that indicates whether the serverless instance uses Serverless Continuous Backup. "
+                    "If this parameter is false, the serverless instance uses Basic Backup."
+                    "Note: This library sets this to False by default, as a sane (no cost) default."
+    )
+    termination_protection: Optional[bool] = Field(
+        False,
+        alias="terminationProtectionEnabled",
+        description="Flag that indicates whether termination protection is enabled on the serverless instance. "
+                    "If set to true, MongoDB Cloud won't delete the serverless instance. If set to false,"
+                    " MongoDB Cloud will delete the serverless instance."
+    )

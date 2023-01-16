@@ -45,7 +45,8 @@ from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 from atlasapi.events_event_types import AtlasEventTypes
 from atlasapi.events import AtlasEvent
 from atlasapi.invoices_pydantic import ApiInvoiceView
-from atlasapi.serverless_pydantic import ServerlessCluster, ServerlessInstanceProviderSettings
+from atlasapi.serverless_pydantic import ServerlessCluster, ServerlessInstanceProviderSettings, BackingProviderName, \
+    ServerlessProviderName, ServerlessRegionName
 import gzip
 
 logger = logging.getLogger('Atlas')
@@ -2297,6 +2298,12 @@ class Atlas:
             else:
                 return self.get_one_for_project(group_id=self.atlas.group, instance_name=instance_name)
 
+        def create(self):
+            provider_obj = ServerlessInstanceProviderSettings(backingProviderName=BackingProviderName.aws,
+                                                            providerName=ProviderName.serverless,
+                                                            regionName=ServerlessRegionName.US_EAST_1
+                                                           )
+            backup_obj = Serverless
 
 class AtlasPagination:
     """Atlas Pagination Generic Implementation

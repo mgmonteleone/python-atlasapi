@@ -44,7 +44,7 @@ class InvoiceTests(BaseTests):
             instance_name = each_item.name
             break
         instance = self.a.Serverless.get_one_for_project(group_id=self.GROUP_ID, instance_name=instance_name)
-        print(instance)
+        print(instance.dict())
         self.assertIsInstance(instance,ServerlessCluster)
 
     test_02_get_one_instance_for_project.basic = True

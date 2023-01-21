@@ -3,10 +3,14 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum
 from ipaddress import IPv4Address
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, TypedDict
 from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Extra, Field, confloat, conint, constr
+
+
+class DeletedReturn(TypedDict):
+    deleted: Required[bool]
 
 
 class ServerlessRegionName(Enum):
@@ -20,7 +24,7 @@ class ServerlessRegionName(Enum):
     EU_WEST_1 = "EU_WEST_1"
 
 
-class Type(Enum):
+class Type(str, Enum):
     """
     MongoDB process type to which your application connects. Use `MONGOD` for replica sets and
     `MONGOS` for sharded clusters.
@@ -30,7 +34,7 @@ class Type(Enum):
     mongos = 'MONGOS'
 
 
-class ServerlessProviderName(Enum):
+class ServerlessProviderName(str, Enum):
     """
     Cloud service provider that serves the requested network peering containers.
     """
@@ -42,7 +46,7 @@ class ServerlessProviderName(Enum):
     serverless = 'SERVERLESS'
 
 
-class BackingProviderName(Enum):
+class BackingProviderName(str, Enum):
     """
     Cloud service provider on which MongoDB Cloud provisioned the serverless instance.
     """
@@ -52,7 +56,7 @@ class BackingProviderName(Enum):
     gcp = 'GCP'
 
 
-class StateName(Enum):
+class StateName(str, Enum):
     """
     Human-readable label that indicates the current operating condition of this cluster.
     """
@@ -65,7 +69,7 @@ class StateName(Enum):
     updating = 'UPDATING'
 
 
-class EndpointStatus(Enum):
+class EndpointStatus(str, Enum):
     """
     Human-readable label that indicates the current operating status of the private endpoint.
     """
@@ -146,7 +150,8 @@ class ServerlessAWSTenantEndpointView(BaseModel):
     error_message: Optional[str] = Field(
         None,
         alias='errorMessage',
-        description='Human-readable error message that indicates error condition associated with establishing the private endpoint connection.',
+        description='Human-readable error message that indicates error condition associated with establishing the'
+                    ' private endpoint connection.',
     )
     status: Optional[EndpointStatus] = Field(
         None,
@@ -168,7 +173,8 @@ class ServerlessAzureTenantEndpointView(BaseModel):
     )
     cloud_provider_endpoint_id: Optional[
         constr(
-            regex=r'^(vpce-[0-9a-f]{17}|\/subscriptions\/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}\/resource[gG]roups\/private[Ll]ink\/providers\/Microsoft\.Network\/privateEndpoints\/[-\w._()]+)$'
+            regex=r'^(vpce-[0-9a-f]{17}|\/subscriptions\/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}\/resource['
+                  r'gG]roups\/private[Ll]ink\/providers\/Microsoft\.Network\/privateEndpoints\/[-\w._()]+)$ '
         )
     ] = Field(
         None,
@@ -203,11 +209,13 @@ class ServerlessAzureTenantEndpointView(BaseModel):
     ] = Field(
         None,
         alias='privateEndpointIpAddress',
-        description='IPv4 address of the private endpoint in your Azure VNet that someone added to this private endpoint service.',
+        description='IPv4 address of the private endpoint in your Azure VNet that someone'
+                    ' added to this private endpoint service.',
     )
     private_link_service_resource_id: Optional[
         constr(
-            regex=r'^\/subscriptions\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/resource[gG]roups\/([-\w._()]+)\/providers\/Microsoft\.Network\/privateLinkServices\/pls_[0-9a-f]{24}'
+            regex=r'^\/subscriptions\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/resource['
+                  r'gG]roups\/([-\w._()]+)\/providers\/Microsoft\.Network/privateLinkServices\/pls_[0-9a-f]{24} '
         )
     ] = Field(
         None,
@@ -267,8 +275,8 @@ class ServerlessInstanceConnectionStrings(BaseModel):
                     ' instance through a private endpoint. This parameter returns only if you created a private '
                     'endpoint for this serverless instance and it is AVAILABLE.',
     )
-    standard_srv: str = Field(
-        ...,
+    standard_srv: Optional[str] = Field(
+        None,
         alias='standardSrv',
         description='Public connection string that you can use to connect to this serverless instance. This connection '
                     'string uses the `mongodb+srv://` protocol.',
@@ -304,8 +312,11 @@ class ServerlessInstanceProviderSettings(BaseModel):
                     'This Enum is updated over time.',
     )
 
+    class Config:
+        use_enum_values = False
 
-class ServerlessCluster(BaseModel):
+
+class ServerlessInstance(BaseModel):
     connection_strings: Optional[ServerlessInstanceConnectionStrings] = Field(
         None, alias='connectionStrings'
     )
@@ -335,7 +346,7 @@ class ServerlessCluster(BaseModel):
         description='List of one or more Uniform Resource Locators (URLs) that point to '
                     'API sub-resources, related API resources, or both. RFC 5988 outlines these relationships.',
     )
-    mongo_db_version: Optional[constr(regex=r'([\d]+\.[\d]+\.[\d]+)')] = Field(
+    mongo_db_version: Optional[constr(regex=r'(\d+\.\d+\.\d+)')] = Field(
         None,
         alias='mongoDBVersion',
         description='Version of MongoDB that the serverless instance runs.',
@@ -372,3 +383,6 @@ class ServerlessCluster(BaseModel):
                     "If set to true, MongoDB Cloud won't delete the serverless instance. If set to false,"
                     " MongoDB Cloud will delete the serverless instance."
     )
+
+    class Config:
+        use_enum_values = False

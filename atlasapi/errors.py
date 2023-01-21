@@ -99,8 +99,8 @@ class ErrAtlasGeneric(Exception):
         """
         return self.code, self.details
 
-class ErrMaintenanceError(ErrAtlasGeneric):
-    """Atlas : Atlas MaintenanceRelatedError
+class ErrNameError(ErrAtlasGeneric):
+    """Atlas : Atlas NamingRelatedError
 
     Constructor
 
@@ -110,7 +110,9 @@ class ErrMaintenanceError(ErrAtlasGeneric):
     """
 
     def __init__(self, c, details):
-        super().__init__(details.get('detail', f'Atlas Maintenance Error: {details.get("detail")} '), c, details)
+        super().__init__(details.get('detail', f'Atlas Naming Error: {details.get("detail")} '), c, details)
+
+
 
 
 class ErrAtlasBadRequest(ErrAtlasGeneric):
@@ -134,6 +136,9 @@ class ErrAtlasBadRequest(ErrAtlasGeneric):
         if details.get('errorCode', None) in ['ATLAS_MAINTENANCE_ALREADY_SCHEDULED',
                                               'ATLAS_NUM_MAINTENANCE_DEFERRALS_EXCEEDED']:
             raise (ErrMaintenanceError(c,details))
+        if details.get('errorCode',None) in (['DUPLICATE_SERVERLESS_INSTANCE_NAME','SERVERLESS_INSTANCE_NAME_INVALID']) :
+            raise (ErrNameError(c,details))
+
         else:
             logger.critical(f"A generic error was raised")
             logger.critical(details)

@@ -35,6 +35,7 @@ logger.setLevel(logging.WARNING)
 def merge(dict1, dict2):
     return dict2.update(dict1)
 
+
 class Network:
     """Network constructor
     
@@ -43,9 +44,9 @@ class Network:
         password (str): password
     """
 
-    def __init__(self, user, password, AuthMethod: Union[HTTPDigestAuth, HTTPBasicAuth] = HTTPDigestAuth):
-        self.user: str = user
-        self.password: str = password
+    def __init__(self, key, secret, AuthMethod: Union[HTTPDigestAuth, HTTPBasicAuth] = HTTPDigestAuth):
+        self.key: str = key
+        self.secret: str = secret
         self.auth_method: Union[HTTPDigestAuth, HTTPBasicAuth] = AuthMethod
 
     def answer(self, c, details: Union[dict, BytesIO]):
@@ -107,8 +108,8 @@ class Network:
                              stream=True,
                              timeout=Settings.file_request_timeout,
                              headers={},
-                             auth=self.auth_method(self.user, self.password))
-            logger.debug("Auth information = {} {}".format(self.user, self.password))
+                             auth=self.auth_method(self.key, self.secret))
+            logger.debug("Auth information = {} {}".format(self.key, self.secret))
 
             for chunk in r.iter_content(chunk_size=1024):
                 # writing one chunk at a time to  file
@@ -187,7 +188,7 @@ class Network:
                 allow_redirects=True,
                 timeout=Settings.requests_timeout,
                 headers={},
-                auth=self.auth_method(self.user, self.password),
+                auth=self.auth_method(self.key, self.secret),
                 **kwargs)
 
     def post(self, uri, payload):
@@ -206,12 +207,13 @@ class Network:
         r = None
 
         try:
+            print(f"The URI is: {uri}")
             r = requests.post(uri,
                               json=payload,
                               allow_redirects=True,
                               timeout=Settings.requests_timeout,
                               headers={"Content-Type": "application/json"},
-                              auth=self.auth_method(self.user, self.password))
+                              auth=self.auth_method(self.key, self.secret))
             return self.answer(r.status_code, r.json())
         except:
             raise
@@ -274,7 +276,7 @@ class Network:
                                 allow_redirects=True,
                                 timeout=Settings.requests_timeout,
                                 headers={},
-                                auth=self.auth_method(self.user, self.password))
+                                auth=self.auth_method(self.key, self.secret))
             return self.answer(r.status_code, {"deleted": True})
         except Exception as e:
             raise e

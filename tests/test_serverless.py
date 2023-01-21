@@ -10,7 +10,7 @@ from atlasapi.atlas import Atlas
 from atlasapi.projects import Project, ProjectSettings
 from atlasapi.teams import TeamRoles
 from atlasapi.atlas_users import AtlasUser
-from atlasapi.serverless_pydantic import ServerlessCluster, StateName, ServerlessInstanceConnectionStrings, \
+from atlasapi.serverless_pydantic import ServerlessInstance, StateName, ServerlessInstanceConnectionStrings, \
     ServerlessInstanceProviderSettings
 from json import dumps
 from tests import BaseTests
@@ -20,7 +20,7 @@ from time import sleep
 logger = logging.getLogger('test')
 
 
-class InvoiceTests(BaseTests):
+class ServerlessTests(BaseTests):
 
     def test_00_get_count_for_group(self):
         count = self.a.Serverless.count_for_group_id(group_id=self.GROUP_ID)
@@ -30,7 +30,7 @@ class InvoiceTests(BaseTests):
     def test_01_get_instances_for_project(self):
         for each_item in self.a.Serverless.get_all_for_project(group_id=self.GROUP_ID):
             pprint(each_item)
-            self.assertIsInstance(each_item, ServerlessCluster)
+            self.assertIsInstance(each_item, ServerlessInstance)
             self.assertIsInstance(each_item.state_name, StateName)
             self.assertIsInstance(each_item.connection_strings, ServerlessInstanceConnectionStrings)
             self.assertIsInstance(each_item.provider_settings, ServerlessInstanceProviderSettings)
@@ -45,7 +45,7 @@ class InvoiceTests(BaseTests):
             break
         instance = self.a.Serverless.get_one_for_project(group_id=self.GROUP_ID, instance_name=instance_name)
         print(instance.dict())
-        self.assertIsInstance(instance,ServerlessCluster)
+        self.assertIsInstance(instance, ServerlessInstance)
 
     test_02_get_one_instance_for_project.basic = True
 
@@ -56,7 +56,7 @@ class InvoiceTests(BaseTests):
             break
         instance = self.a.Serverless.instance(instance_name=instance_name)
         print(f"Found {instance.name}")
-        self.assertIsInstance(instance, ServerlessCluster)
+        self.assertIsInstance(instance, ServerlessInstance)
 
     test_02a_instance.basic = True
 
@@ -68,7 +68,7 @@ class InvoiceTests(BaseTests):
         with self.assertRaises(AttributeError):
             instance = self.a_owner.Serverless.instance(instance_name=instance_name)
             print(f"Found {instance.name}")
-            self.assertIsInstance(instance, ServerlessCluster)
+            self.assertIsInstance(instance, ServerlessInstance)
 
     test_02b_instance_fail_no_group.basic = True
 
@@ -88,7 +88,7 @@ class InvoiceTests(BaseTests):
     def test_05_instances(self):
         for each_item in self.a.Serverless.instances:
             print(f"Found instance {each_item.name}")
-            self.assertIsInstance(each_item, ServerlessCluster)
+            self.assertIsInstance(each_item, ServerlessInstance)
 
     test_05_instances.basic = True
 
@@ -96,6 +96,22 @@ class InvoiceTests(BaseTests):
         with self.assertRaises(AttributeError):
             for each_item in self.a_owner.Serverless.instances:
                 print(f"Found instance {each_item.name}")
-                self.assertIsInstance(each_item, ServerlessCluster)
+                self.assertIsInstance(each_item, ServerlessInstance)
 
     test_06_instances_no_group.basic = True
+
+    def test_07_create_basic(self):
+        out = self.a.Serverless.create(self.TEST_SERVERLESS_NAME)
+        self.assertEqual(out.group_id,self.a.group)
+        self.assertIsInstance(out.backup_options,dict)
+        self.assertFalse(out.backup_options.get("serverlessContinuousBackupEnabled"))
+        self.assertIsInstance(out.provider_settings, ServerlessInstanceProviderSettings)
+        self.assertFalse(out.termination_protection)
+        self.assertEqual(out.state_name,StateName.creating)
+    test_07_create_basic.basic = True
+
+    def test_08_delete_basic(self):
+        out = self.a.Serverless.remove_one_by_project(self.TEST_SERVERLESS_NAME)
+        pprint(out)
+
+    test_08_delete_basic.basic = True

@@ -164,8 +164,8 @@ class Settings:
             "Return One Serverless Instance": URI_STUB + "/groups/{GROUP_ID}/serverless/{INSTANCE_NAME}",
             "Return All Serverless Instances": URI_STUB + "/groups/{GROUP_ID}/serverless/",
             "Create One Serverless Instance": URI_STUB + "/groups/{GROUP_ID}/serverless/",
-            "Update One Serverless Instance": URI_STUB + "/groups/{GROUP_ID}/serverless/[INSTANCE_NAME]",
-            "Remove One Serverless Instance": URI_STUB + "/groups/{GROUP_ID}/serverless/[INSTANCE_NAME]",
+            "Update One Serverless Instance": URI_STUB + "/groups/{GROUP_ID}/serverless/{INSTANCE_NAME}",
+            "Remove One Serverless Instance": URI_STUB + "/groups/{GROUP_ID}/serverless/{INSTANCE_NAME}",
 
 
         }

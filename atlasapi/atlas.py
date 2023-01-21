@@ -2399,6 +2399,20 @@ class Atlas:
 
             return self.atlas.network.delete(uri)
 
+        def delete(self, name: str) -> DeletedReturn:
+            """
+            Helper method to delete the named instance for the instantiated group id.
+
+            Will fail if the Atlas object is not instantiated with a group/project id.
+
+            Args:
+                name (str):
+
+            Returns:
+                DeletedReturn
+            """
+            return self.remove_one_by_project(name)
+
 
 class AtlasPagination:
     """Atlas Pagination Generic Implementation

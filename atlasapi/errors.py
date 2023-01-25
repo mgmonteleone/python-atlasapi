@@ -24,6 +24,7 @@ import logging
 
 logger = logging.getLogger('Error_Handler')
 
+
 class ErrRole(Exception):
     """A role is not compatible with Atlas"""
     pass
@@ -99,6 +100,7 @@ class ErrAtlasGeneric(Exception):
         """
         return self.code, self.details
 
+
 class ErrNameError(ErrAtlasGeneric):
     """Atlas : Atlas NamingRelatedError
 
@@ -113,6 +115,15 @@ class ErrNameError(ErrAtlasGeneric):
         super().__init__(details.get('detail', f'Atlas Naming Error: {details.get("detail")} '), c, details)
 
 
+class ErrMaintenanceError(ErrAtlasGeneric):
+    """Atlas : Atlas MaintenanceRelatedError
+
+    Constructor
+
+    Args:
+        c (int): HTTP code
+        details (dict): Response payload
+    """
 
 
 class ErrAtlasBadRequest(ErrAtlasGeneric):
@@ -132,17 +143,17 @@ class ErrAtlasBadRequest(ErrAtlasGeneric):
         if details.get('errorCode', None) == 'RESOURCE_NOT_FOUND_FOR_JOB':
             raise (ErrAtlasJobError(c, details))
         if details.get('errorCode', None) == 'CANNOT_CANCEL_AUTOMATED_RESTORE':
-            raise (ErrAtlasBackupError(c,details))
+            raise (ErrAtlasBackupError(c, details))
         if details.get('errorCode', None) in ['ATLAS_MAINTENANCE_ALREADY_SCHEDULED',
                                               'ATLAS_NUM_MAINTENANCE_DEFERRALS_EXCEEDED']:
-            raise (ErrMaintenanceError(c,details))
-        if details.get('errorCode',None) in (['DUPLICATE_SERVERLESS_INSTANCE_NAME','SERVERLESS_INSTANCE_NAME_INVALID']) :
-            raise (ErrNameError(c,details))
+            raise (ErrMaintenanceError(c, details))
+        if details.get('errorCode', None) in (
+        ['DUPLICATE_SERVERLESS_INSTANCE_NAME', 'SERVERLESS_INSTANCE_NAME_INVALID']):
+            raise (ErrNameError(c, details))
 
         else:
             logger.critical(f"A generic error was raised")
             logger.critical(details)
-
 
         super().__init__("Something was wrong with the client request.", c, details)
 

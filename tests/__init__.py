@@ -21,7 +21,7 @@ TEST_CLUSTER_NAME_UNIQUE = TEST_CLUSTER_NAME + test_run_id
 TEST_CLUSTER2_NAME_UNIQUE = TEST_CLUSTER2_NAME + test_run_id
 TEST_CLUSTER3_NAME_UNIQUE = TEST_CLUSTER2_NAME + coolname.generate_slug(2)
 CLUSTER_CREATE_WAIT_SECONDS = 60 * 10
-
+TEST_SERVERLESS_NAME = f"serverless{test_run_id}"
 ephemeral_test_clusters = [TEST_CLUSTER_NAME_UNIQUE, TEST_CLUSTER2_NAME_UNIQUE, TEST_CLUSTER3_NAME_UNIQUE]
 
 
@@ -71,6 +71,7 @@ class BaseTests(unittest.TestCase):
         self.TEST_CLUSTER_NAME_UNIQUE = TEST_CLUSTER2_NAME_UNIQUE
         self.TEST_CLUSTER2_NAME_UNIQUE = TEST_CLUSTER2_NAME_UNIQUE
         self.TEST_CLUSTER3_NAME_UNIQUE = TEST_CLUSTER3_NAME_UNIQUE
+        self.TEST_SERVERLESS_NAME = TEST_SERVERLESS_NAME
 
         if not self.USER or not self.API_KEY or not self.GROUP_ID:
             raise EnvironmentError('In order to run this smoke test you need ATLAS_USER, AND ATLAS_KEY env variables'

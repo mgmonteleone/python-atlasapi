@@ -20,6 +20,7 @@ Core module which provides access to MongoDB Atlas Cloud Provider APIs
 from atlasapi.network import Network
 from atlasapi.errors import *
 from pprint import pprint
+from json import loads
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
 from atlasapi.specs import Host, ListOfHosts, DatabaseUsersUpdatePermissionsSpecs, ReplicaSetTypes
@@ -29,7 +30,7 @@ from atlasapi.clusters import ClusterConfig, ShardedClusterConfig, AtlasBasicRep
     InstanceSizeName, AdvancedOptions, TLSProtocols, return_correct_cluster_config, ClusterView, OrgGroupView
 from atlasapi.events import atlas_event_factory, EventsIterable
 import logging
-from typing import Union, Iterable, Set, BinaryIO, Iterator
+from typing import Union, Iterable, Set, BinaryIO, Iterator, Dict
 from atlasapi.errors import ErrAtlasBadRequest
 from atlasapi.alerts import Alert
 from atlasapi.whitelist import WhitelistEntry
@@ -45,6 +46,8 @@ from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 from atlasapi.events_event_types import AtlasEventTypes
 from atlasapi.events import AtlasEvent
 from atlasapi.invoices_pydantic import ApiInvoiceView
+from atlasapi.serverless_pydantic import ServerlessInstance, ServerlessInstanceProviderSettings, BackingProviderName, \
+    ServerlessProviderName, ServerlessRegionName, DeletedReturn
 import gzip
 
 logger = logging.getLogger('Atlas')
@@ -83,6 +86,7 @@ class Atlas:
         self.Projects = Atlas._Projects(self)
         self.Organizations = Atlas._Organizations(self)
         self.Invoices = Atlas._Invoices(self)
+        self.Serverless = Atlas._Serverless(self)
         if not self.group:
             self.logger.warning("Note! The Atlas client has been initialized without a Group/Project, some endpoints"
                                 "will not function without a Group or project.")
@@ -363,9 +367,8 @@ class Atlas:
 
             PATCH /groups/{GROUP-ID}/clusters/{CLUSTER-NAME}/processArgs
 
-            :param cluster: The clutster name
+            :param cluster: The cluster name
             :param advanced_options: An AdvancedOptions object with the options to be set.
-            :param as_obj: Return the new AdvancedOptions as an object.
             :return:
             """
             uri = Settings.api_resources["Clusters"]["Advanced Configuration Options"].format(GROUP_ID=self.atlas.group,
@@ -396,6 +399,7 @@ class Atlas:
             :param cluster: The name of the cluster
             :return: bool: paused status
             """
+            result = None
             existing_config = self.get_single_cluster(cluster=cluster)
             logger.info(f'The cluster state is currently Paused= {existing_config.paused}')
             if existing_config.paused is True:
@@ -743,9 +747,9 @@ class Atlas:
                                  date_from: datetime = None,
                                  date_to: datetime = None) -> Iterable[Host]:
             """
-            Yields A Host object per Host in the passed cluster with  a File-like objects containing the gzipped log file
-            requested for each  host in the project using the same date filters and log_name (type) in the log_files
-            property.
+            Yields A Host object per Host in the passed cluster with  a File-like objects containing the gzipped
+            log file requested for each  host in the project using the same date filters and log_name (type) in the
+            log_files property.
 
             Currently the log_file property (List) is usually with only one item.
             Args:
@@ -1347,7 +1351,7 @@ class Atlas:
 
         def _get_maint_window(self, as_obj: bool = True) -> Union[dict, MaintenanceWindow]:
             """
-            (Internal)Gets the current maint window configuration for the the project.
+            (Internal)Gets the current maint window configuration for the project.
 
             the current_config should be used instead.
 
@@ -1427,7 +1431,7 @@ class Atlas:
             """
             Sets the maint configuration to the values in the passed MaintWindow Object
 
-            Will only set those values which are not none in the MaintWindow Object. Currently you can not use
+            Will only set those values which are not none in the MaintWindow Object. Currently, you can not use
             this method to set a value as null. (This is not supported by the API anyway)
 
             Args:
@@ -1472,7 +1476,7 @@ class Atlas:
 
             try:
                 response = self.atlas.network.post(uri=Settings.BASE_URL + uri, payload=request_obj.as_dict)
-            except ErrAtlasBadRequest as e:
+            except ErrAtlasBadRequest:
                 logger.warning('Received an Atlas bad request on Snapshot creation. Could be due to overlap')
                 raise IOError("Got a bad request error back from Atlas, this may be due to submitting"
                               "a snapshot request before a previous request has "
@@ -1700,10 +1704,9 @@ class Atlas:
                     try:
                         for each_restore in each_page.get("results"):
                             yield SnapshotRestoreResponse.from_dict(each_restore)
-                    except TypeError as e:
+                    except TypeError:
                         logger.warning("There was no results property, so should have gotten a single result")
                         yield SnapshotRestoreResponse.from_dict(each_page)
-
 
             except KeyError as e:
                 raise e
@@ -1906,6 +1909,7 @@ class Atlas:
             """Yields all users (AtlasUser objects) associated with the group_id.
 
             Args:
+                flatten_teams Optional[bool]:
                 group_id (str): The group id to search, will use the configured group for the Atlas instance if
                  instantiated in this way. flatten_teams (bool): Flag that indicates whether the returned list should
                  include users who belong to a team that is assigned a role in this project. You might not have
@@ -2098,7 +2102,7 @@ class Atlas:
                     yield Project.from_dict(each_project)
 
     class _Invoices:
-        """INvoices API
+        """Invoices API
 
         see: https://docs.atlas.mongodb.com/reference/api/invoices/
 
@@ -2179,6 +2183,274 @@ class Atlas:
             response = self.atlas.network.get(uri=uri)
             for page in response:
                 return ApiInvoiceView.parse_obj(page)
+
+    class _Serverless:
+        """Serverless API
+
+        see: https://docs.atlas.mongodb.com/reference/api/serverless/
+
+        Constructor
+
+        Args:
+            atlas (Atlas): Atlas instance
+        """
+
+        def __init__(self, atlas):
+            self.atlas = atlas
+
+        def get_group(self, group_id: Optional[str] = None):
+            if self.atlas.group is None and group_id is None:
+                raise AttributeError("A group/project id must be provided either in the Atlas object or as a parameter")
+            elif self.atlas.group is not None and group_id is not None:
+                raise AttributeError(f"You have provided a group_id ({group_id}) for an Atlas instance which was "
+                                     f"instantiated with a group_id ({self.atlas.group}). Either use an Atlas"
+                                     f"instance without a group_id, or do not specify the group_id as a parameter.")
+            elif self.atlas.group is None and group_id is not None:
+                logger.info(f"Using the passed group_id of {group_id}")
+
+            else:
+                logger.info(f"Using the Atlas instance group id of {self.atlas.group}")
+                group_id = self.atlas.group
+            return group_id
+
+        def count_for_group_id(self, group_id: str) -> int:
+            """Returns the number of serverless instances available for the project
+
+            Args:
+                group_id:
+
+            Returns:
+                int: count of serverless instances
+
+            """
+            uri = Settings.BASE_URL + Settings.api_resources["Serverless"][
+                "Return All Serverless Instances"].format(GROUP_ID=group_id)
+            response = self.atlas.network.get(uri=uri, params={'includeCount': True})
+            for page in response:
+                logger.info(f"Total of {page.get('totalCount')} serverless instances to be returned")
+                return page.get('totalCount')
+
+        @property
+        def count(self) -> int:
+            """Count of serverless instances for current project/group.
+
+            Will only work if the Atlas object has been instantiated with a group/project id
+
+            Returns:
+                int:
+
+            """
+            if self.atlas.group is None:
+                raise AttributeError(
+                    'The Atlas object must be initialized with a project/group in order to use the `count` method.')
+            else:
+                return self.count_for_group_id(self.atlas.group)
+
+        def get_all_for_project(self, group_id: str) -> Iterable[ServerlessInstance]:
+            """Returns all serverless instances for the passed group.
+
+            Args:
+                group_id:
+
+            Returns:
+                Iterable[ServerlessInstance]: yields ApiInvoiceView objects
+            """
+            logger.info(f"The Atlas instance has a group defined {self.atlas.group}")
+            uri = Settings.BASE_URL + Settings.api_resources["Serverless"][
+                "Return All Serverless Instances"].format(GROUP_ID=group_id)
+            response = self.atlas.network.get(uri=uri)
+            for page in response:
+                logger.info(f"Total of {page.get('totalCount')} serverless instances to be returned")
+                for each_instance in page.get("results"):
+                    yield ServerlessInstance.parse_obj(each_instance)
+
+        @property
+        def instances(self) -> Iterable[ServerlessInstance]:
+            """Returns all serverless instances for the current project/group id.
+
+            Will only work if the Atlas object has been instantiated with a group/project id.
+            Returns:
+                Iterable[ServerlessInstance]:
+            """
+            if self.atlas.group is None:
+                raise AttributeError('The Atlas object must be initialized with a project/group in order to use the '
+                                     '`instances` method.')
+            else:
+                return self.get_all_for_project(group_id=self.atlas.group)
+
+        def get_one_for_project(self, group_id: str, instance_name: str) -> ServerlessInstance:
+            """Returns a single Serverless Instance.
+
+            Args:
+                group_id:
+                instance_name:
+
+            Returns:
+                ApiInvoiceView: A single invoice with all line items (Full Data).
+
+            """
+            uri = Settings.BASE_URL + Settings.api_resources["Serverless"][
+                "Return One Serverless Instance"].format(GROUP_ID=group_id, INSTANCE_NAME=instance_name)
+            response = self.atlas.network.get(uri=uri)
+            for page in response:
+                return ServerlessInstance.parse_obj(page)
+
+        def instance(self, instance_name: str) -> ServerlessInstance:
+            """Returns a single instance by instance_name
+
+            Will only work if the Atlas object has been instantiated with a group/project id.
+
+
+            Args:
+                instance_name:
+
+            Returns:
+                ServerlessInstance:
+
+            """
+            if self.atlas.group is None:
+                raise AttributeError('The Atlas object must be initialized with a project/group in order to use the '
+                                     '`instance` method.')
+            else:
+                return self.get_one_for_project(group_id=self.atlas.group, instance_name=instance_name)
+
+        def create(self, name: str, group_id: Optional[str] = None,
+                   backing_provider: BackingProviderName = BackingProviderName.aws,
+                   region_name: ServerlessRegionName = ServerlessRegionName.US_EAST_1,
+                   continuous_backup: bool = False, termination_protection: bool = False) -> ServerlessInstance:
+            """Creates a new serverless instance
+
+            Only name is required, others have sane defaults.
+
+            If the Altas instance is instantiated with a group, that group will be used, and you do not need to
+            provide one as a parameter.
+
+            If you provide a group and one is already intantiated, an error will be raised.
+
+            Args:
+                name:
+                group_id:
+                backing_provider:
+                region_name:
+                continuous_backup:
+                termination_protection:
+
+            Returns:
+                ServerlessInstance:
+
+            """
+            group_id = self.get_group(group_id)
+
+            provider_obj = ServerlessInstanceProviderSettings(backingProviderName=backing_provider,
+                                                              providerName=ServerlessProviderName.serverless,
+                                                              regionName=region_name
+                                                              )
+            backup_obj = {"serverlessContinuousBackupEnabled": continuous_backup}
+
+            create_obj: ServerlessInstance = ServerlessInstance(groupId=group_id, name=name,
+                                                                providerSettings=provider_obj,
+                                                                serverlessBackupOptions=backup_obj,
+                                                                terminationProtectionEnabled=termination_protection)
+
+            uri = Settings.BASE_URL + Settings.api_resources["Serverless"][
+                "Create One Serverless Instance"].format(GROUP_ID=group_id, INSTANCE_NAME=name)
+
+            payload_dict = loads(create_obj.json(by_alias=True, exclude_unset=True))
+
+            instance_data = self.atlas.network.post(uri, payload=payload_dict)
+            return ServerlessInstance.parse_obj(instance_data)
+
+        def create_aws(self, name: str, group_id: Optional[str] = None,
+                       region_name: ServerlessRegionName = ServerlessRegionName.US_EAST_1,
+                       continuous_backup: bool = False, termination_protection: bool = False):
+            """Little helper method for creating on aws.
+
+            Args:
+                name:
+                group_id:
+                region_name:
+                continuous_backup:
+                termination_protection:
+
+            Returns:
+
+            """
+            group_id = self.get_group(group_id)
+            return self.create(name=name, group_id=group_id, backing_provider=BackingProviderName.aws,
+                               region_name=region_name, continuous_backup=continuous_backup,
+                               termination_protection=termination_protection)
+
+        def remove_one(self, name: str, group_id: Optional[str] = None) -> DeletedReturn:
+            """
+            Removes a single Serverless instance.
+
+            You can pass None for the group/project id if the Atlas instance is instantiated with a group id.
+            Args:
+                name: the name of the instance as displayed in the UI and returned by GET
+                group_id:
+
+            Returns:
+                DeletedReturn: A dist with 'deleted' either true or false.
+
+            """
+            group_id = self.get_group(group_id)
+            uri = Settings.BASE_URL + Settings.api_resources["Serverless"][
+                "Remove One Serverless Instance"].format(GROUP_ID=group_id, INSTANCE_NAME=name)
+
+            return self.atlas.network.delete(uri)
+
+        def delete(self, name: str) -> DeletedReturn:
+            """
+            Helper method to delete the named instance for the instantiated group id.
+
+            Will fail if the Atlas object is not instantiated with a group/project id.
+
+            Args:
+                name (str):
+
+            Returns:
+                DeletedReturn
+            """
+            return self.remove_one(name)
+
+        def update_continuous_backup(self, name: str, enabled: bool = False,
+                                     group_id: Optional[str] = None) -> ServerlessInstance:
+            """Enables or disables the continuous backup option.
+
+            Args:
+                group_id:
+                name: Name of the instance to update
+                enabled (bool): True to enable, False to disable.
+            """
+            group_id = self.get_group(group_id)
+            uri = Settings.BASE_URL + Settings.api_resources["Serverless"][
+                "Update One Serverless Instance"].format(GROUP_ID=group_id, INSTANCE_NAME=name)
+            output = self.atlas.network.patch(uri, dict(serverlessContinuousBackupEnabled=enabled))
+            return ServerlessInstance.parse_obj(output)
+
+        def update_termination_protection(self, name: str, enabled: bool = False,
+                                          group_id: Optional[str] = None) -> ServerlessInstance:
+            """Enables or disables the termination protection option.
+
+            Args:
+                name (str): The name of the serverless instance
+                enabled (bool):
+                group_id (str):
+
+            Returns:
+                ServerlessInstance
+            """
+            group_id = self.get_group(group_id)
+            uri = Settings.BASE_URL + Settings.api_resources["Serverless"][
+                "Update One Serverless Instance"].format(GROUP_ID=group_id, INSTANCE_NAME=name)
+            output = self.atlas.network.patch(uri, dict(terminationProtectionEnabled=enabled))
+            return ServerlessInstance.parse_obj(output)
+
+        def termination_protection_enable(self, name: str) -> ServerlessInstance:
+            return self.update_termination_protection(name, True, None)
+
+        def continuous_backup_enable(self, name: str) -> ServerlessInstance:
+            return self.update_continuous_backup(name, True, None)
 
 
 class AtlasPagination:
@@ -2274,10 +2546,3 @@ class WhitelistGetAll(AtlasPagination):
 
     def __init__(self, atlas, pageNum, itemsPerPage):
         super().__init__(atlas, atlas.Whitelist.get_all_whitelist_entries, pageNum, itemsPerPage)
-
-
-class CloudBackupSnapshotsGetAll(AtlasPagination):
-    """Pagination for Database User : Get All"""
-
-    def __init__(self, atlas, pageNum, itemsPerPage):
-        super().__init__(atlas, atlas.CloudBackups.get_all_backup_snapshots, pageNum, itemsPerPage)

@@ -241,8 +241,8 @@ class Network:
                                allow_redirects=True,
                                timeout=Settings.requests_timeout,
                                headers={"Content-Type": "application/json"},
-                               auth=self.auth_method(self.user, self.password))
-
+                               auth=self.auth_method(self.key, self.secret))
+            print(f'THe Payload is.... {payload}')
             try:
                 output = r.json()
             except:

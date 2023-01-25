@@ -25,7 +25,7 @@ class ServerlessTests(BaseTests):
     def test_00_get_count_for_group(self):
         count = self.a.Serverless.count_for_group_id(group_id=self.GROUP_ID)
         print(f'✅ There are {count} serverless instances in the project/group.')
-        self.assertIsInstance(count,int, "Instance count must be a non-negative int.")
+        self.assertIsInstance(count, int, "Instance count must be a non-negative int.")
 
     def test_01_get_instances_for_project(self):
         for each_item in self.a.Serverless.get_all_for_project(group_id=self.GROUP_ID):
@@ -75,7 +75,7 @@ class ServerlessTests(BaseTests):
     def test_03_count(self):
         current_count = self.a.Serverless.count
         print(f"The number of serverless instances is {current_count}")
-        self.assertIsInstance(current_count,int)
+        self.assertIsInstance(current_count, int)
 
     test_03_count.basic = True
 
@@ -102,16 +102,63 @@ class ServerlessTests(BaseTests):
 
     def test_07_create_basic(self):
         out = self.a.Serverless.create(self.TEST_SERVERLESS_NAME)
-        self.assertEqual(out.group_id,self.a.group)
-        self.assertIsInstance(out.backup_options,dict)
+        self.assertEqual(out.group_id, self.a.group)
+        self.assertIsInstance(out.backup_options, dict)
         self.assertFalse(out.backup_options.get("serverlessContinuousBackupEnabled"))
         self.assertIsInstance(out.provider_settings, ServerlessInstanceProviderSettings)
         self.assertFalse(out.termination_protection)
-        self.assertEqual(out.state_name,StateName.creating)
+        self.assertEqual(out.state_name, StateName.creating)
+
     test_07_create_basic.basic = True
 
-    def test_08_delete_basic(self):
-        out = self.a.Serverless.remove_one_by_project(self.TEST_SERVERLESS_NAME)
+    def test_08_enable_cont_backup(self):
+        instance_name = None
+        for each_item in self.a.Serverless.get_all_for_project(group_id=self.GROUP_ID):
+            instance_name = each_item.name
+            break
+        output = self.a.Serverless.update_continuous_backup(instance_name, True)
+        pprint(output.dict())
+        self.assertIsInstance(output, ServerlessInstance)
+        backup_setting = output.backup_options
+        self.assertIsInstance(backup_setting, dict)
+        self.assertIsInstance(backup_setting.get('serverlessContinuousBackupEnabled'), bool)
+        # self.assertEqual(backup_setting.get('serverlessContinuousBackupEnabled'), True)
+        # Can not really test if this change has been made since the snapshot has to be created before the change is
+        # Shown. So we will check that status is updating?
+        self.assertIn(output.state_name, [StateName.updating, StateName.creating])
+    test_08_enable_cont_backup.basic = True
+
+    def test_09_enable_termination_protection(self):
+        instance_name = None
+        for each_item in self.a.Serverless.get_all_for_project(group_id=self.GROUP_ID):
+            instance_name = each_item.name
+            break
+        output = self.a.Serverless.update_termination_protection(instance_name, True)
+        pprint(output.dict())
+        self.assertIsInstance(output, ServerlessInstance)
+        self.assertIsInstance(output.termination_protection, bool)
+        self.assertEqual(output.termination_protection, True)
+
+    test_09_enable_termination_protection.basic = True
+
+    def test_09a_tp_enable(self):
+        instance_name = None
+        for each_item in self.a.Serverless.get_all_for_project(group_id=self.GROUP_ID):
+            instance_name = each_item.name
+            break
+        output = self.a.Serverless.termination_protection_enable(name=instance_name)
+        pprint(output.dict())
+
+    def test_09b_cps_enable(self):
+        instance_name = None
+        for each_item in self.a.Serverless.get_all_for_project(group_id=self.GROUP_ID):
+            instance_name = each_item.name
+            break
+        output = self.a.Serverless.continuous_backup_enable(name=instance_name)
+        pprint(output.dict())
+
+    def test_10_delete_basic(self):
+        out = self.a.Serverless.remove_one(self.TEST_SERVERLESS_NAME)
         pprint(out)
 
-    test_08_delete_basic.basic = True
+    test_10_delete_basic.basic = True

@@ -2380,7 +2380,7 @@ class Atlas:
                                region_name=region_name, continuous_backup=continuous_backup,
                                termination_protection=termination_protection)
 
-        def remove_one_by_project(self, name: str, group_id: Optional[str] = None) -> DeletedReturn:
+        def remove_one(self, name: str, group_id: Optional[str] = None) -> DeletedReturn:
             """
             Removes a single Serverless instance.
 
@@ -2411,7 +2411,46 @@ class Atlas:
             Returns:
                 DeletedReturn
             """
-            return self.remove_one_by_project(name)
+            return self.remove_one(name)
+
+        def update_continuous_backup(self, name: str, enabled: bool = False,
+                                     group_id: Optional[str] = None) -> ServerlessInstance:
+            """Enables or disables the continuous backup option.
+
+            Args:
+                group_id:
+                name: Name of the instance to update
+                enabled (bool): True to enable, False to disable.
+            """
+            group_id = self.get_group(group_id)
+            uri = Settings.BASE_URL + Settings.api_resources["Serverless"][
+                "Update One Serverless Instance"].format(GROUP_ID=group_id, INSTANCE_NAME=name)
+            output = self.atlas.network.patch(uri, dict(serverlessContinuousBackupEnabled=enabled))
+            return ServerlessInstance.parse_obj(output)
+
+        def update_termination_protection(self, name: str, enabled: bool = False,
+                                          group_id: Optional[str] = None) -> ServerlessInstance:
+            """Enables or disables the termination protection option.
+
+            Args:
+                name (str): The name of the serverless instance
+                enabled (bool):
+                group_id (str):
+
+            Returns:
+                ServerlessInstance
+            """
+            group_id = self.get_group(group_id)
+            uri = Settings.BASE_URL + Settings.api_resources["Serverless"][
+                "Update One Serverless Instance"].format(GROUP_ID=group_id, INSTANCE_NAME=name)
+            output = self.atlas.network.patch(uri, dict(terminationProtectionEnabled=enabled))
+            return ServerlessInstance.parse_obj(output)
+
+        def termination_protection_enable(self, name: str) -> ServerlessInstance:
+            return self.update_termination_protection(name, True, None)
+
+        def continuous_backup_enable(self, name: str) -> ServerlessInstance:
+            return self.update_continuous_backup(name, True, None)
 
 
 class AtlasPagination:

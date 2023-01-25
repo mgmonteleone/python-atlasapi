@@ -242,7 +242,7 @@ class Network:
                                timeout=Settings.requests_timeout,
                                headers={"Content-Type": "application/json"},
                                auth=self.auth_method(self.key, self.secret))
-            print(f'THe Payload is.... {payload}')
+            logger.info(f'THe Payload is.... {payload}')
             try:
                 output = r.json()
             except:

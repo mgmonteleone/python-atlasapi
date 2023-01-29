@@ -373,7 +373,7 @@ class Atlas:
             """
             uri = Settings.api_resources["Clusters"]["Advanced Configuration Options"].format(GROUP_ID=self.atlas.group,
                                                                                               CLUSTER_NAME=cluster)
-            print(f"The advanced options {advanced_options.as_dict}")
+            logger.info(f"The advanced options {advanced_options.as_dict}")
             value_returned = self.atlas.network.patch(uri=Settings.BASE_URL + uri, payload=advanced_options.as_dict)
             advanced_options_obj = AdvancedOptions.fill_from_dict(data_dict=value_returned)
             return advanced_options_obj
@@ -470,7 +470,7 @@ class Atlas:
             self.atlas: atlas = atlas
             self.logger = logging.getLogger('Atlas.Hosts')
             self.host_list_with_measurements: Optional[List[Host]] = list()
-            self.host_list: Optional[List[Host]] = list()
+            self.host_list: Optional[List[Host]] = list(self._get_all_hosts())
 
         def _get_all_hosts(self):
             """Get All Hosts (actually processes)
@@ -510,14 +510,19 @@ class Atlas:
                 Iterable[Host]: Yields `Host` objects
             """
             host_list = self._get_all_hosts()
+            self.host_list = list()
             if for_cluster:
                 out_list = list()
                 for host in host_list:
                     if host.cluster_name.lower() == for_cluster.lower():
-                        out_list.append(host)
+                        logger.info(f"Matching {host.cluster_name.lower()} to {for_cluster.lower()}")
+                        logger.info(f"Host list is now {len(self.host_list)}")
+                        self.host_list.append(host)
                     elif host.cluster_name_alias.lower() == for_cluster.lower():
-                        out_list.append(host)
-                self.host_list = out_list
+                        logger.info(f"Matched {host.cluster_name_alias.lower()} to {for_cluster.lower()}")
+                        logger.info(f"Host list is now {len(self.host_list)}")
+                        self.host_list.append(host)
+                logger.info(f"The host list is {len(self.host_list)} long")
             else:
                 self.host_list = list(self._get_all_hosts())
 
@@ -555,8 +560,15 @@ class Atlas:
                  Iterable[Host]: An interator of Host Objects.
             """
             for host in self.host_list:
-                if host.cluster_name == cluster_name:
+                if host.cluster_name.lower() == cluster_name.lower():
+                    logger.info(f"Matching {host.cluster_name.lower()} to {cluster_name.lower()}")
+                    logger.info(f"Host list is now {len(self.host_list)}")
                     yield host
+                elif host.cluster_name_alias.lower() == cluster_name.lower():
+                    logger.info(f"Matched {host.cluster_name_alias.lower()} to {cluster_name.lower()}")
+                    logger.info(f"Host list is now {len(self.host_list)}")
+                    yield host
+
 
         def update_host_list(self, host_obj: Host) -> None:
             """
@@ -753,6 +765,7 @@ class Atlas:
 
             Currently the log_file property (List) is usually with only one item.
             Args:
+                cluster_name (str) :
                 log_name (AtlasLogNames): The type of log to be retrieved
                 date_from (datetime) : Start of log entries
                 date_to (datetime): End of log entries
@@ -761,8 +774,10 @@ class Atlas:
                 Iterable[Host]: Yields Host objects, with full host information as well as the logfile in the log_files
                 property.
             """
-            for each_host in self.host_list_by_cluster(cluster_name=cluster_name):
+            self.fill_host_list(for_cluster=cluster_name)
+            for each_host in self.host_list:
                 try:
+                    logger.warning(f"Now retrieving log file for {each_host}, this may take a while....")
                     log_file: BinaryIO = self.get_log_for_host(host_obj=each_host,
                                                                log_name=log_name,
                                                                date_from=date_from,

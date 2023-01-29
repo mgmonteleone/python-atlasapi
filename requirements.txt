@@ -1,11 +1,11 @@
-requests
+requests==2.28.2
 python-dateutil
 isodate
-future
-pytz
-coolname
+future==0.18.3
+pytz==2022.7.1
+coolname==2.2.0
 nose
 awspublicranges
 humanfriendly
-pydantic
+pydantic==1.10.4
 pyhumps

@@ -87,7 +87,8 @@ class Network:
             # Settings.SERVER_ERRORS
             raise ErrAtlasServerErrors(c, details)
 
-    def get_file(self, uri):
+    # noinspection PyArgumentList
+    def get_file(self, uri, **kwargs):
         """Get request which returns a binary file
 
         Args:
@@ -108,8 +109,11 @@ class Network:
                              stream=True,
                              timeout=Settings.file_request_timeout,
                              headers={},
-                             auth=self.auth_method(self.key, self.secret))
+                             auth=self.auth_method(self.key, self.secret),
+                             **kwargs)
             logger.debug("Auth information = {} {}".format(self.key, self.secret))
+            if kwargs is not None:
+                logger.info(f"kwargs are: {kwargs}")
 
             for chunk in r.iter_content(chunk_size=1024):
                 # writing one chunk at a time to  file
@@ -119,10 +123,13 @@ class Network:
             logger.info("---- Completed downloading the file. ----")
             return self.answer(r.status_code, file_obj)
 
-        except Exception:
-            logger.warning('Request: {}'.format(r.request.__dict__))
-            logger.warning('Response: {}'.format(r.__dict__))
-            raise
+        except Exception as e:
+            try:
+                logger.warning('Request: {}'.format(r.request.__dict__))
+                logger.warning('Response: {}'.format(r.__dict__))
+                raise e
+            except AttributeError:
+                raise e
         finally:
             if r:
                 r.connection.close()
@@ -207,7 +214,6 @@ class Network:
         r = None
 
         try:
-            print(f"The URI is: {uri}")
             r = requests.post(uri,
                               json=payload,
                               allow_redirects=True,

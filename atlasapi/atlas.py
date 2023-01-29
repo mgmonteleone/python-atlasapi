@@ -49,6 +49,7 @@ from atlasapi.invoices_pydantic import ApiInvoiceView
 from atlasapi.serverless_pydantic import ServerlessInstance, ServerlessInstanceProviderSettings, BackingProviderName, \
     ServerlessProviderName, ServerlessRegionName, DeletedReturn
 import gzip
+import pytz
 
 logger = logging.getLogger('Atlas')
 
@@ -680,21 +681,26 @@ class Atlas:
                 date_from=date_from,
                 date_to=date_to
             )
+            params = dict()
+            if date_from:
+                try:
+                    date_from = pytz.utc.localize(date_from)
+                except ValueError:
+                    logger.info(f'The date_from value {date_from} is already localized. Will not re-localize.')
+                    pass
+
+                params.update({'startDate': int(round(date_from.timestamp()))})
+            if date_to:
+                try:
+                    date_to = pytz.utc.localize(date_to)
+                except ValueError:
+                    logger.info(f'The date_to value {date_to} is already localized. Will not re-localize.')
+                    pass
+                params.update({'endDate': int(round(date_to.timestamp()))})
+
             # Build the request
-            if date_to is None and date_from is None:
-                logger.info('No dates passed so we are not going to send date params, API default will be used.')
-                uri = Settings.BASE_URL + uri
-            # TODO: refator to use params instead of hand crafting the uri for the dates
-            elif date_to is None and date_from is not None:
-                logger.info('Received only a date_from, so sending only startDate')
-                uri = Settings.BASE_URL + uri + f'?startDate={int(round(date_from.timestamp()))}'
-            elif date_to is not None and date_from is None:
-                uri = Settings.BASE_URL + uri + f'?endDate={int(round(date_to.timestamp()))}'
-            else:
-                uri = Settings.BASE_URL + uri + f'?endDate={int(round(date_to.timestamp()))}' \
-                                                f'&startDate={int(round(date_from.timestamp()))}'
             logger.info(f'The URI used will be {uri}')
-            return_val = self.atlas.network.get_file(uri)
+            return_val = self.atlas.network.get_file(Settings.BASE_URL + uri, params=params)
             return return_val
 
         def get_loglines_for_host(self, host_obj: Host,

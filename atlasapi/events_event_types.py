@@ -168,6 +168,8 @@ class AtlasEventTypes(Enum):
     DATA_EXPLORER_CRUD = 'Data Explorer Crud'
     DATA_EXPLORER_CRUD_ERROR = 'Data Explorer Crud Error'
     DATA_EXPLORER_CRUD_ATTEMPT = 'Data Explorer Crud Attempt'
+    DATA_FEDERATION_QUERY_LIMIT_CONFIGURED = 'Data Federation Query Limit configured'
+    DATA_FEDERATION_QUERY_LIMIT_DELETED = 'Data Federation Query Limit deleted'
     AWS_ENCRYPTION_KEY_ROTATED = 'AWS Encryption Key Rotated'
     AWS_ENCRYPTION_KEY_NEEDS_ROTATION = 'AWS Encryption Key Needs Rotation'
     AZURE_ENCRYPTION_KEY_ROTATED = 'Azure Encryption Key Rotated'

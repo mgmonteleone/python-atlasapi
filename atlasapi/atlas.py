@@ -17,7 +17,7 @@ Atlas module
 
 Core module which provides access to MongoDB Atlas Cloud Provider APIs
 """
-from atlasapi.network import Network
+from atlasapi.network import Network, atlas_encode_params
 from atlasapi.errors import *
 from pprint import pprint
 from json import loads
@@ -605,13 +605,17 @@ class Atlas:
 
         def get_measurement_for_hosts(self, granularity: Optional[AtlasGranularities] = None,
                                       period: Optional[AtlasPeriods] = None,
-                                      measurement: Optional[AtlasMeasurementTypes] = None, return_data: bool = False):
+                                      measurement: Optional[AtlasMeasurementTypes] = None, return_data: bool = False,
+                                      start: Optional[datetime] = None, end: Optional[datetime] = None):
             """Get measurement(s) for all hosts in the host_list
 
 
                         Populates all hosts in the host_list with the requested metric.
 
                         Multiple calls will append additional metrics to the same host object.
+
+                        You must provide both `start` and `end` or neither. You cannot provide `period`
+                        with `start` and `end`.
 
                         Please note that using the `return_data`  param will also return the updated
                         host objects, which may unnecessarily consume memory.
@@ -620,7 +624,8 @@ class Atlas:
                             granularity (AtlasGranularities): the desired granularity
                             period (AtlasPeriods): The desired period
                             measurement (AtlasMeasurementTypes) : The desired measurement or Measurement class
-
+                            start (datetime): The start of the desired period
+                            end (datetime): The end of the desired period
 
 
                             :param return_data:
@@ -643,6 +648,7 @@ class Atlas:
                     logger.debug(f'The data type of measurement is is {type(measurement)}')
                     returned_data = self._get_measurement_for_host(each_host, granularity=granularity,
                                                                    period=period,
+                                                                   start=start, end=end,
                                                                    measurement=measurement)
                     each_host.measurements = list(returned_data)
                 except Exception as e:
@@ -790,7 +796,9 @@ class Atlas:
         def _get_measurement_for_host(self, host_obj: Host,
                                       granularity: Optional[AtlasGranularities] = None,
                                       period: Optional[AtlasPeriods] = None,
-                                      measurement: Optional[AtlasMeasurementTypes] = None
+                                      measurement: Optional[AtlasMeasurementTypes] = None,
+                                      start: Optional[datetime] = None,
+                                      end: Optional[datetime] = None
                                       ) -> Iterable[AtlasMeasurement]:
             """Get  measurement(s) for a host
 
@@ -814,6 +822,8 @@ class Atlas:
                 pageNum (int): Page number
                 itemsPerPage (int): Number of Users per Page
                 iterable (bool): To return an iterable high level object instead of a low level API response
+                start (datetime): Start of the desired period
+                end (datetime): End of the desired period
 
             Returns:
                  Iterable[AtlasMeasurement] or dict: Iterable object representing this function OR Response payload
@@ -832,7 +842,7 @@ class Atlas:
             #  Set default measurement, period and granularity if none are sent
             if measurement is None:
                 measurement = AtlasMeasurementTypes.Cache.dirty
-            if period is None:
+            if period is None and start is None and end is None:
                 period = AtlasPeriods.WEEKS_1
             if granularity is None:
                 granularity = AtlasGranularities.HOUR
@@ -864,11 +874,11 @@ class Atlas:
             uri = Settings.api_resources["Monitoring and Logs"]["Get measurement for host"].format(
                 group_id=self.atlas.group,
                 host=host_obj.hostname,
-                port=host_obj.port,
-                granularity=granularity,
-                period=period,
-                measurement=measurement
-            )
+                port=host_obj.port
+            ) + "?" + atlas_encode_params({
+                "granularity": granularity, "m": measurement,
+                "period": period, "start": start, "end": end})
+
             logger.debug(f'The URI used will be {uri}')
             # Build the request
             return_val = self.atlas.network.get(Settings.BASE_URL + uri)

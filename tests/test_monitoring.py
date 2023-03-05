@@ -371,3 +371,15 @@ class MeasurementTests(BaseTests):
 
     # This test requires a cluster of m40 or higher , so will not run this in the automated suite.
     test_26_issue_114_add_ten_second_granularity.basic = False
+
+    def test_27_get_measurements_start_end(self):
+        self.a.Hosts.fill_host_list()
+        self.assertGreaterEqual(len(self.a.Hosts.host_list), 2)
+        end = datetime.utcnow()
+        start = end - timedelta(minutes=10)
+        self.a.Hosts.get_measurement_for_hosts(measurement=AtlasMeasurementTypes.connections,
+                                               start=start, end=end)
+
+        self.assertGreaterEqual(len(self.a.Hosts.host_list_with_measurements), 1)
+
+    test_27_get_measurements_start_end.basic = True

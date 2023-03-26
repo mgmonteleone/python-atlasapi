@@ -213,9 +213,9 @@ class Host(object):
             measurement=measurement
         )
         logger.info(f'The URI is.... {uri}')
-
+        parameters = {'granularity': granularity, 'period': period, 'm': measurement}
         # Build the request
-        return_val = atlas_obj.network.get(Settings.BASE_URL + uri)
+        return_val = atlas_obj.network.get(Settings.BASE_URL + uri, params=parameters)
         for each_response in return_val:
             for each_measurement in each_response.get("measurements"):
                 measurement_obj = AtlasMeasurement(name=each_measurement.get('name'),

@@ -1,3 +1,4 @@
+from enum import Enum
 class AtlasEventTypes(Enum):
     APP_SETTINGS_CHANGE = 'App Settings Change'
     PEER_CREATED = 'Peer Created'

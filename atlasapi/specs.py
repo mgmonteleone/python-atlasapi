@@ -180,7 +180,7 @@ class Host(object):
 
 
         """
-
+        measurement_list = list()
         # Set default
         if measurement is None:
             measurement = AtlasMeasurementTypes.Cache.dirty
@@ -199,23 +199,22 @@ class Host(object):
             logger.info('We received a branch, whos parent is {}'.format(parent.__str__()))
             leaves = measurement.get_all()
             measurement_list = list(leaves)
-            measurement = '&m='.join(measurement_list)
         except TypeError:
             logger.info('We received a leaf')
+        if len(measurement_list) < 1:
+            measurement_list.append(measurement)
 
         # Build the URL
         uri = Settings.api_resources["Monitoring and Logs"]["Get measurement for host"].format(
             group_id=self.group_id,
             host=self.hostname,
-            port=self.port,
-            granularity=granularity,
-            period=period,
-            measurement=measurement
+            port=self.port
         )
         logger.info(f'The URI is.... {uri}')
+        parameters = {'granularity': granularity, 'period': period, 'm': measurement_list}
 
         # Build the request
-        return_val = atlas_obj.network.get(Settings.BASE_URL + uri)
+        return_val = atlas_obj.network.get(Settings.BASE_URL + uri, params=parameters)
         for each_response in return_val:
             for each_measurement in each_response.get("measurements"):
                 measurement_obj = AtlasMeasurement(name=each_measurement.get('name'),

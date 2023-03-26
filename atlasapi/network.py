@@ -18,12 +18,15 @@ Network module
 Module which handles the basic network operations with the Atlas API>
 """
 
+import datetime
 from math import ceil
 import requests
 from requests.auth import HTTPDigestAuth, HTTPBasicAuth
 from atlasapi.settings import Settings
 from atlasapi.errors import *
 import logging
+import urllib.parse
+from dateutil.tz import UTC
 from json import dumps
 from io import BytesIO
 from typing import Union
@@ -34,6 +37,19 @@ logger.setLevel(logging.WARNING)
 
 def merge(dict1, dict2):
     return dict2.update(dict1)
+
+
+def atlas_encode_dt(dt: datetime.datetime) -> str:
+    """Encode a datetime (must already be UTC!) for the Atlas API."""
+    # Atlas requires "Z" suffix, not Python's usual "+00:00" for UTC.
+    return dt.replace(tzinfo=None).isoformat() + 'Z'
+
+
+def atlas_encode_params(params: dict) -> str:
+    # Use "safe" to permit ":" in ISO8601 datetimes.
+    return urllib.parse.urlencode(
+        {k: atlas_encode_dt(v) if isinstance(v, datetime.datetime) else v
+         for k, v in params.items() if v is not None}, safe=':')
 
 
 class Network:

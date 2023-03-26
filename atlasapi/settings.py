@@ -38,8 +38,7 @@ class Settings:
             "Get information for process in group": URI_STUB + "/groups/%s/processes/%s:&s?pageNum=%d"
                                                                "&itemsPerPage=%d",
             "Get measurement for host": URI_STUB + "/groups/{group_id}/processes/{host}:{"
-                                                   "port}/measurements?granularity={granularity}&period={period}"
-                                                   "&m={measurement}",
+                                                   "port}/measurements",
             "Get list of databases for host": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{PORT}/databases",
             "Get measurements of database for host.": "/api/atlas/v1.0/groups/{GROUP-ID}/processes/{HOST}:{"
                                                       "PORT}/databases/{DATABASE-NAME}/measurements",

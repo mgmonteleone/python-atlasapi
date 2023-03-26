@@ -34,7 +34,7 @@ class Settings:
             "Get One Project": URI_STUB + "/groups/{GROUP_ID}"
         },
         "Monitoring and Logs": {
-            "Get all processes for group": URI_STUB + "/groups/{group_id}/processes",
+            "Get all processes for group": URI_STUB + "/groups/{GROUP_ID}/processes",
             "Get information for process in group": URI_STUB + "/groups/%s/processes/%s:&s?pageNum=%d"
                                                                "&itemsPerPage=%d",
             "Get measurement for host": URI_STUB + "/groups/{group_id}/processes/{host}:{"

@@ -11,7 +11,7 @@ from atlasapi.atlas import Atlas
 from atlasapi.lib import AtlasPeriods, AtlasUnits, AtlasGranularities
 from json import dumps
 from datetime import datetime
-from atlasapi.clusters import AtlasBasicReplicaSet, ClusterConfig
+from atlasapi.clusters import AtlasBasicReplicaSet, ClusterConfig, ShardedClusterConfig
 from atlasapi.lib import MongoDBMajorVersion as mdb_version
 from atlasapi.lib import DefaultReadConcerns
 from atlasapi.clusters import ClusterConfig, ProviderSettings, ReplicationSpecs, InstanceSizeName, OrgGroupView, ClusterView
@@ -248,3 +248,10 @@ class ClusterTests(BaseTests):
         self.assertIsInstance(cluster.create_date, datetime)
         pprint(cluster.as_dict())
 
+    def test_15_issue_177_sharded(self):
+        SHARDED_NAME = 'PyAtlasShardedTest'
+        cluster = self.a.Clusters.get_single_cluster_as_obj(SHARDED_NAME)
+        self.assertTrue(type(cluster) is ShardedClusterConfig)
+        self.assertIsInstance(cluster.create_date, datetime)
+    # A bit expensive to run a sharded test cluster, so this test will be run manually as needed.
+    test_15_issue_177_sharded.advanced = True

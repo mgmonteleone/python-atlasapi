@@ -485,16 +485,24 @@ class Atlas:
                 ListOfHosts: Iterable object representing this function
 
             """
-            uri = Settings.api_resources["Monitoring and Logs"]["Get all processes for group"].format(
-                group_id=self.atlas.group)
+            # Handling for Atlas Object which have been intantiated without a Group/Project (a Group Key)
+            # We need to handle the fact that for these atlas objects, we can not grab all hosts.
+            if not self.atlas.group:
+                logger.error("we do not have a group, the Atlas object does not have a group!")
+                print("we do not have a group, the Atlas object does not have a group!")
+                yield None
+            else:
 
-            try:
-                response = self.atlas.network.get(Settings.BASE_URL + uri)
-                for page in response:
-                    for each_process in page.get("results"):
-                        yield Host(each_process)
-            except Exception as e:
-                raise e
+                uri = Settings.api_resources["Monitoring and Logs"]["Get all processes for group"].format(
+                    GROUP_ID=self.atlas.group)
+
+                try:
+                    response = self.atlas.network.get(Settings.BASE_URL + uri)
+                    for page in response:
+                        for each_process in page.get("results"):
+                            yield Host(each_process)
+                except Exception as e:
+                    raise e
 
         def fill_host_list(self, for_cluster: Optional[str] = None) -> Iterable[Host]:
             """

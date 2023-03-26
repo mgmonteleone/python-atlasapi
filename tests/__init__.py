@@ -11,6 +11,10 @@ from datetime import datetime
 import coolname
 from time import sleep, time
 import humanfriendly
+import urllib.request
+
+external_ip = urllib.request.urlopen('https://ident.me').read().decode('utf8')
+
 
 TEST_CLUSTER_NAME = getenv('TEST_CLUSTER_NAME', 'pyAtlasTestCluster')
 TEST_CLUSTER2_NAME = getenv('TEST_CLUSTER2_NAME', 'pyAtlas-')
@@ -60,8 +64,6 @@ class BaseTests(unittest.TestCase):
         self.OTHER_USER = getenv('ATLAS_OTHER_USER', None)
         self.OTHER_API_KEY = getenv('ATLAS_OTHER_KEY', None)
 
-        # print("env var is".format(getenv('ATLAS_USER', None)))
-
         self.GROUP_OWNER_USER = getenv('ATLAS_ORG_USER', None)
         self.GROUP_OWNER_KEY = getenv('ATLAS_ORG_KEY', None)
 
@@ -73,6 +75,10 @@ class BaseTests(unittest.TestCase):
         self.TEST_CLUSTER3_NAME_UNIQUE = TEST_CLUSTER3_NAME_UNIQUE
         self.TEST_SERVERLESS_NAME = TEST_SERVERLESS_NAME
 
+        print("------The Config Variables -------")
+        print(f"ATLAS_USER is {self.USER}")
+        print(f"External IP is {external_ip}")
+
         if not self.USER or not self.API_KEY or not self.GROUP_ID:
             raise EnvironmentError('In order to run this smoke test you need ATLAS_USER, AND ATLAS_KEY env variables'
                                    'your env variables are {}'.format(environ.__str__()))
@@ -81,6 +87,8 @@ class BaseTests(unittest.TestCase):
         self.a_owner = Atlas(self.GROUP_OWNER_USER, self.GROUP_OWNER_KEY)
 
         self.CLUSTER_CREATE_WAIT_SECONDS = CLUSTER_CREATE_WAIT_SECONDS
+
+
 
         # make sure test cluster is unpaused
         print(f"🚀🚀🚀 Pre Test Checks........")

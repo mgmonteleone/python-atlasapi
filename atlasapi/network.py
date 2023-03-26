@@ -26,13 +26,24 @@ from atlasapi.settings import Settings
 from atlasapi.errors import *
 import logging
 import urllib.parse
+import urllib.request
 from dateutil.tz import UTC
 from json import dumps
 from io import BytesIO
 from typing import Union
 
+
+
+
 logger = logging.getLogger('network')
 logger.setLevel(logging.WARNING)
+
+external_ip = 'Unknown'
+if logger.level == logging.INFO:
+    try:
+        external_ip = urllib.request.urlopen('https://ident.me').read().decode('utf8')
+    except Exception as e:
+        logger.warning(f"Could not get public IP: {e}")
 
 
 def merge(dict1, dict2):
@@ -92,6 +103,8 @@ class Network:
         elif c == Settings.UNAUTHORIZED:
             raise ErrAtlasUnauthorized(c, details)
         elif c == Settings.FORBIDDEN:
+            logger.error(f"Got FORBIDDEN, we are using external ip {external_ip}")
+            details["external_ip"] = external_ip
             raise ErrAtlasForbidden(c, details)
         elif c == Settings.NOTFOUND:
             raise ErrAtlasNotFound(c, details)

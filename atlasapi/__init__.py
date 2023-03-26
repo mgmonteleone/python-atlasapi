@@ -15,4 +15,4 @@
 # __init__.py
 
 # Version of the realpython-reader package
-__version__ = "3.0.1b5"
+__version__ = "3.0.1b6"

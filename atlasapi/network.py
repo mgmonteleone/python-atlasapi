@@ -171,8 +171,18 @@ class Network:
         try:
             logger.debug(f"{method} - URI Being called is {url}")
             session = requests.Session()
-            request = session.request(method=method, url=url, **kwargs)
-            logger.debug("Request arguments: {}".format(str(kwargs)))
+            logger.info("🔎🔎Request arguments: {}".format(str(kwargs)))
+            if kwargs.get('params'):
+                existing_params: dict = kwargs.get('params')
+                logger.debug(f"Existing params are: {existing_params}")
+                existing_params.update(dict(itemsPerPage=Settings.itemsPerPage))
+                logger.debug(f"New params are {existing_params}")
+                kwargs["params"] = existing_params
+                logger.debug(f"Fully updated kwargs is now... {kwargs}")
+
+            request = session.request(method=method, url=url,**kwargs)
+            logger.info("Request arguments: {}".format(str(kwargs)))
+
             first_page = self.answer(request.status_code, request.json())
             yield first_page
             total_count = first_page.get("totalCount", 0)
@@ -185,6 +195,7 @@ class Network:
                         existing_params: dict = kwargs.get('params')
                         logger.debug(f"Existing params are: {existing_params}")
                         existing_params.update(dict(pageNum=page_number))
+                        existing_params.update(dict(itemsPerPage=Settings.itemsPerPage))
                         logger.debug(f"New params are {existing_params}")
                         kwargs["params"] = existing_params
                         logger.debug(f"Fully updated kwargs is now... {kwargs}")

@@ -208,7 +208,6 @@ class MeasurementTests(BaseTests):
                 each_host.get_measurement_for_host(atlas_obj=self.a, measurement=AtlasMeasurementTypes.connections))
             each_host.add_measurements(measurements)
             self.assertIsInstance(each_host.measurements[0], AtlasMeasurement)
-            pprint(each_host.measurements[0].measurement_stats.mean)
 
     test_12_issue_90_get_measurement_for_host.basic = True
 
@@ -217,8 +216,10 @@ class MeasurementTests(BaseTests):
         test_host: Host = self.a.Hosts.host_list[0]
         measurements = test_host.get_measurement_for_host(atlas_obj=self.a, measurement=AtlasMeasurementTypes.Cache)
         for each in measurements:
+            print(f"📏📏📏{each.__dict__}")
             self.assertIsInstance(each, AtlasMeasurement)
             for each_one in each.measurements:
+                # print(each_one.__dict__)
                 self.assertIsInstance(each_one, AtlasMeasurementValue)
 
     test_13_get_multiple_metrics_at_once_for_host.basic = True

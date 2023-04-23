@@ -103,7 +103,8 @@ class ClusterTests(BaseTests):
         printf(f"Will now resize {self.TEST_CLUSTER3_NAME_UNIQUE} to m20....")
         self.a.Clusters.modify_cluster_instance_size(cluster=self.TEST_CLUSTER3_NAME_UNIQUE,
                                                      new_cluster_size=InstanceSizeName.M20)
-        self.wait_for_cluster_state(self.TEST_CLUSTER3_NAME_UNIQUE,states_to_wait=[ClusterStates.UPDATING,ClusterStates.REPAIRING])
+        self.wait_for_cluster_state(self.TEST_CLUSTER3_NAME_UNIQUE,
+                                    states_to_wait=[ClusterStates.UPDATING, ClusterStates.REPAIRING])
 
         print(f"✅ Cluster Succesfully resized.")
         print(f"Going to clean up by deleting this cluster ({self.TEST_CLUSTER3_NAME_UNIQUE})")
@@ -112,7 +113,6 @@ class ClusterTests(BaseTests):
         print('Successfully Deleted resized cluster :{}, output was '.format(self.TEST_CLUSTER3_NAME_UNIQUE, output))
 
     test_07_create_resize_delete.advanced = True
-
 
     def test_10_pause_cluster(self):
         pprint('Pausing Cluster {}'.format(self.TEST_CLUSTER_NAME))
@@ -177,9 +177,6 @@ class ClusterTests(BaseTests):
 
     test_13_set_advanced_options.basic = True
 
-
-
-
     def test_14_issue_154_additional_data(self):
         cluster = self.a.Clusters.get_single_cluster_as_obj(self.TEST_CLUSTER_NAME)
         self.assertTrue(type(cluster) is ClusterConfig)
@@ -188,3 +185,18 @@ class ClusterTests(BaseTests):
         pprint(cluster.as_dict())
 
     test_02_get_a_cluster_as_obj.basic = True
+
+    def test_15_issue_182(self):
+        """
+        Test for problems with added read_only items being included in the as_modify
+        Returns:
+
+        """
+        atlas = self.a
+
+        out = atlas.Clusters.modify_cluster_instance_size(cluster=self.TEST_CLUSTER_NAME,
+                                                          new_cluster_size=InstanceSizeName.M20)
+        pprint(out)
+
+        out2 = atlas.Clusters.modify_cluster_instance_size(cluster=self.TEST_CLUSTER_NAME,
+                                                          new_cluster_size=InstanceSizeName.M10)

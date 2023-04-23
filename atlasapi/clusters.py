@@ -452,6 +452,7 @@ class ClusterConfig(object):
         out_dict.pop('srvAddress', None)
         out_dict.pop('links', None)
         out_dict.pop('state_name', None)
+        out_dict.pop('create_date', None)
 
         return out_dict
 

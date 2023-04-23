@@ -887,8 +887,6 @@ class AtlasEventTypes(Enum):
     INDEX_SUCCESS_INDEX_BUILD = 'Index Success Index Build'
     INGESTION_PIPELINE_CREATED = 'Ingestion Pipeline Created'
     INGESTION_PIPELINE_UPDATED = 'Ingestion Pipeline Updated'
-    DATA_FEDERATION_QUERY_LIMIT_CONFIGURED = 'Data Federation Query Limit Configured'
-    DATA_FEDERATION_QUERY_LIMIT_DELETED = 'Data Federation Query Limit Deleted'
     CLUSTER_PREFERRED_CPU_ARCHITECTURE_MODIFIED = 'Cluster Preferred Cpu Architecture Modified'
     USER_ACCOUNT_EMAIL_ADDRESS_CHANGED_AUDIT = 'User Account Email Address Changed Audit'
     ONLINE_ARCHIVE_DATA_EXPIRATION_DID_NOT_RUN = 'Online Archive Data Expiration Did Not Run'

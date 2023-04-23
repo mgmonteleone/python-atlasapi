@@ -16,6 +16,7 @@ from time import sleep
 from atlasapi.lib import AtlasUnits, ClusterType
 from atlasapi.specs import Host, AtlasPeriods, AtlasGranularities, ReplicaSetTypes
 from atlasapi.measurements import AtlasMeasurementTypes, AtlasMeasurementValue, AtlasMeasurement
+from atlasapi import events_event_types
 from io import BytesIO
 from datetime import datetime, timedelta
 
@@ -25,6 +26,14 @@ logger = logging.getLogger('test')
 # noinspection PyTypeChecker
 class MeasurementTests(BaseTests):
 
+    def test_00_check_event_types(self):
+
+        my_events = events_event_types
+
+        test = my_events.AtlasEventTypes.TEST_FAILOVER_REQUESTED
+        print(test)
+
+    test_00_check_event_types.basic = True
     def test_00_get_hosts_count(self):
         atlas: Atlas = self.a
         atlas.Hosts.fill_host_list()

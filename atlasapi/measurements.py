@@ -8,6 +8,7 @@ import humanfriendly as hf
 from dateutil.parser import parse
 
 from atlasapi.atlas_types import OptionalFloat
+from typing import Union, Optional
 from atlasapi.lib import _GetAll, AtlasPeriods, AtlasGranularities
 
 logger: logging.Logger = logging.getLogger('Atlas.measurements')
@@ -219,14 +220,14 @@ class AtlasMeasurementTypes(_GetAll):
 
         As found in dbstats (https://www.mongodb.com/docs/manual/reference/command/dbStats/)
             """
-        object_size = 'DATABASE_AVERAGE_OBJECT_SIZE' # dbStats.avgObjSize Average size of each document in bytes. This is the dataSize divided by the number of documents. The scale argument does not affect the avgObjSize value.
+        object_size = 'DATABASE_AVERAGE_OBJECT_SIZE'  # dbStats.avgObjSize Average size of each document in bytes. This is the dataSize divided by the number of documents. The scale argument does not affect the avgObjSize value.
         collection_count = 'DATABASE_COLLECTION_COUNT'
-        data_size = 'DATABASE_DATA_SIZE' # Total size of the uncompressed data held in the database. The dataSize decreases when you remove documents.
-        storage_size = 'DATABASE_STORAGE_SIZE' # Sum of the space allocated to all collections in the database for document storage, including free space. storageSize does not include space allocated to indexes. See indexSize for the total index size.
-        index_size = 'DATABASE_INDEX_SIZE' # Sum of the space allocated to all indexes in the database, including free index space.
+        data_size = 'DATABASE_DATA_SIZE'  # Total size of the uncompressed data held in the database. The dataSize decreases when you remove documents.
+        storage_size = 'DATABASE_STORAGE_SIZE'  # Sum of the space allocated to all collections in the database for document storage, including free space. storageSize does not include space allocated to indexes. See indexSize for the total index size.
+        index_size = 'DATABASE_INDEX_SIZE'  # Sum of the space allocated to all indexes in the database, including free index space.
         index_count = 'DATABASE_INDEX_COUNT'
-        extent_count = 'DATABASE_EXTENT_COUNT' # ?
-        object_count = 'DATABASE_OBJECT_COUNT' # Number of objects (specifically, documents) in the database across all collections.
+        extent_count = 'DATABASE_EXTENT_COUNT'  # ?
+        object_count = 'DATABASE_OBJECT_COUNT'  # Number of objects (specifically, documents) in the database across all collections.
         view_count = 'DATABASE_VIEW_COUNT'
 
 
@@ -235,26 +236,34 @@ class AtlasMeasurementValue(object):
     def __init__(self, value_dict: dict):
         """
         Class for holding a measurement value
+
+        Does error handling with different data types.
+
+
         :type value_dict: dict
         :param value_dict: An Atlas standard Measurement value dictionary.
         """
-        timestamp: int = value_dict.get('timestamp', None)
+        timestamp: str = value_dict.get('timestamp', None)
         value: float = value_dict.get('value', None)
+        # First cast/validate the timestamp
+        self.timestamp: Optional[datetime] = None
+        self.value: Optional[float] = None
         try:
-            self.timestamp: datetime = parse(timestamp)
+            self.timestamp: Optional[datetime] = parse(timestamp)
         except (ValueError, TypeError):
-            logger.warning('Could not parse "{}" as a datetime.')
-            self.timestamp = None
-        try:
-            if value is None:
+            logger.warning(f'Could not parse "{timestamp}" as a datetime.')
+        # Cast/validate the value itself
+        if value is None:
+            self.value = None
+        else:
+            try:  # try to cast to a float
+                self.value: float = float(value)
+            except ValueError as e:
                 self.value = None
-            self.value: float = float(value)
-        except ValueError as e:
-            self.value = None
-            logger.warning('Could not parse the metric value "{}". Error was {}'.format(value, e))
-        except TypeError:
-            logger.info('Value is none.')
-            self.value = None
+                logger.warning(f'Could not parse the metric value "{value}". Error was {e}')
+            except TypeError:
+                logger.warning(f'Could not parse the metric value "{value}" (Type Error). Error was {e}')
+                self.value = None
 
     # noinspection PyBroadException
     @property

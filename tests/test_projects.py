@@ -26,7 +26,7 @@ class ProjectTests(BaseTests):
             # pprint(each.__dict__)
             self.assertIsInstance(each, Project, "An Atlas <Project should be returned>")
             count += 1
-        self.assertEqual(count, 3, "There should be exactly 3 projects returned when for this test Organization")
+        self.assertEqual(count, 4, "There should be exactly 4 projects returned when for this test Organization")
 
     test_00_get_projects_all_for_org_key.basic = True
 

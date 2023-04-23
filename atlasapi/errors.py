@@ -21,8 +21,9 @@ Provides all specific Exceptions
 from atlasapi.settings import Settings
 from pprint import pprint
 import logging
-
+from typing import Tuple
 logger = logging.getLogger('Error_Handler')
+
 
 class ErrRole(Exception):
     """A role is not compatible with Atlas"""
@@ -85,12 +86,12 @@ class ErrAtlasGeneric(Exception):
         details (dict): Response payload
     """
 
-    def __init__(self, msg, c, details):
+    def __init__(self, msg: str, c: int, details: dict):
         super().__init__(msg)
         self.code = c
         self.details = details
 
-    def getAtlasResponse(self):
+    def getAtlasResponse(self) -> Tuple[int, dict]:
         """Get details about the Atlas response
 
         Returns:
@@ -98,6 +99,7 @@ class ErrAtlasGeneric(Exception):
 
         """
         return self.code, self.details
+
 
 class ErrMaintenanceError(ErrAtlasGeneric):
     """Atlas : Atlas MaintenanceRelatedError
@@ -130,16 +132,16 @@ class ErrAtlasBadRequest(ErrAtlasGeneric):
         if details.get('errorCode', None) == 'RESOURCE_NOT_FOUND_FOR_JOB':
             raise (ErrAtlasJobError(c, details))
         if details.get('errorCode', None) == 'CANNOT_CANCEL_AUTOMATED_RESTORE':
-            raise (ErrAtlasBackupError(c,details))
+            raise (ErrAtlasBackupError(c, details))
         if details.get('errorCode', None) in ['ATLAS_MAINTENANCE_ALREADY_SCHEDULED',
                                               'ATLAS_NUM_MAINTENANCE_DEFERRALS_EXCEEDED']:
-            raise (ErrMaintenanceError(c,details))
+            raise (ErrMaintenanceError(c, details))
         else:
             logger.critical(f"A generic error was raised")
             logger.critical(details)
 
-
-        super().__init__("Something was wrong with the client request.", c, details)
+        super().__init__(f"Something was wrong with the client request. ({details.get('detail', None)})"
+                         f" [{details.get('errorCode', None)}]", c, details)
 
 
 class ErrAtlasJobError(ErrAtlasGeneric):

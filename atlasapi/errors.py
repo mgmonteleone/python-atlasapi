@@ -21,7 +21,7 @@ Provides all specific Exceptions
 from atlasapi.settings import Settings
 from pprint import pprint
 import logging
-
+from typing import Tuple
 logger = logging.getLogger('Error_Handler')
 
 
@@ -86,12 +86,12 @@ class ErrAtlasGeneric(Exception):
         details (dict): Response payload
     """
 
-    def __init__(self, msg, c, details):
+    def __init__(self, msg: str, c: int, details: dict):
         super().__init__(msg)
         self.code = c
         self.details = details
 
-    def getAtlasResponse(self):
+    def getAtlasResponse(self) -> Tuple[int, dict]:
         """Get details about the Atlas response
 
         Returns:
@@ -99,20 +99,6 @@ class ErrAtlasGeneric(Exception):
 
         """
         return self.code, self.details
-
-
-class ErrNameError(ErrAtlasGeneric):
-    """Atlas : Atlas NamingRelatedError
-
-    Constructor
-
-    Args:
-        c (int): HTTP code
-        details (dict): Response payload
-    """
-
-    def __init__(self, c, details):
-        super().__init__(details.get('detail', f'Atlas Naming Error: {details.get("detail")} '), c, details)
 
 
 class ErrMaintenanceError(ErrAtlasGeneric):
@@ -124,6 +110,9 @@ class ErrMaintenanceError(ErrAtlasGeneric):
         c (int): HTTP code
         details (dict): Response payload
     """
+
+    def __init__(self, c, details):
+        super().__init__(details.get('detail', f'Atlas Maintenance Error: {details.get("detail")} '), c, details)
 
 
 class ErrAtlasBadRequest(ErrAtlasGeneric):
@@ -155,7 +144,8 @@ class ErrAtlasBadRequest(ErrAtlasGeneric):
             logger.critical(f"A generic error was raised")
             logger.critical(details)
 
-        super().__init__("Something was wrong with the client request.", c, details)
+        super().__init__(f"Something was wrong with the client request. ({details.get('detail', None)})"
+                         f" [{details.get('errorCode', None)}]", c, details)
 
 
 class ErrAtlasJobError(ErrAtlasGeneric):

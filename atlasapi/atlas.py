@@ -891,16 +891,12 @@ class Atlas:
             # Build the request
             return_val = self.atlas.network.get(Settings.BASE_URL + uri)
             for each_host in return_val:
+                measurement_obj = None
                 try:
                     measurements = each_host.get('measurements')
                 except Exception as e:
-                    logger.error(f"Error getting measurements from results")
-
+                    logger.error(f"Error getting measurements from results, no measurements were found in results")
                     logger.error(e)
-                    logger.error(f"The results look like {results}")
-                    logger.error(f"The results have length {len(list(results))}")
-                    for each in results:
-                        logger.error(f"Results are: {each}")
                     raise e
                 measurements_count = len(measurements)
                 self.logger.info('There are {} measurements.'.format(measurements_count))
